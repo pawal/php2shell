@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- The address field has focus when the page loads.
+
 ## v1.0.2 (2026-10-22)
 
 - `php2shell fingerprints` downloads the optional PHP fingerprint database.
