@@ -14,7 +14,8 @@ case "$1" in
         # deb: $2 is the previous version on upgrade, empty on first install.
         if [ -z "$2" ]; then
             if [ -x /usr/bin/deb-systemd-helper ]; then
-                deb-systemd-helper preset php2shell.service >/dev/null 2>&1 || true
+                # enable applies the preset on a first install; there is no preset action.
+                deb-systemd-helper enable php2shell.service >/dev/null 2>&1 || true
             else
                 systemctl preset php2shell.service >/dev/null 2>&1 || true
             fi
