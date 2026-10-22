@@ -386,5 +386,31 @@
     "status": 200,
     "headers": {},
     "body": "<link rel=\"icon\" href=\"./images/phplist.ico\"><link rel=\"apple-touch-icon\" href=\"./images/phplist-touch-icon.png\">"
+  },
+  {
+    "technology": "Bludit",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "BLUDIT-KEY=sample-secret-123"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "ProcessWire",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "wire=sample-secret-123"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Serendipity",
+    "status": 200,
+    "headers": {},
+    "body": "<meta name=\"generator\" content=\"Serendipity v.2.5.0\">"
   }
 ]

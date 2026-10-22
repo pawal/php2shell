@@ -819,7 +819,14 @@
     "diagnostics": [],
     "confidence": "medium",
     "source": "https://raw.githubusercontent.com/Piwigo/Piwigo/master/themes/default/template/header.tpl",
-    "emits_generator": true
+    "emits_generator": true,
+    "cookies": [
+      {
+        "name": "pwg_id",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/Piwigo/Piwigo/master/include/config_default.inc.php"
+      }
+    ]
   },
   {
     "technology": "Coppermine",
@@ -1004,5 +1011,60 @@
         "source": "https://raw.githubusercontent.com/phpList/phplist3/main/public_html/lists/admin/ui/default/header.inc"
       }
     ]
+  },
+  {
+    "technology": "Bludit",
+    "category": "CMS",
+    "aliases": [
+      "Bludit"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/bludit/bludit/master/bl-kernel/helpers/session.class.php",
+    "cookies": [
+      {
+        "name": "BLUDIT-KEY",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/bludit/bludit/master/bl-kernel/helpers/session.class.php"
+      },
+      {
+        "name": "__Secure-BLUDIT-KEY",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/bludit/bludit/master/bl-kernel/helpers/session.class.php"
+      }
+    ]
+  },
+  {
+    "technology": "ProcessWire",
+    "category": "CMS",
+    "aliases": [
+      "ProcessWire"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/processwire/processwire/master/wire/config.php",
+    "cookies": [
+      {
+        "name": "wire",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/processwire/processwire/master/wire/config.php"
+      },
+      {
+        "name": "wires",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/processwire/processwire/master/wire/config.php"
+      }
+    ]
+  },
+  {
+    "technology": "Serendipity",
+    "category": "Publishing",
+    "aliases": [
+      "Serendipity"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/s9y/Serendipity/master/templates/2k11/index.tpl",
+    "emits_generator": true
   }
 ]

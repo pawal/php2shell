@@ -35,8 +35,8 @@ func applicationFixtures(t *testing.T) []applicationFixture {
 
 func TestAdditionalApplicationFingerprints(t *testing.T) {
 	fixtures := applicationFixtures(t)
-	if len(fixtures) != 50 {
-		t.Fatalf("expected fifty additional application fixtures, got %d", len(fixtures))
+	if len(fixtures) != 53 {
+		t.Fatalf("expected 53 additional application fixtures, got %d", len(fixtures))
 	}
 	for _, fixture := range fixtures {
 		t.Run(fixture.Technology, func(t *testing.T) {
@@ -76,7 +76,7 @@ func TestApplicationCatalogueCoverage(t *testing.T) {
 	for _, fixture := range applicationFixtures(t) {
 		expected[fixture.Technology] = true
 	}
-	if len(expected) != 51 || len(applicationCatalogue) != len(expected) {
+	if len(expected) != 54 || len(applicationCatalogue) != len(expected) {
 		t.Fatalf("catalogue and fixture coverage differ: %d versus %d", len(applicationCatalogue), len(expected))
 	}
 	source := func(value string) {
@@ -173,5 +173,34 @@ func TestGLPICheckRecordsEvidenceWithoutExtraRequests(t *testing.T) {
 	}
 	if strings.Contains(fmt.Sprint(evidence.Passive.Fingerprints), "private-request-id") {
 		t.Fatal("request ID leaked")
+	}
+}
+
+func TestExtendedApplicationSignals(t *testing.T) {
+	cases := []struct{ name, cookie, body, want string }{
+		{"bludit https", "__Secure-BLUDIT-KEY=sample-secret-123", "", "Bludit"},
+		{"processwire https", "wires=sample-secret-123", "", "ProcessWire"},
+		{"piwigo without generator", "pwg_id=sample-secret-123", "", "Piwigo"},
+		{"custom cookie", "custom_session=x", "", ""},
+		{"cookie lookalikes", "wires_extra=x", "", ""},
+		{"bludit lookalike", "__Secure-BLUDIT-KEY_extra=x", "", ""},
+		{"piwigo lookalike", "pwg_id_extra=x", "", ""},
+		{"product mentions", "", "<p>Bludit, ProcessWire and Serendipity</p>", ""},
+		{"generator lookalike", "", `<meta name="generator" content="SerendipityClone">`, ""},
+		{"commented generator", "", `<!-- <meta name="generator" content="Serendipity"> -->`, ""},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := applicationFingerprints(response("/", map[string][]string{"Set-Cookie": {c.cookie}}), c.body)
+			if c.want == "" {
+				if len(got) != 0 {
+					t.Fatalf("unexpected fingerprint: %+v", got)
+				}
+				return
+			}
+			if len(got) != 1 || got[0].Technology != c.want || got[0].Confidence != "low" || strings.Contains(fmt.Sprint(got), "sample-secret") {
+				t.Fatalf("unexpected evidence: %+v", got)
+			}
+		})
 	}
 }

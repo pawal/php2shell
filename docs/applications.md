@@ -1,9 +1,9 @@
 # Additional PHP application coverage
 
-Reviewed 2026-10-22. This catalogue update adds 50 applications beyond
+Reviewed 2026-10-22. This catalogue update adds 53 applications beyond
 Roundcube and the previously recognised CMS/application names. The set
 covers common deployment categories; it is not a statistical ranking of
-the fifty most popular PHP products. Frameworks remain a separate catalogue.
+the most popular PHP products. Frameworks remain a separate catalogue.
 
 Selection was informed by the [W3Techs CMS survey](https://w3techs.com/technologies/overview/content_management)
 and [WhatCMS technology categories](https://whatcms.org/Technologies).
@@ -14,7 +14,8 @@ are independently written, not copied from a third-party scanner database.
 | Category | New applications |
 |---|---|
 | Forums | 6 |
-| CMS | 1 |
+| CMS | 3 |
+| Publishing | 1 |
 | Wikis | 5 |
 | Database administration | 3 |
 | Files and collaboration | 4 |
@@ -38,6 +39,9 @@ MUST NOT become a PHP version.
 | Invision Community | Forums | cookie `ips4_IPSSessionFront`; cookie `ips4_member_id`; cookie `ips4_login_key` | [Source](https://invisioncommunity.com/cookies/) |
 | MyBB | Forums | cookie `mybbuser` | [Source](https://raw.githubusercontent.com/mybb/mybb/feature/inc/class_session.php) |
 | Simple Machines Forum | Forums | SMF logo ID and alt text | [Source](https://raw.githubusercontent.com/SimpleMachines/SMF/release-2.1/Themes/default/index.template.php) |
+| Bludit | CMS | cookies `BLUDIT-KEY`, `__Secure-BLUDIT-KEY` | [Source](https://raw.githubusercontent.com/bludit/bludit/master/bl-kernel/helpers/session.class.php) |
+| ProcessWire | CMS | cookies `wire`, `wires` | [Source](https://raw.githubusercontent.com/processwire/processwire/master/wire/config.php) |
+| Serendipity | Publishing | generator meta tag | [Source](https://raw.githubusercontent.com/s9y/Serendipity/master/templates/2k11/index.tpl) |
 | MODX | CMS | HTTP 5xx diagnostic identifier `MODX\Revolution\` | [Source](https://raw.githubusercontent.com/modxcms/revolution/3.x/core/src/Revolution/modX.php) |
 | Flarum | Forums | cookie `flarum_remember` | [Source](https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Http/CookieFactory.php) |
 | bbPress | Forums | CSS `css/bbpress.css` | [Source](https://raw.githubusercontent.com/bbpress/bbPress/trunk/src/templates/default/bbpress-functions.php) |
@@ -122,7 +126,7 @@ Additional references establish configurable defaults or emitted branding:
 
 ## Verification
 
-Each of the fifty entries has a separate synthetic response fixture derived
+Each of the 53 entries has a separate synthetic response fixture derived
 from the cited producers or documentation. Tests verify the detected name,
 provenance, confidence, verdict integration and PHP-version separation.
 Negative cases cover generic cookies, lookalikes, invalid hash suffixes,
@@ -132,10 +136,23 @@ not copied into fingerprint evidence.
 
 The catalogue consumes existing bounded responses. It adds no target
 requests, login attempts or authenticated inspection. These fixtures are
-not live acceptance tests against fifty deployed applications. See
+not live acceptance tests against 53 deployed applications. See
 [fingerprints.md](fingerprints.md) for framework and Roundcube coverage, and
 [detection.md](detection.md) for discovery and blocked inspection.
 
-Validation on 2026-10-22: `make test`, `make build` and `make test-lab`
+Validation of this extension on 2026-10-22: `make test` and `make build`
 passed. The PHP lab checks patched, unpatched and hardened PHP plus a static
 server; application-family coverage is established by the separate fixtures.
+
+## Further coverage
+
+Bludit is recognised by `BLUDIT-KEY` and its HTTPS `__Secure-` variant
+([session source](https://raw.githubusercontent.com/bludit/bludit/master/bl-kernel/helpers/session.class.php)).
+ProcessWire is recognised by the default `wire` and HTTPS `wires` cookies
+([configuration](https://raw.githubusercontent.com/processwire/processwire/master/wire/config.php)).
+Serendipity is recognised by its generator declaration
+([template](https://raw.githubusercontent.com/s9y/Serendipity/master/templates/2k11/index.tpl)).
+Piwigo additionally accepts the `pwg_id` cookie when its generator is absent
+([configuration](https://raw.githubusercontent.com/Piwigo/Piwigo/master/include/config_default.inc.php)).
+Cookie names are configurable and MUST remain low-confidence indicators.
+These rules inspect responses already fetched and add no requests.
