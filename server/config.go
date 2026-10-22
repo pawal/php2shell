@@ -113,7 +113,7 @@ var stringKeys = []key[string]{
 	{"source-url", "SOURCE_URL", "where the source code is published", func(c *Config) *string { return &c.SourceURL }},
 	{"contact", "CONTACT", "address for opt-out requests, shown on the about page", func(c *Config) *string { return &c.Contact }},
 	{"log-file", "LOG_FILE", "file receiving one line per check, empty for none", func(c *Config) *string { return &c.LogFile }},
-	{"fingerprints", "FINGERPRINT_FILE", "optional PHP fingerprint database file", func(c *Config) *string { return &c.FingerprintFile }},
+	{"fingerprints", "FINGERPRINT_FILE", "PHP fingerprint database; empty loads the default if present", func(c *Config) *string { return &c.FingerprintFile }},
 }
 
 var intKeys = []key[int]{

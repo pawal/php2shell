@@ -7,7 +7,29 @@ They inspect existing responses and MUST NOT add requests or execute JavaScript.
 
 ## Use
 
-Run from the source checkout:
+On a package install, as root:
+
+```sh
+php2shell fingerprints
+systemctl restart php2shell
+```
+
+The command writes the adapted database `php.json`, the upstream licence,
+an attribution notice and a manifest with input and output SHA-256 hashes
+to `/etc/php2shell/fingerprints/`. A different directory is given as an
+argument. When no database is named, `php2shell serve` and `php2shell check`
+load `php.json` from that directory if it exists, and the service logs the
+file it loaded. Removing the directory and restarting returns the service
+to built-in detection.
+
+A database elsewhere is named with `fingerprint_file` in the JSON
+configuration, `-fingerprints` or `PHP2SHELL_FINGERPRINT_FILE`, as an
+absolute path the service account MUST be able to read. The database loads
+once at startup; restart after changing it. An invalid database, named or
+found at the default path, MUST fail startup instead of silently disabling
+the additional rules.
+
+From the source checkout:
 
 ```sh
 make fingerprints
@@ -16,20 +38,12 @@ make build
 bin/php2shell check -passive -fingerprints local/fingerprints/php.json https://example.com/
 ```
 
-The downloader uses pinned revision
-`d91f7e510e93457041bea874e8a9ffb011e3e4fe`, not a moving branch.
-It writes the adapted database, upstream licence, attribution notice and
-input/output SHA-256 hashes under ignored `local/fingerprints/`.
-The command uses Go and network access. Normal checks and
-`make test` require no upstream access. Downloading rules contacts GitHub
-and sends no requests to websites described by the rules.
-
-For the service, set `fingerprint_file` to an absolute database path in
-the JSON configuration, use `-fingerprints`, or set
-`PHP2SHELL_FINGERPRINT_FILE`. The service account MUST be able to read the
-file. The database loads once at startup; restart after changing it.
-An invalid configured database MUST fail startup instead of silently
-disabling the additional rules. An omitted path keeps built-in detection.
+The download uses pinned revision
+`d91f7e510e93457041bea874e8a9ffb011e3e4fe`, not a moving branch; run it
+again after an upgrade that changes the pin. It contacts GitHub only and
+sends no requests to websites described by the rules. Each file is replaced
+atomically and `php.json` last, so a failed download keeps the previous
+database. Normal checks and `make test` require no upstream access.
 
 ## Selection and coverage
 

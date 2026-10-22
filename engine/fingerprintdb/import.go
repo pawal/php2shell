@@ -1,11 +1,10 @@
-// Command fingerprint-import downloads a pinned passive PHP fingerprint subset.
-package main
+// Package fingerprintdb downloads a pinned passive PHP fingerprint subset.
+package fingerprintdb
 
 import (
 	"context"
 	"crypto/sha256"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,11 +16,17 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pawal/php2shell/engine/probe"
 )
 
-const revision = "d91f7e510e93457041bea874e8a9ffb011e3e4fe"
-const rawBase = "https://raw.githubusercontent.com/enthec/webappanalyzer/" + revision + "/"
-const source = "https://github.com/enthec/webappanalyzer/tree/" + revision
+// DefaultDir holds the database on a package install.
+const DefaultDir = "/etc/php2shell/fingerprints"
+
+// Revision is the pinned WebAppAnalyzer commit.
+const Revision = "d91f7e510e93457041bea874e8a9ffb011e3e4fe"
+const rawBase = "https://raw.githubusercontent.com/enthec/webappanalyzer/" + Revision + "/"
+const source = "https://github.com/enthec/webappanalyzer/tree/" + Revision
 
 type stringList []string
 
@@ -57,25 +62,20 @@ type unsupportedPattern struct {
 	Pattern     string `json:"pattern"`
 }
 
-func main() {
-	output := flag.String("output", "local/fingerprints", "directory for external rules, licence and manifest")
-	flag.Parse()
-	if err := importRules(*output); err != nil {
-		fmt.Fprintln(os.Stderr, "fingerprint-import:", err)
-		os.Exit(1)
-	}
+// Import writes php.json, manifest.json, LICENSE and NOTICE to dir and
+// returns the number of selected technologies.
+func Import(ctx context.Context, dir, userAgent string) (int, error) {
+	return importRules(ctx, rawBase, dir, userAgent, probe.CatalogueTechnologies())
 }
 
-func importRules(output string) error {
+func importRules(ctx context.Context, base, dir, userAgent string, catalogue []string) (int, error) {
 	paths := []string{"LICENSE"}
 	for _, letter := range "_abcdefghijklmnopqrstuvwxyz" {
 		paths = append(paths, "src/technologies/"+string(letter)+".json")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-	files, err := downloadFiles(ctx, paths)
+	files, err := downloadFiles(ctx, base, userAgent, paths)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	apps := map[string]upstreamApp{}
 	hashes := map[string]string{}
@@ -84,7 +84,7 @@ func importRules(output string) error {
 		hashes[path] = fmt.Sprintf("%x", sha256.Sum256(data))
 		if strings.HasSuffix(path, ".json") {
 			if err := json.Unmarshal(data, &apps); err != nil {
-				return fmt.Errorf("%s: %w", path, err)
+				return 0, fmt.Errorf("%s: %w", path, err)
 			}
 		}
 	}
@@ -92,46 +92,61 @@ func importRules(output string) error {
 	for i := range seeds {
 		seeds[i] = strings.ReplaceAll(seeds[i], "_", " ")
 	}
-	for _, file := range []string{"engine/probe/applications.json", "engine/probe/frameworks.json"} {
-		data, err := os.ReadFile(file)
-		if err != nil {
-			return fmt.Errorf("run from the source checkout: %w", err)
-		}
-		var specs []struct{ Technology string }
-		if err := json.Unmarshal(data, &specs); err != nil {
-			return err
-		}
-		for _, spec := range specs {
-			seeds = append(seeds, spec.Technology)
-		}
-	}
+	seeds = append(seeds, catalogue...)
 	selected, skipped, unsupported := selectRules(apps, seeds)
 	if len(selected) == 0 {
-		return fmt.Errorf("upstream supplied no supported PHP fingerprints")
+		return 0, fmt.Errorf("upstream supplied no supported PHP fingerprints")
 	}
 	encoded, err := encode(map[string]any{"source": source, "license": "GPL-3.0", "apps": selected})
 	if err != nil {
-		return err
+		return 0, err
+	}
+	if _, err := probe.ParseFingerprintDatabase(encoded); err != nil {
+		return 0, err
 	}
 	manifest, err := encode(map[string]any{
-		"revision": revision, "source": source, "license": "GPL-3.0", "applications": len(selected),
+		"revision": Revision, "source": source, "license": "GPL-3.0", "applications": len(selected),
 		"skipped_applications": skipped, "unsupported_patterns": unsupported,
 		"sha256": hashes, "output_sha256": fmt.Sprintf("%x", sha256.Sum256(encoded)),
 	})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	notice := "PHP subset adapted from Enthec WebAppAnalyzer and Wappalyzer contributors.\nSource: " + source + "\nLicense: GPL-3.0; see LICENSE.\nChanges: PHP dependency selection; only cookies, headers, meta and scriptSrc;\nversion/confidence annotations removed; conditional and incompatible rules omitted.\n"
-	if err := os.MkdirAll(output, 0755); err != nil {
-		return err
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return 0, err
 	}
-	for name, data := range map[string][]byte{"php.json": encoded, "manifest.json": manifest, "LICENSE": files["LICENSE"], "NOTICE": []byte(notice)} {
-		if err := os.WriteFile(filepath.Join(output, name), data, 0644); err != nil {
-			return err
+	// php.json last: a failed run keeps the previous database.
+	for _, file := range []struct {
+		name string
+		data []byte
+	}{{"LICENSE", files["LICENSE"]}, {"NOTICE", []byte(notice)}, {"manifest.json", manifest}, {"php.json", encoded}} {
+		if err := writeFile(dir, file.name, file.data); err != nil {
+			return 0, err
 		}
 	}
-	fmt.Printf("Downloaded %d PHP-related technologies to %s\nPinned revision: %s; external rules remain GPL-3.0.\n", len(selected), filepath.Join(output, "php.json"), revision)
-	return nil
+	return len(selected), nil
+}
+
+// writeFile replaces name atomically, readable by the service's dynamic user.
+func writeFile(dir, name string, data []byte) error {
+	f, err := os.CreateTemp(dir, "."+name+".*")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(f.Name())
+	if _, err := f.Write(data); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Chmod(0644); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return os.Rename(f.Name(), filepath.Join(dir, name))
 }
 
 func encode(value any) ([]byte, error) {
@@ -139,7 +154,7 @@ func encode(value any) ([]byte, error) {
 	return append(data, '\n'), err
 }
 
-func downloadFiles(ctx context.Context, paths []string) (map[string][]byte, error) {
+func downloadFiles(ctx context.Context, base, userAgent string, paths []string) (map[string][]byte, error) {
 	client := &http.Client{Timeout: 30 * time.Second}
 	files := map[string][]byte{}
 	var mu sync.Mutex
@@ -150,7 +165,7 @@ func downloadFiles(ctx context.Context, paths []string) (map[string][]byte, erro
 		wg.Go(func() {
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			data, err := download(ctx, client, rawBase+path)
+			data, err := download(ctx, client, base+path, userAgent)
 			mu.Lock()
 			defer mu.Unlock()
 			if err != nil && firstError == nil {
@@ -163,10 +178,13 @@ func downloadFiles(ctx context.Context, paths []string) (map[string][]byte, erro
 	return files, firstError
 }
 
-func download(ctx context.Context, client *http.Client, address string) ([]byte, error) {
+func download(ctx context.Context, client *http.Client, address, userAgent string) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, address, nil)
 	if err != nil {
 		return nil, err
+	}
+	if userAgent != "" {
+		req.Header.Set("User-Agent", userAgent)
 	}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -259,7 +277,7 @@ func selectRules(apps map[string]upstreamApp, seeds []string) (map[string]appRul
 		if letter < "a" || letter > "z" {
 			letter = "_"
 		}
-		rules.Source = "https://github.com/enthec/webappanalyzer/blob/" + revision + "/src/technologies/" + letter + ".json"
+		rules.Source = "https://github.com/enthec/webappanalyzer/blob/" + Revision + "/src/technologies/" + letter + ".json"
 		selected[name] = rules
 	}
 	return selected, skipped, unsupported

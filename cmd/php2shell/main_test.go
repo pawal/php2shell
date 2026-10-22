@@ -80,3 +80,40 @@ func TestCheckExternalFingerprints(t *testing.T) {
 		t.Fatalf("invalid service database accepted: %d %s", code, stderr)
 	}
 }
+
+func TestDefaultFingerprints(t *testing.T) {
+	saved := defaultFingerprints
+	defer func() { defaultFingerprints = saved }()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `<meta name=generator content="Example CMS 9.2">`)
+	}))
+	defer srv.Close()
+	defaultFingerprints = filepath.Join(t.TempDir(), "php.json")
+	code, stdout, stderr := runArgs("check", "-allow-non-global", "-passive", "-json", srv.URL)
+	if code != exitOK || strings.Contains(stdout, "Example CMS") {
+		t.Fatalf("missing default database: %d %s %s", code, stdout, stderr)
+	}
+	data := `{"source":"https://example.com/database","license":"test","apps":{"Example CMS":{"source":"https://example.com/rule","meta":{"generator":"^Example CMS"}}}}`
+	if err := os.WriteFile(defaultFingerprints, []byte(data), 0600); err != nil {
+		t.Fatal(err)
+	}
+	code, stdout, stderr = runArgs("check", "-allow-non-global", "-passive", "-json", srv.URL)
+	if code != exitOK || !strings.Contains(stdout, `"technology": "Example CMS"`) {
+		t.Fatalf("default database not loaded: %d %s %s", code, stdout, stderr)
+	}
+	if err := os.WriteFile(defaultFingerprints, []byte("{}"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if code, _, stderr = runArgs("serve"); code != exitUsage || !strings.Contains(stderr, "fingerprint database") {
+		t.Fatalf("invalid default database accepted: %d %s", code, stderr)
+	}
+}
+
+func TestFingerprintsUsage(t *testing.T) {
+	if code, stdout, _ := runArgs("fingerprints", "-h"); code != exitOK || !strings.Contains(stdout, "/etc/php2shell/fingerprints") {
+		t.Errorf("help: %d %q", code, stdout)
+	}
+	if code, _, stderr := runArgs("fingerprints", "a", "b"); code != exitUsage || !strings.Contains(stderr, "at most one directory") {
+		t.Errorf("two directories: %d %q", code, stderr)
+	}
+}

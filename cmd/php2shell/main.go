@@ -9,14 +9,17 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"log/slog"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime/debug"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/pawal/php2shell/engine/fingerprintdb"
 	"github.com/pawal/php2shell/engine/probe"
 	"github.com/pawal/php2shell/engine/verdict"
 	"github.com/pawal/php2shell/server"
@@ -34,6 +37,7 @@ const synopsis = `Check a website for PHP2Shell, CVE-2026-109618 and CVE-2026-10
 Usage:
   php2shell check [flags] <url>   check one site and print the verdict
   php2shell serve [flags]         run the web service
+  php2shell fingerprints [dir]    download the optional PHP fingerprint database
   php2shell version               print the build
 
 "php2shell <subcommand> -h" prints the flags of one subcommand.
@@ -44,7 +48,9 @@ const checkFlags = `Check flags:
   -passive           read the advertised version only; send no session request
   -allow-non-global  check non-global addresses and any port, for a lab
   -timeout <dur>     wall clock the whole check may take (default 15s)
-  -fingerprints <file>  add a separately downloaded PHP fingerprint database
+  -fingerprints <file>
+                     PHP fingerprint database, default
+                     ` + fingerprintdb.DefaultDir + `/php.json when present
 `
 
 const serveFlags = `Serve flags:
@@ -54,6 +60,16 @@ const serveFlags = `Serve flags:
 Every configuration key also has a flag and a PHP2SHELL_* environment
 variable, listed below: a flag beats the variable, which beats the file.
 `
+
+const fingerprintsUsage = `Fingerprints:
+  Downloads the pinned PHP subset of WebAppAnalyzer, GPL-3.0, to dir,
+  default ` + fingerprintdb.DefaultDir + `. check and serve load php.json
+  from there when no other database is named. Restart the service after
+  a download.
+`
+
+// defaultFingerprints is loaded when present and no other database is named.
+var defaultFingerprints = filepath.Join(fingerprintdb.DefaultDir, "php.json")
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -68,12 +84,14 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	}
 	switch args[0] {
 	case "help", "-h", "--help":
-		fmt.Fprint(stdout, synopsis+"\n"+checkFlags+"\n"+serveFlags+"\nConfiguration flags:\n"+server.FlagUsage())
+		fmt.Fprint(stdout, synopsis+"\n"+checkFlags+"\n"+fingerprintsUsage+"\n"+serveFlags+"\nConfiguration flags:\n"+server.FlagUsage())
 		return exitOK
 	case "check":
 		return check(ctx, args[1:], stdout, stderr)
 	case "serve":
 		return serve(ctx, args[1:], stdout, stderr)
+	case "fingerprints":
+		return fingerprints(ctx, args[1:], stdout, stderr)
 	case "version":
 		fmt.Fprintln(stdout, buildVersion())
 		return exitOK
@@ -110,12 +128,9 @@ func check(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	ctx, cancel := context.WithTimeout(ctx, *timeout)
 	defer cancel()
 	prober := &probe.Prober{AllowNonGlobal: *allowNonGlobal, UserAgent: userAgent("")}
-	if *fingerprints != "" {
-		prober.Fingerprints, err = probe.LoadFingerprintDatabase(*fingerprints)
-		if err != nil {
-			fmt.Fprintf(stderr, "php2shell check: %v\n", err)
-			return exitUsage
-		}
+	if prober.Fingerprints, _, err = loadFingerprints(*fingerprints); err != nil {
+		fmt.Fprintf(stderr, "php2shell check: %v\n", err)
+		return exitUsage
 	}
 	input, evidence, err := prober.Check(ctx, target, !*passive)
 	if err != nil {
@@ -164,12 +179,13 @@ func serve(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	}
 	logger := slog.New(slog.NewTextHandler(stderr, nil))
 	prober := &probe.Prober{AllowNonGlobal: cfg.AllowNonGlobalAddresses, UserAgent: userAgent(cfg.Origin())}
-	if cfg.FingerprintFile != "" {
-		prober.Fingerprints, err = probe.LoadFingerprintDatabase(cfg.FingerprintFile)
-		if err != nil {
-			fmt.Fprintf(stderr, "php2shell serve: %v\n", err)
-			return exitUsage
-		}
+	var file string
+	if prober.Fingerprints, file, err = loadFingerprints(cfg.FingerprintFile); err != nil {
+		fmt.Fprintf(stderr, "php2shell serve: %v\n", err)
+		return exitUsage
+	}
+	if file != "" {
+		logger.Info("fingerprint database", "file", file)
 	}
 	srv, err := server.New(cfg, buildVersion(), prober, logger)
 	if err != nil {
@@ -181,6 +197,49 @@ func serve(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return exitFailure
 	}
 	return exitOK
+}
+
+func fingerprints(ctx context.Context, args []string, stdout, stderr io.Writer) int {
+	set := flag.NewFlagSet("fingerprints", flag.ContinueOnError)
+	set.SetOutput(io.Discard)
+	if err := set.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			fmt.Fprint(stdout, fingerprintsUsage)
+			return exitOK
+		}
+		fmt.Fprintf(stderr, "php2shell fingerprints: %v\n\n%s", err, fingerprintsUsage)
+		return exitUsage
+	}
+	if set.NArg() > 1 {
+		fmt.Fprintf(stderr, "php2shell fingerprints: expected at most one directory\n\n%s", fingerprintsUsage)
+		return exitUsage
+	}
+	dir := fingerprintdb.DefaultDir
+	if set.NArg() == 1 {
+		dir = set.Arg(0)
+	}
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	count, err := fingerprintdb.Import(ctx, dir, userAgent(""))
+	if err != nil {
+		fmt.Fprintf(stderr, "php2shell fingerprints: %v\n", err)
+		return exitFailure
+	}
+	fmt.Fprintf(stdout, "Wrote %d PHP-related technologies to %s\nPinned revision %s; the rules remain GPL-3.0.\n",
+		count, filepath.Join(dir, "php.json"), fingerprintdb.Revision)
+	return exitOK
+}
+
+// loadFingerprints reads file, or the default database when one is installed.
+func loadFingerprints(file string) (*probe.FingerprintDatabase, string, error) {
+	if file == "" {
+		if _, err := os.Stat(defaultFingerprints); errors.Is(err, fs.ErrNotExist) {
+			return nil, "", nil
+		}
+		file = defaultFingerprints
+	}
+	db, err := probe.LoadFingerprintDatabase(file)
+	return db, file, err
 }
 
 // userAgent names the tool and, for a public instance, its about page.

@@ -19,9 +19,14 @@ answered by `/api/v1/version` and shown in the page footer.
 A tagged release carries a `.deb` and an `.rpm` for amd64 and arm64. They
 install the binary as `/usr/bin/php2shell`, the configuration as
 `/etc/php2shell/config.json`, the unit below, a logrotate rule as
-`/etc/logrotate.d/php2shell`, and this document with the Caddy example under
-`/usr/share/doc/php2shell/`. The service is enabled according to the
+`/etc/logrotate.d/php2shell`, and this document with
+[external-fingerprints.md](external-fingerprints.md) and the Caddy example
+under `/usr/share/doc/php2shell/`. The service is enabled according to the
 distribution's preset policy and is restarted on upgrade.
+
+The optional PHP fingerprint database is not packaged. Run as root,
+`php2shell fingerprints` downloads it to `/etc/php2shell/fingerprints/`,
+where the service finds it at the next restart without a configuration change.
 
 ## Configuration
 
@@ -77,7 +82,8 @@ Notes on the keys:
   with 503 and `Retry-After`. `check_timeout` bounds one check.
 - `log_file` receives one line per check; see below. Empty logs nothing.
 - `fingerprint_file` MAY name a separately downloaded PHP fingerprint database.
-  It loads once at startup; invalid files prevent startup. See
+  Empty loads `/etc/php2shell/fingerprints/php.json` when that file exists.
+  The database loads once at startup; an invalid one prevents startup. See
   [external-fingerprints.md](external-fingerprints.md) for installation,
   coverage and the external data licence.
 - `allow_non_global_addresses` lifts the address and port policy, so private

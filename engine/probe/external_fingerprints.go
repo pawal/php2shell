@@ -1,6 +1,7 @@
 package probe
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -36,7 +37,7 @@ type externalApp struct {
 	ScriptSrc []string          `json:"scriptSrc"`
 }
 
-// LoadFingerprintDatabase reads the PHP-only output of cmd/fingerprint-import.
+// LoadFingerprintDatabase reads the output of "php2shell fingerprints".
 func LoadFingerprintDatabase(filename string) (*FingerprintDatabase, error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -47,8 +48,13 @@ func LoadFingerprintDatabase(filename string) (*FingerprintDatabase, error) {
 	if err != nil || len(data) > 8<<20 {
 		return nil, fmt.Errorf("fingerprint database unreadable or larger than 8 MiB")
 	}
+	return ParseFingerprintDatabase(data)
+}
+
+// ParseFingerprintDatabase compiles an encoded database.
+func ParseFingerprintDatabase(data []byte) (*FingerprintDatabase, error) {
 	var input externalDatabase
-	decoder := json.NewDecoder(strings.NewReader(string(data)))
+	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&input); err != nil {
 		return nil, fmt.Errorf("fingerprint database: %w", err)

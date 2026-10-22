@@ -15,7 +15,7 @@ test: fmt-check vet test-go csp-check
 
 # External GPL rules are downloaded separately and are not packaged with the binary.
 fingerprints:
-	$(GO) run ./cmd/fingerprint-import
+	$(GO) run ./cmd/php2shell fingerprints local/fingerprints
 
 test-fingerprint-db:
 	PHP2SHELL_FINGERPRINT_DB="$(CURDIR)/local/fingerprints/php.json" $(GO) test -count=1 -v -run '^TestExternalDatabase$$' ./engine/probe/

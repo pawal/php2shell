@@ -86,6 +86,15 @@ var frameworkCatalogue = loadCatalogue(frameworkCatalogueJSON)
 var applicationCatalogue = loadCatalogue(applicationCatalogueJSON)
 var fingerprintCatalogue = append(append([]technologySpec(nil), frameworkCatalogue...), applicationCatalogue...)
 
+// CatalogueTechnologies names the built-in applications and frameworks.
+func CatalogueTechnologies() []string {
+	names := make([]string, 0, len(fingerprintCatalogue))
+	for _, spec := range fingerprintCatalogue {
+		names = append(names, spec.Technology)
+	}
+	return names
+}
+
 func loadCatalogue(data []byte) []technologySpec {
 	var specs []technologySpec
 	if err := json.Unmarshal(data, &specs); err != nil {

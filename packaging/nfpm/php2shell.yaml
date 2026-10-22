@@ -62,6 +62,11 @@ contents:
     file_info:
       mode: 0644
 
+  - src: docs/external-fingerprints.md
+    dst: /usr/share/doc/php2shell/external-fingerprints.md
+    file_info:
+      mode: 0644
+
 scripts:
   postinstall: packaging/scripts/postinstall.sh
   preremove: packaging/scripts/preremove.sh
