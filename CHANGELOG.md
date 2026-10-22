@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- Results name a CDN, firewall or cache in front of the site when it limits what the check sees.
+
 ## v1.0.5 (2026-10-22)
 
 More sites that hide their PHP version are recognised as PHP, from

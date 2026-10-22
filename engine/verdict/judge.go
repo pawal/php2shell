@@ -39,6 +39,7 @@ type Input struct {
 	PHPInfo           string // the version a phpinfo() page shows
 	PHPInfoSettings   map[string]string
 	Sightings         []Sighting // versions other pages showed
+	Front             []string   // CDNs, firewalls and caches in front of the site
 	Hints             []string
 	Oracle            Oracle
 }
@@ -60,6 +61,9 @@ func Judge(in Input) Result {
 	out := judge(in)
 	if out.Version != nil {
 		out.Summary += disagreement(*out.Version, sightings(in))
+	}
+	if len(in.Front) > 0 && (out.Verdict == NoPHPSignal || out.Verdict == Inconclusive || out.Verdict == InspectionBlocked || in.Oracle == OracleSilent) {
+		out.Summary += frontNote(in.Front)
 	}
 	if in.PHPInfo != "" {
 		advice := slices.Clone(out.Recommendations)
@@ -144,4 +148,13 @@ func silentNote(in Input) string {
 
 func result(verdict, confidence, summary string, v *Version) Result {
 	return Result{Verdict: verdict, Confidence: confidence, Summary: summary, Version: v, Recommendations: recommendations[verdict]}
+}
+
+// frontNote says what a layer in front of the site can hide from a remote check.
+func frontNote(layers []string) string {
+	who, verb := strings.Join(layers, " and "), "answers"
+	if len(layers) > 1 {
+		verb = "answer"
+	}
+	return " " + strings.ToUpper(who[:1]) + who[1:] + " " + verb + " in front of the site and can replace headers, serve cached pages and filter requests, so this check sees less of the server behind it."
 }

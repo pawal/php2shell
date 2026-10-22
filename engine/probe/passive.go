@@ -19,6 +19,7 @@ type Passive struct {
 	PHPInfo      string            `json:"phpinfo_version,omitempty"`
 	Settings     map[string]string `json:"phpinfo_settings,omitempty"`
 	Signature    string            `json:"server_signature,omitempty"`
+	Front        []string          `json:"front_layers,omitempty"`
 	Cookies      []string          `json:"cookies,omitempty"`
 	Redirects    []string          `json:"redirects,omitempty"`
 	// Stopped is a redirect left unfollowed, off the site or past the limit.
@@ -74,6 +75,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 	}
 	out.FinalURL, out.Status = resp.Request.URL.String(), resp.StatusCode
 	out.Server, out.PoweredBy = resp.Header.Get("Server"), resp.Header.Get("X-Powered-By")
+	out.Front = frontLayers(resp)
 	for _, cookie := range resp.Cookies() {
 		out.Cookies = append(out.Cookies, cookie.Name)
 	}

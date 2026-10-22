@@ -81,6 +81,12 @@ Cloudflare's documented challenge header and known challenge-page signatures
 are recognised, including the JavaScript challenge observed at 99musik.se.
 The checker does not execute JavaScript or solve challenges.
 
+When a CDN, firewall or cache shows itself in the start page's headers,
+the evidence names it. A blocked result, or one drawn without an answer
+from the session request, then adds that such a layer can replace headers,
+serve cached pages and filter requests. A layer that does not show itself goes unnoticed, so a
+missing note proves nothing.
+
 [detection.md](detection.md) records the research behind these choices.
 
 ## The session request

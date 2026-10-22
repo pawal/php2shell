@@ -73,6 +73,26 @@ Unknown challenge products, hidden warnings, static exports and stripped
 headers still limit what the check can see. [method.md](method.md) defines
 the resulting verdicts and the owner's local verification step.
 
+## Layers in front of the site
+
+A layer is named only from a header its vendor documents. Load balancers
+that pass the origin's headers through unchanged are not named, nor are
+vendors whose response headers are not publicly documented, such as
+Imperva. Fastly runs on Varnish and sends `X-Varnish` too, so Varnish is
+named only without Fastly. A `Via` header with no recognised vendor names a
+proxy.
+
+| Layer | Signal | Source |
+|---|---|---|
+| Cloudflare | header `CF-Ray` | [Source](https://developers.cloudflare.com/fundamentals/reference/http-headers/) |
+| Amazon CloudFront | header `X-Amz-Cf-Id`; `Via` naming `(CloudFront)` | [Source](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/RequestAndResponseBehaviorCustomOrigin.html) |
+| Fastly | `X-Served-By` entry `cache-{datacenter}{nodeid}-{datacenter}` | [Source](https://www.fastly.com/documentation/reference/http/http-headers/X-Served-By/) |
+| Akamai | `Server: AkamaiGHost`; header `Akamai-GRN` | [Source](https://techdocs.akamai.com/edgeworkers/docs/common-errors), [Source](https://techdocs.akamai.com/property-mgr/docs/global-req-number) |
+| Azure Front Door | header `X-Azure-Ref` | [Source](https://learn.microsoft.com/en-us/azure/frontdoor/front-door-http-headers-protocol) |
+| Sucuri | header `X-Sucuri-ID`; `Server: Sucuri/` | [Source](https://docs.sucuri.net/website-firewall/troubleshooting/investigating-cache-headers/) |
+| Varnish | header `X-Varnish` | [Source](https://www.varnish.org/docs/reference/vsl-query/) |
+| Any proxy | header `Via` | [RFC 9110, section 7.6.3](https://www.rfc-editor.org/rfc/rfc9110#section-7.6.3) |
+
 ## Verification
 
 `make test`, `make build` and `make test-lab` passed on 2026-10-22.

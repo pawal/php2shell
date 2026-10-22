@@ -128,3 +128,32 @@ func mustVersion(t *testing.T, header string) Version {
 	}
 	return v
 }
+
+// A layer in front is named only where it weakens the reading.
+func TestFrontNote(t *testing.T) {
+	front := []string{"Cloudflare"}
+	for _, c := range []struct {
+		name string
+		in   Input
+		note bool
+	}{
+		{"no php signal", Input{Reachable: true, Front: front}, true},
+		{"inconclusive", Input{Reachable: true, Hints: []string{"PHPSESSID cookie"}, Front: front}, true},
+		{"silent session request", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleSilent, Front: front}, true},
+		{"blocked", Input{Reachable: true, InspectionBlocked: "HTTP 403 access denied", Front: front}, true},
+		{"header version", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleNotRun, Front: front}, false},
+		{"session answer", Input{Reachable: true, Oracle: OracleUnpatched, Front: front}, false},
+		{"nothing in front", Input{Reachable: true}, false},
+	} {
+		got := Judge(c.in).Summary
+		if strings.Contains(got, "in front of the site") != c.note {
+			t.Errorf("%s: %s", c.name, got)
+		}
+	}
+	if got := frontNote([]string{"a proxy"}); !strings.HasPrefix(got, " A proxy answers in front") {
+		t.Errorf("generic: %q", got)
+	}
+	if got := frontNote([]string{"Cloudflare", "Varnish"}); !strings.HasPrefix(got, " Cloudflare and Varnish answer in front") {
+		t.Errorf("plural: %q", got)
+	}
+}
