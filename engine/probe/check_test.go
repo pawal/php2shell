@@ -300,3 +300,18 @@ func TestWordPressFallbackUsesFinalOrigin(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+func TestVBulletinWithoutVersion(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `<meta name="generator" content="vBulletin 4.2.5">`)
+	}))
+	defer srv.Close()
+	in, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := verdict.Judge(in)
+	if result.Verdict != verdict.Inconclusive || result.Version != nil || !strings.Contains(result.Summary, "vBulletin") {
+		t.Fatalf("application version must not be treated as PHP version: %+v", result)
+	}
+}

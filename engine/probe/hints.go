@@ -11,6 +11,8 @@ var bodyMarkers = []struct{ needle, hint string }{
 	{"/wp-content/", "WordPress assets"},
 	{"/wp-includes/", "WordPress assets"},
 	{"/wp-json/", "WordPress REST API"},
+	{"/vbulletin-core.js", "vBulletin assets"},
+	{"/vbulletin_global.js", "vBulletin assets"},
 	{"/sites/default/files/", "Drupal assets"},
 	{"drupal-settings-json", "Drupal settings"},
 	{"/media/system/js/", "Joomla assets"},
@@ -23,13 +25,14 @@ var bodyMarkers = []struct{ needle, hint string }{
 // Generators that are PHP applications, matched at the start of the content.
 var generatorApps = []string{
 	"WordPress", "Drupal", "Joomla", "TYPO3", "PrestaShop", "Magento", "Shopware",
-	"OpenCart", "MediaWiki", "phpBB", "Elementor", "WooCommerce", "Craft CMS",
+	"OpenCart", "MediaWiki", "phpBB", "vBulletin", "Elementor", "WooCommerce", "Craft CMS",
 	"concrete5", "Grav", "Kirby", "October CMS", "SilverStripe", "Contao",
 }
 
 // Session cookie names only PHP applications set.
 var cookieHints = []struct{ name, hint string }{
 	{"phpsessid", "PHPSESSID cookie"},
+	{"bb_sessionhash", "vBulletin cookie"},
 	{"wordpress_test_cookie", "WordPress cookie"},
 	{"wp-settings-", "WordPress cookie"},
 	{"wordpress_logged_in_", "WordPress cookie"},

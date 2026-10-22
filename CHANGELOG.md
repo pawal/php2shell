@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- Recognise vBulletin from its generator, script assets and default session cookie.
+
 - Attested checks try `/wp-login.php` when WordPress is detected and earlier paths are silent.
 
 - Passive fetching and the session patch-state request, with bounded redirects and pinned addresses.

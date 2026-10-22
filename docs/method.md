@@ -26,10 +26,13 @@ whether the workers were restarted after an upgrade.
 
 A site behind a cache or a managed host often shows no PHP header and sets
 no cookie on its start page. The check then reads what the page itself
-carries: a WordPress, Drupal, Joomla, TYPO3, PrestaShop or Magento asset
+carries: a WordPress, Drupal, Joomla, TYPO3, PrestaShop, Magento or vBulletin asset
 path, a generator tag naming a PHP application, a REST API link, or a
 session cookie only PHP software sets. These prove PHP is present with no
 version, and the verdict is `inconclusive` rather than `no_php_signal`.
+A bot challenge can hide the application page and its markers. The check
+does not execute JavaScript or solve challenges, so those responses can
+still yield `no_php_signal`.
 
 ## The session request
 
