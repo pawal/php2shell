@@ -45,6 +45,11 @@ is intentionally conservative and is not a browser or a full HTML5 parser.
 Bodies remain bounded by the existing limit. Malformed or truncated HTML
 can therefore reduce detection coverage.
 
+A sourced framework catalogue supplements these generic signals.
+[fingerprints.md](fingerprints.md) lists all twenty framework families, the
+per-signal sources and confidence, and the distinction between declared
+identity, default-cookie hints and component evidence.
+
 These changes improve coverage without claiming universal identification.
 Unknown challenge products, hidden warnings, static exports and stripped
 headers remain limitations. [method.md](method.md) defines the resulting

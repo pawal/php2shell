@@ -8,15 +8,16 @@ import (
 
 // Passive is what one GET of the start URL shows.
 type Passive struct {
-	Paths     []string `json:"discovered_paths,omitempty"`
-	Blocked   string   `json:"inspection_blocked,omitempty"`
-	Error     string   `json:"error,omitempty"`
-	FinalURL  string   `json:"final_url"`
-	Status    int      `json:"status"`
-	Server    string   `json:"server,omitempty"`
-	PoweredBy string   `json:"x_powered_by,omitempty"`
-	Cookies   []string `json:"cookies,omitempty"`
-	Redirects []string `json:"redirects,omitempty"`
+	Fingerprints []Fingerprint `json:"fingerprints,omitempty"`
+	Paths        []string      `json:"discovered_paths,omitempty"`
+	Blocked      string        `json:"inspection_blocked,omitempty"`
+	Error        string        `json:"error,omitempty"`
+	FinalURL     string        `json:"final_url"`
+	Status       int           `json:"status"`
+	Server       string        `json:"server,omitempty"`
+	PoweredBy    string        `json:"x_powered_by,omitempty"`
+	Cookies      []string      `json:"cookies,omitempty"`
+	Redirects    []string      `json:"redirects,omitempty"`
 	// Stopped is a redirect left unfollowed, off the site or past the limit.
 	Stopped string   `json:"redirect_not_followed,omitempty"`
 	Hints   []string `json:"php_hints,omitempty"`
@@ -34,6 +35,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		if req.Response != nil {
 			out.Hints = append(out.Hints, applicationHints(req.Response, "")...)
+			out.Fingerprints = mergeFingerprints(out.Fingerprints, frameworkFingerprints(req.Response, ""))
 			for _, cookie := range req.Response.Cookies() {
 				out.Cookies = append(out.Cookies, cookie.Name)
 			}
@@ -75,6 +77,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 	out.Blocked = inspectionBlock(resp, text)
 	if out.Blocked == "" {
 		out.Hints = dedupe(append(out.Hints, applicationHints(resp, text)...))
+		out.Fingerprints = mergeFingerprints(out.Fingerprints, frameworkFingerprints(resp, text))
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			out.Paths = discoveredPaths(out.FinalURL, text)
 		}

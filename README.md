@@ -17,7 +17,9 @@ Colima. The manual Firefox pass and public deployment remain to be verified.
 
 PHP detection combines response evidence with bounded same-origin page
 discovery. Challenges and access denials are reported as blocked inspection.
-[docs/detection.md](docs/detection.md) records the research and limits.
+[docs/detection.md](docs/detection.md) records the research and limits;
+[docs/fingerprints.md](docs/fingerprints.md) lists the twenty framework
+families in the sourced fingerprint catalogue.
 
 A check reads the PHP version a site advertises and compares it with the
 fixed releases. When the visitor attests that the site is theirs, it adds one

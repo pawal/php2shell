@@ -25,7 +25,8 @@ whether the workers were restarted after an upgrade.
 ## Recognising PHP without a version
 
 The check combines headers, cookies, redirect responses, generator tags,
-application asset paths, PHP diagnostics, and same-origin navigation or form
+application asset paths, sourced framework fingerprints, PHP diagnostics,
+and same-origin navigation or form
 URLs with PHP extensions. Generator attributes may appear in any order;
 comments and script text are not treated as navigation or generator tags.
 A CMS version is never treated as a PHP version. The resulting hints are
@@ -38,7 +39,10 @@ three-second discovery budget. Paths naming actions such as logout,
 delete, reset or installation are excluded. The address policy, pinned
 connections, body cap and User-Agent apply to every request. A discovery
 failure is recorded in the evidence and does not discard the start page.
-Evidence identifies each inspected URL and its observations.
+Evidence identifies each inspected URL and its observations. Framework
+fingerprints include their source, confidence and whether they indicate a
+declaration, default cookie or component. [fingerprints.md](fingerprints.md)
+documents the twenty covered families and their detection limits.
 
 Challenge pages, authentication requirements, access denials and rate limits
 produce `inspection_blocked` rather than an ordinary absence of PHP evidence.

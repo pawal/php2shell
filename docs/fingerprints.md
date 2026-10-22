@@ -1,0 +1,100 @@
+# Framework fingerprint coverage
+
+Reviewed 2026-10-22. The embedded [catalogue](../engine/probe/frameworks.json)
+contains 20 PHP framework families. This is a selected coverage set, not a
+ranking of the twenty most popular frameworks. It supplements the existing
+CMS, forum, hosting and generic PHP hints.
+
+Every family accepts an explicit name in `X-Powered-By`, `X-Generator` or a
+generator meta tag. This does not mean these frameworks normally expose
+those fields. Alias boundaries are checked to reject lookalike names.
+
+Every family also has a namespace or class-prefix signature for diagnostics
+already returned with HTTP 5xx and an exception, stack trace or fatal-error
+context. The checker MUST NOT request debug endpoints or induce errors to
+obtain these signals. Symfony, Illuminate, Laminas and other components can
+be embedded in different applications; diagnostic evidence therefore
+identifies a component family, not the entire application.
+
+| Family | Diagnostic identifier prefix | Additional passive signals | Identifier source |
+|---|---|---|---|
+| Laravel | `Illuminate\` | Exact `laravel_session`, `laravel-session` cookie names | [Official source](https://raw.githubusercontent.com/laravel/framework/12.x/src/Illuminate/Database/QueryException.php) |
+| Symfony | `Symfony\` | Profiler header pair | [Official source](https://raw.githubusercontent.com/symfony/http-kernel/7.3/Exception/HttpException.php) |
+| CodeIgniter | `CodeIgniter\` | Exact `ci_session` cookie names | [Official source](https://raw.githubusercontent.com/codeigniter4/CodeIgniter4/develop/system/Exceptions/FrameworkException.php) |
+| CakePHP | `Cake\` | Exact `CAKEPHP` cookie names | [Official source](https://raw.githubusercontent.com/cakephp/cakephp/5.x/src/Http/Exception/HttpException.php) |
+| Yii | `yii\` | Paired Yii script assets | [Official source](https://raw.githubusercontent.com/yiisoft/yii2/master/framework/web/HttpException.php) |
+| Nette | `Nette\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/nette/application/master/src/Application/exceptions.php) |
+| Laminas | `Laminas\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/laminas/laminas-mvc/3.8.x/src/Exception/RuntimeException.php) |
+| Zend Framework | `Zend\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/zendframework/zend-mvc/master/src/Exception/RuntimeException.php) |
+| Phalcon | `Phalcon\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/phalcon/cphalcon/master/phalcon/Mvc/Dispatcher/Exception.zep) |
+| Slim | `Slim\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/slimphp/Slim/4.x/Slim/Exception/HttpException.php) |
+| FuelPHP | `Fuel\Core\` | Exact `fuelcid`, `fuelfid`, `fuelmid`, `fueldid`, `fuelrid` cookie names | [Official source](https://raw.githubusercontent.com/fuel/core/1.9/develop/classes/httpexceptions.php) |
+| Kohana | `Kohana_` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/kohana/core/3.3/master/classes/Kohana/Kohana/Exception.php) |
+| ThinkPHP | `think\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/top-think/framework/8.x/src/think/exception/HttpException.php) |
+| Yaf | `Yaf_` | Explicit identity or diagnostic only | [Official source](https://www.php.net/manual/en/class.yaf-exception.php) |
+| Spiral | `Spiral\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/spiral/framework/master/src/Http/src/Exception/ClientException.php) |
+| Hyperf | `Hyperf\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/hyperf/hyperf/master/src/http-message/src/Exception/HttpException.php) |
+| Mezzio | `Mezzio\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/mezzio/mezzio/3.29.x/src/Exception/RuntimeException.php) |
+| PHPixie | `PHPixie\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/phpixie/orm/master/src/PHPixie/ORM/Exception.php) |
+| Flight | `flight\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/flightphp/core/master/flight/core/Dispatcher.php) |
+| Neos Flow | `Neos\Flow\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/neos/flow-development-collection/9.0/Neos.Flow/Classes/Exception.php) |
+
+## Signal sources and limits
+
+Additional signal sources are recorded on the individual catalogue rules:
+
+- Laravel cookies: [source](https://raw.githubusercontent.com/laravel/laravel/11.x/config/session.php).
+- Laravel cookies: [source](https://raw.githubusercontent.com/laravel/laravel/12.x/config/session.php).
+- Symfony headers: [source](https://symfony.com/doc/current/profiler.html).
+- CodeIgniter cookies: [source](https://raw.githubusercontent.com/codeigniter4/CodeIgniter4/develop/app/Config/Session.php).
+- CakePHP cookies: [source](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework).
+- Yii assets: [source](https://raw.githubusercontent.com/yiisoft/yii2/master/framework/assets/yii.validation.js).
+- FuelPHP cookies: [source](https://raw.githubusercontent.com/fuel/core/1.9/develop/config/session.php).
+
+Laravel cookie defaults depend on the framework version and `APP_NAME`;
+custom names are not guessed. The `CAKEPHP` name is a legacy default; newer
+CakePHP deployments may use the generic PHP session name. CodeIgniter and
+FuelPHP cookie names are also configurable. Cookie names alone are low
+confidence. Generic cookies such as `XSRF-TOKEN`, `_csrf`, `_identity`,
+`session` and arbitrary names ending in `_session` MUST NOT identify a
+particular framework.
+
+Symfony profiler identification requires both a nonempty `X-Debug-Token`
+and an `X-Debug-Token-Link` containing a profiler path. The link is inspected
+as text and never followed. It is component evidence because applications
+such as Drupal may use Symfony components. Yii asset detection requires
+both `yii.js` and `yii.validation.js` script references, not their names in
+prose. Browser assets can be reused or served statically, so this is a low
+confidence component hint.
+
+## Evidence and confidence
+
+Each matched framework fingerprint records the technology, signal, scope,
+confidence, source and observed URL in the existing evidence panel and API.
+Raw cookie values, debug tokens and stack-trace contents are not stored.
+The source is the rule reference; the URL identifies the response inspected.
+
+| Scope | Meaning | Confidence |
+|---|---|---|
+| `declared` | The response explicitly names the framework | medium |
+| `component` | A framework component or its artifacts were observed | medium for diagnostics/profiler; low for browser assets |
+| `default_cookie` | A known default cookie name was observed | low |
+
+Fingerprint confidence describes the technology indication, not the PHP
+patch state. No fingerprint supplies a PHP version; only the existing PHP
+version parser and session-request observations affect that assessment.
+A framework version MUST NOT become a PHP version.
+
+Fixtures cover all twenty diagnostic families, explicit declarations,
+production cookie/header/asset signals, provenance, privacy and negative
+cases. These are synthetic regression responses based on the linked
+sources, not live acceptance tests against twenty deployed applications.
+
+Custom cookies, disabled diagnostics, stripped identity headers, static
+exports and challenge pages can hide every framework-specific signal.
+Such deployments remain undetectable through this catalogue. See
+[detection.md](detection.md) for discovery and challenge handling.
+
+`make test`, `make build` and `make test-lab` pass with the expanded catalogue.
+The existing lab verifies unpatched, patched and hardened PHP plus a static
+server; it does not substitute for the twenty-family synthetic fixtures.

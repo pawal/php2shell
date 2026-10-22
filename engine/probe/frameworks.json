@@ -1,0 +1,299 @@
+[
+  {
+    "technology": "Laravel",
+    "aliases": [
+      "Laravel"
+    ],
+    "diagnostics": [
+      "Illuminate\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/laravel/framework/12.x/src/Illuminate/Database/QueryException.php",
+    "cookies": [
+      {
+        "name": "laravel_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/laravel/laravel/11.x/config/session.php"
+      },
+      {
+        "name": "laravel-session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/laravel/laravel/12.x/config/session.php"
+      }
+    ]
+  },
+  {
+    "technology": "Symfony",
+    "aliases": [
+      "Symfony"
+    ],
+    "diagnostics": [
+      "Symfony\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/symfony/http-kernel/7.3/Exception/HttpException.php",
+    "headers": [
+      {
+        "name": "X-Debug-Token-Link",
+        "pattern": "(?:^|/)_profiler/[a-zA-Z0-9]+(?:$|[/?#])",
+        "requires": [
+          "X-Debug-Token"
+        ],
+        "scope": "component",
+        "confidence": "medium",
+        "source": "https://symfony.com/doc/current/profiler.html"
+      }
+    ]
+  },
+  {
+    "technology": "CodeIgniter",
+    "aliases": [
+      "CodeIgniter"
+    ],
+    "diagnostics": [
+      "CodeIgniter\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/codeigniter4/CodeIgniter4/develop/system/Exceptions/FrameworkException.php",
+    "cookies": [
+      {
+        "name": "ci_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/codeigniter4/CodeIgniter4/develop/app/Config/Session.php"
+      }
+    ]
+  },
+  {
+    "technology": "CakePHP",
+    "aliases": [
+      "CakePHP"
+    ],
+    "diagnostics": [
+      "Cake\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/cakephp/cakephp/5.x/src/Http/Exception/HttpException.php",
+    "cookies": [
+      {
+        "name": "CAKEPHP",
+        "confidence": "low",
+        "source": "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework"
+      }
+    ]
+  },
+  {
+    "technology": "Yii",
+    "aliases": [
+      "Yii"
+    ],
+    "diagnostics": [
+      "yii\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/yiisoft/yii2/master/framework/web/HttpException.php",
+    "assets": [
+      {
+        "names": [
+          "yii.js",
+          "yii.validation.js"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/yiisoft/yii2/master/framework/assets/yii.validation.js"
+      }
+    ]
+  },
+  {
+    "technology": "Nette",
+    "aliases": [
+      "Nette"
+    ],
+    "diagnostics": [
+      "Nette\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/nette/application/master/src/Application/exceptions.php"
+  },
+  {
+    "technology": "Laminas",
+    "aliases": [
+      "Laminas"
+    ],
+    "diagnostics": [
+      "Laminas\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/laminas/laminas-mvc/3.8.x/src/Exception/RuntimeException.php"
+  },
+  {
+    "technology": "Zend Framework",
+    "aliases": [
+      "Zend Framework",
+      "ZendFramework"
+    ],
+    "diagnostics": [
+      "Zend\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/zendframework/zend-mvc/master/src/Exception/RuntimeException.php"
+  },
+  {
+    "technology": "Phalcon",
+    "aliases": [
+      "Phalcon"
+    ],
+    "diagnostics": [
+      "Phalcon\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/phalcon/cphalcon/master/phalcon/Mvc/Dispatcher/Exception.zep"
+  },
+  {
+    "technology": "Slim",
+    "aliases": [
+      "Slim"
+    ],
+    "diagnostics": [
+      "Slim\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/slimphp/Slim/4.x/Slim/Exception/HttpException.php"
+  },
+  {
+    "technology": "FuelPHP",
+    "aliases": [
+      "FuelPHP"
+    ],
+    "diagnostics": [
+      "Fuel\\Core\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/fuel/core/1.9/develop/classes/httpexceptions.php",
+    "cookies": [
+      {
+        "name": "fuelcid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/fuel/core/1.9/develop/config/session.php"
+      },
+      {
+        "name": "fuelfid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/fuel/core/1.9/develop/config/session.php"
+      },
+      {
+        "name": "fuelmid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/fuel/core/1.9/develop/config/session.php"
+      },
+      {
+        "name": "fueldid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/fuel/core/1.9/develop/config/session.php"
+      },
+      {
+        "name": "fuelrid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/fuel/core/1.9/develop/config/session.php"
+      }
+    ]
+  },
+  {
+    "technology": "Kohana",
+    "aliases": [
+      "Kohana"
+    ],
+    "diagnostics": [
+      "Kohana_"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/kohana/core/3.3/master/classes/Kohana/Kohana/Exception.php"
+  },
+  {
+    "technology": "ThinkPHP",
+    "aliases": [
+      "ThinkPHP"
+    ],
+    "diagnostics": [
+      "think\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/top-think/framework/8.x/src/think/exception/HttpException.php"
+  },
+  {
+    "technology": "Yaf",
+    "aliases": [
+      "Yaf"
+    ],
+    "diagnostics": [
+      "Yaf_"
+    ],
+    "confidence": "medium",
+    "source": "https://www.php.net/manual/en/class.yaf-exception.php"
+  },
+  {
+    "technology": "Spiral",
+    "aliases": [
+      "Spiral"
+    ],
+    "diagnostics": [
+      "Spiral\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/spiral/framework/master/src/Http/src/Exception/ClientException.php"
+  },
+  {
+    "technology": "Hyperf",
+    "aliases": [
+      "Hyperf"
+    ],
+    "diagnostics": [
+      "Hyperf\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/hyperf/hyperf/master/src/http-message/src/Exception/HttpException.php"
+  },
+  {
+    "technology": "Mezzio",
+    "aliases": [
+      "Mezzio"
+    ],
+    "diagnostics": [
+      "Mezzio\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/mezzio/mezzio/3.29.x/src/Exception/RuntimeException.php"
+  },
+  {
+    "technology": "PHPixie",
+    "aliases": [
+      "PHPixie"
+    ],
+    "diagnostics": [
+      "PHPixie\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/phpixie/orm/master/src/PHPixie/ORM/Exception.php"
+  },
+  {
+    "technology": "Flight",
+    "aliases": [
+      "Flight",
+      "FlightPHP"
+    ],
+    "diagnostics": [
+      "flight\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/flightphp/core/master/flight/core/Dispatcher.php"
+  },
+  {
+    "technology": "Neos Flow",
+    "aliases": [
+      "Neos Flow"
+    ],
+    "diagnostics": [
+      "Neos\\Flow\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/neos/flow-development-collection/9.0/Neos.Flow/Classes/Exception.php"
+  }
+]

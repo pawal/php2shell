@@ -93,11 +93,36 @@ components:
         oracle_run: { type: boolean }
         evidence:
           type: object
+          properties:
+            passive: { $ref: "#/components/schemas/PageEvidence" }
+            discovery:
+              type: array
+              items: { $ref: "#/components/schemas/PageEvidence" }
         local_check:
           type: array
           items: { type: string }
         checked_at: { type: string, format: date-time }
         cached: { type: boolean }
+    PageEvidence:
+      type: object
+      properties:
+        fingerprints:
+          type: array
+          items: { $ref: "#/components/schemas/Fingerprint" }
+    Fingerprint:
+      type: object
+      required: [technology, signal, scope, confidence, source, url]
+      properties:
+        technology: { type: string }
+        signal: { type: string }
+        scope:
+          type: string
+          enum: [declared, component, default_cookie]
+        confidence:
+          type: string
+          enum: [medium, low]
+        source: { type: string, format: uri }
+        url: { type: string, format: uri }
     Error:
       type: object
       properties:

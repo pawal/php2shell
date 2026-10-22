@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- A sourced catalogue of twenty PHP framework families adds scoped evidence and per-signal confidence.
+
 - Combine PHP links, forms, diagnostics, generator tags and redirect evidence across bounded discovery.
 - Report challenges and access controls as `inspection_blocked` and stop further probes.
 

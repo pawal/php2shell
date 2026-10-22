@@ -68,15 +68,7 @@ func pageTags(body string) []htmlTag {
 			continue
 		}
 		name := lower[start:nameEnd]
-		switch name {
-		case "script", "style", "textarea", "title", "xmp", "iframe":
-			close := strings.Index(lower[pos:], "</"+name)
-			if close < 0 {
-				return tags
-			}
-			pos += close
-			continue
-		}
+
 		tag := htmlTag{name: name, attrs: map[string]string{}}
 		for _, attr := range htmlAttributes.FindAllStringSubmatch(body[nameEnd:end], -1) {
 			key := strings.ToLower(attr[1])
@@ -84,6 +76,18 @@ func pageTags(body string) []htmlTag {
 				continue
 			}
 			tag.attrs[key] = html.UnescapeString(attr[2] + attr[3] + attr[4])
+		}
+		switch name {
+		case "script", "style", "textarea", "title", "xmp", "iframe":
+			if name == "script" {
+				tags = append(tags, tag)
+			}
+			close := strings.Index(lower[pos:], "</"+name)
+			if close < 0 {
+				return tags
+			}
+			pos += close
+			continue
 		}
 		tags = append(tags, tag)
 	}

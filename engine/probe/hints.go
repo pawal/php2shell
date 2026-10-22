@@ -37,8 +37,6 @@ var cookieHints = []struct{ name, hint string }{
 	{"wordpress_test_cookie", "WordPress cookie"},
 	{"wp-settings-", "WordPress cookie"},
 	{"wordpress_logged_in_", "WordPress cookie"},
-	{"laravel_session", "Laravel cookie"},
-	{"ci_session", "CodeIgniter cookie"},
 	{"fe_typo_user", "TYPO3 cookie"},
 	{"prestashop-", "PrestaShop cookie"},
 }
@@ -121,6 +119,9 @@ func applicationHints(resp *http.Response, body string) []string {
 		hints = append(hints, "PHP warning header")
 	}
 
+	for _, fingerprint := range frameworkFingerprints(resp, body) {
+		hints = append(hints, fingerprint.hint())
+	}
 	return dedupe(hints)
 }
 
