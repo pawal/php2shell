@@ -86,6 +86,9 @@ It shows nothing when warnings are hidden, which is the production default,
 when session upload progress is disabled, when the session handler is not the
 file handler, or when the path is not served by PHP.
 
+The evidence keeps each distinct warning line the answer was counted from,
+as plain text, at most six lines of 300 bytes each.
+
 ## Verdicts
 
 | Verdict | Ground | Confidence |

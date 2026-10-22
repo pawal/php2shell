@@ -141,6 +141,9 @@ func TestCheckRedirects(t *testing.T) {
 	if got := strings.Join(paths, ","); got != "GET /,GET /home.php,GET /phpinfo.php,GET /info.php,POST /,POST /index.php,POST /home.php" {
 		t.Error(got)
 	}
+	if last := evidence.Requests[len(evidence.Requests)-1]; len(last.Lines) != 1 || evidence.Requests[0].Lines != nil {
+		t.Errorf("warning lines %+v", evidence.Requests)
+	}
 }
 
 func TestCheckRedirectLimitAndOffsite(t *testing.T) {

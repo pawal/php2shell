@@ -3,9 +3,11 @@ package probe
 import (
 	"bytes"
 	"context"
+	"html"
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/pawal/php2shell/engine/verdict"
@@ -19,6 +21,46 @@ type OracleObservation struct {
 	InvalidID   int    `json:"invalid_id"`
 	FailedRead  int    `json:"failed_read"`
 	FailedWrite int    `json:"failed_write"`
+	// Lines are the distinct warning lines counted, as plain text.
+	Lines []string `json:"lines,omitempty"`
+}
+
+// The warnings the session request counts.
+const (
+	invalidIDWarning   = "Session ID is too long"
+	failedReadWarning  = "Failed to read session data"
+	failedWriteWarning = "Failed to write session data"
+)
+
+// Bounds on the warning lines kept as evidence.
+const (
+	maxWarningLines = 6
+	maxWarningLine  = 300
+)
+
+var (
+	lineBreak = regexp.MustCompile(`(?i)<br\s*/?>|\n`)
+	markup    = regexp.MustCompile(`<[^>]*>`)
+)
+
+// warningLines keeps each distinct line that carries a counted warning.
+func warningLines(text string) []string {
+	var lines []string
+	for _, line := range lineBreak.Split(text, -1) {
+		if !strings.Contains(line, invalidIDWarning) && !strings.Contains(line, failedReadWarning) && !strings.Contains(line, failedWriteWarning) {
+			continue
+		}
+		line = strings.Join(strings.Fields(html.UnescapeString(markup.ReplaceAllString(line, ""))), " ")
+		if len(line) > maxWarningLine {
+			line = strings.ToValidUTF8(line[:maxWarningLine], "")
+		}
+		lines = append(lines, line)
+	}
+	lines = dedupe(lines)
+	if len(lines) > maxWarningLines {
+		lines = lines[:maxWarningLines]
+	}
+	return lines
 }
 
 // oracle uses only the invalid session key in the lab reference request.
@@ -58,9 +100,10 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 			observation.Status = resp.StatusCode
 			observation.Blocked = inspectionBlock(resp, text)
 		}
-		observation.InvalidID = strings.Count(text, "Session ID is too long")
-		observation.FailedRead = strings.Count(text, "Failed to read session data")
-		observation.FailedWrite = strings.Count(text, "Failed to write session data")
+		observation.InvalidID = strings.Count(text, invalidIDWarning)
+		observation.FailedRead = strings.Count(text, failedReadWarning)
+		observation.FailedWrite = strings.Count(text, failedWriteWarning)
+		observation.Lines = warningLines(text)
 		observations = append(observations, observation)
 		if err != nil {
 			if ctx.Err() != nil {

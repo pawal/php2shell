@@ -13,6 +13,7 @@ number is written.
 - A phpinfo() page supplies the PHP version when no header carries one.
 - Attested checks without a version ask for `/phpinfo.php` and `/info.php`.
 - A phpinfo() page's server API and session settings shape the summary and advice.
+- Session request evidence keeps the warning lines it counted.
 
 ## v1.0.3 (2026-10-22)
 

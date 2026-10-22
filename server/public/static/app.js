@@ -194,6 +194,11 @@
       children.push(el('h4', 'Patch-state requests'), table(['Page', 'Status', 'PHP answered'], requests.map((request) => [
         el('code', short(request.url)), request.status ? String(request.status) : '', reading(request),
       ])));
+      for (const request of requests.filter((request) => (request.lines || []).length > 0)) {
+        const lines = el('details');
+        lines.append(el('summary', 'Warnings from ' + short(request.url)), el('pre', request.lines.join('\n')));
+        children.push(lines);
+      }
     }
     const raw = el('details');
     raw.append(el('summary', 'Raw JSON'), el('pre', JSON.stringify(evidence, null, 2)));
