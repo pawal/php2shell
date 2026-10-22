@@ -117,6 +117,8 @@ func TestDocumentsCarryHeadAndFooter(t *testing.T) {
 		for _, want := range []string{
 			`<html lang="en">`, `<link rel="canonical" href="` + canonical + `">`,
 			`<meta property="og:title"`, `<meta name="description"`,
+			`<meta property="og:image" content="https://php2shell.example.net/static/og.png">`,
+			`<meta name="twitter:card" content="summary_large_image">`,
 			`This service is provided by <a href="https://evilbit.de/">evilbit.de</a>.`, "v1.2.3",
 		} {
 			if !strings.Contains(body, want) {
@@ -129,6 +131,44 @@ func TestDocumentsCarryHeadAndFooter(t *testing.T) {
 		if strings.Contains(body, "style=") || strings.Contains(body, "<script>") {
 			t.Errorf("%s carries an inline style or script", path)
 		}
+	}
+}
+
+// The start page alone describes the service as JSON-LD, and only with a public_url.
+func TestStructuredData(t *testing.T) {
+	const open, end = `<script type="application/ld+json">`, "</script>"
+	h := newTestServer(t, nil, nil).Handler()
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	body := rec.Body.String()
+	start := strings.Index(body, open)
+	if start < 0 {
+		t.Fatal("the start page carries no JSON-LD")
+	}
+	text, _, _ := strings.Cut(body[start+len(open):], end)
+	var data struct {
+		Graph []struct {
+			Type string `json:"@type"`
+			URL  string `json:"url"`
+		} `json:"@graph"`
+	}
+	if err := json.Unmarshal([]byte(text), &data); err != nil {
+		t.Fatalf("JSON-LD: %v: %s", err, text)
+	}
+	if len(data.Graph) != 2 || data.Graph[1].Type != "WebApplication" || data.Graph[1].URL != "https://php2shell.example.net/" {
+		t.Errorf("JSON-LD: %s", text)
+	}
+
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/about", nil))
+	if strings.Contains(rec.Body.String(), open) {
+		t.Error("/about carries JSON-LD")
+	}
+	bare := newTestServer(t, func(c *Config) { c.PublicURL = "" }, nil).Handler()
+	rec = httptest.NewRecorder()
+	bare.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	if body := rec.Body.String(); strings.Contains(body, open) || strings.Contains(body, "og:image") {
+		t.Error("the start page without public_url carries JSON-LD or a share image")
 	}
 }
 

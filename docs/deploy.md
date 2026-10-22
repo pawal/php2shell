@@ -55,9 +55,10 @@ that loads back unchanged. A file naming an unknown key is refused.
 Notes on the keys:
 
 - `listen_addr` SHOULD be a loopback address; the proxy is the only client.
-- `public_url` is the origin the canonical links, the sitemap and the
-  outbound `User-Agent` name. It MUST be the name the proxy answers on. Left
-  empty, the documents carry no canonical link and `/sitemap.xml` answers 404.
+- `public_url` is the origin the canonical links, the share image, the
+  structured data, the sitemap and the outbound `User-Agent` name. It MUST be
+  the name the proxy answers on. Left empty, the documents carry no canonical
+  link, share image or structured data, and `/sitemap.xml` answers 404.
 - `provider` and `provider_url` fill the footer line "This service is
   provided by". `source_url` is the source link of the footer and the about
   page. `contact`, when set, is offered on the about page for opt-out

@@ -9,6 +9,7 @@ number is written.
 
 - The Debian package enables the service on a first install.
 - The Caddy example drops the `Server` header.
+- The pages carry a share image, Twitter card tags and JSON-LD for search engines.
 
 ## v1.0.0 (2026-10-22)
 

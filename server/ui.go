@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -15,15 +16,17 @@ var public embed.FS
 
 // page is what a document template is rendered with.
 type page struct {
-	Title       string
-	Description string
-	Canonical   string
-	Path        string
-	Version     string
-	Provider    string
-	ProviderURL string
-	SourceURL   string
-	Contact     string
+	Title          string
+	Description    string
+	Origin         string
+	Canonical      string
+	Path           string
+	Version        string
+	Provider       string
+	ProviderURL    string
+	SourceURL      string
+	Contact        string
+	StructuredData template.JS
 }
 
 // documents are the indexable pages, by path.
@@ -47,7 +50,13 @@ func (s *Server) renderDocuments() (map[string][]byte, error) {
 			Provider: s.cfg.Provider, ProviderURL: s.cfg.ProviderURL, SourceURL: s.cfg.SourceURL, Contact: s.cfg.Contact,
 		}
 		if origin := s.cfg.Origin(); origin != "" {
+			data.Origin = origin
 			data.Canonical = origin + doc.path
+			if doc.path == "/" {
+				if data.StructuredData, err = s.structuredData(doc.title, doc.description); err != nil {
+					return nil, err
+				}
+			}
 		}
 		var buf bytes.Buffer
 		if err := templates.ExecuteTemplate(&buf, doc.file, data); err != nil {
@@ -56,6 +65,27 @@ func (s *Server) renderDocuments() (map[string][]byte, error) {
 		out[doc.path] = buf.Bytes()
 	}
 	return out, nil
+}
+
+// structuredData describes the service to search engines, as JSON-LD.
+func (s *Server) structuredData(name, description string) (template.JS, error) {
+	home := s.cfg.Origin() + "/"
+	provider := map[string]any{"@type": "Organization", "name": s.cfg.Provider}
+	if s.cfg.ProviderURL != "" {
+		provider["url"] = s.cfg.ProviderURL
+	}
+	data, err := json.Marshal(map[string]any{
+		"@context": "https://schema.org",
+		"@graph": []any{
+			map[string]any{"@type": "WebSite", "name": name, "url": home},
+			map[string]any{
+				"@type": "WebApplication", "name": name, "url": home, "description": description,
+				"applicationCategory": "SecurityApplication", "operatingSystem": "Any",
+				"isAccessibleForFree": true, "provider": provider,
+			},
+		},
+	})
+	return template.JS(data), err
 }
 
 func (s *Server) serveDocument(path string) http.HandlerFunc {
