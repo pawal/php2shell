@@ -274,7 +274,7 @@ func TestFailureLabel(t *testing.T) {
 	if got := failureLabel(&probe.PolicyError{Host: "h", Reason: "r"}); got != "refused:"+codeNonGlobalAddress {
 		t.Errorf("policy: %s", got)
 	}
-	if got := failureLabel(probe.ErrNotImplemented); got != "error:"+codeCheckFailed {
+	if got := failureLabel(io.ErrUnexpectedEOF); got != "error:"+codeCheckFailed {
 		t.Errorf("failure: %s", got)
 	}
 }

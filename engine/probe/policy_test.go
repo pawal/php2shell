@@ -55,14 +55,17 @@ func TestCheckAppliesThePolicy(t *testing.T) {
 	if _, _, err := p.Check(ctx, target("missing.example.com", "443"), false); !errors.Is(err, ErrUnresolvable) {
 		t.Errorf("missing name: got %v", err)
 	}
-	if _, _, err := p.Check(ctx, target("public.example.com", "443"), false); !errors.Is(err, ErrNotImplemented) {
-		t.Errorf("public name: got %v", err)
+	if err := newPins(resolver, false).admitPort("public.example.com", "443"); err != nil {
+		t.Errorf("public port: %v", err)
+	}
+	lab := newPins(resolver, true)
+	if err := lab.admitPort("private.example.com", "18081"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := lab.addresses(ctx, "private.example.com"); err != nil {
+		t.Fatal(err)
 	}
 
-	lab := &Prober{Resolver: resolver, AllowNonGlobal: true}
-	if _, _, err := lab.Check(ctx, target("private.example.com", "18081"), false); !errors.Is(err, ErrNotImplemented) {
-		t.Errorf("lab mode: got %v", err)
-	}
 }
 
 // A host is resolved once per check, so a second answer cannot move the dial.

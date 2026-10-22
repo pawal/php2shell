@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- Passive fetching and the session patch-state request, with bounded redirects and pinned addresses.
+
 - Targets are public names and addresses on ports 80, 443, 8080 and 8443.
 - IPv4 carried in IPv6 is refused in every form, not unwrapped.
 - A host is resolved once per check and only its validated addresses are dialled.

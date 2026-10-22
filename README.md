@@ -8,10 +8,10 @@ embedded.
 
 ## Status
 
-The address policy, the verdict engine, the service and the page are in
-place. The passive fetch of the start page and the session request are not
-written yet, so a check of a public site currently ends with the error "the
-network checks are not implemented yet". Refusals of non-public targets work.
+The address policy, passive fetch, session request, verdict engine, service
+and page are implemented. Unit tests cover the network checks against local
+HTTP and HTTPS servers. Docker lab acceptance, the manual Firefox pass and
+public deployment remain to be verified.
 
 ## Overview
 
