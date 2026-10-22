@@ -32,6 +32,157 @@
     return node;
   }
 
+  function group(tag, children, className) {
+    const node = el(tag, undefined, className);
+    node.append(...children.filter((child) => child !== null && child !== undefined && child !== ''));
+    return node;
+  }
+
+  function codes(values, separator) {
+    if (!values || values.length === 0) {
+      return null;
+    }
+    const span = el('span');
+    values.forEach((value, index) => {
+      if (index > 0) {
+        span.append(separator || ' ');
+      }
+      span.append(el('code', value));
+    });
+    return span;
+  }
+
+  function relative(address, origin) {
+    try {
+      const url = new URL(address);
+      return url.origin === origin ? url.pathname + url.search : address;
+    } catch (err) {
+      return address;
+    }
+  }
+
+  function facts(pairs) {
+    const list = el('dl', undefined, 'facts');
+    for (const [term, value] of pairs) {
+      if (value) {
+        list.append(el('dt', term), value instanceof Node ? group('dd', [value]) : el('dd', value));
+      }
+    }
+    return list;
+  }
+
+  function table(headings, rows) {
+    const head = group('tr', headings.map((heading) => el('th', heading)));
+    const body = group('tbody', rows.map((cells) => group('tr', cells.map((cell) => cell instanceof Node ? group('td', [cell]) : el('td', cell)))));
+    return group('div', [group('table', [group('thead', [head]), body])], 'scroll');
+  }
+
+  function pageSeen(page, start) {
+    if (page.error) {
+      return page.error;
+    }
+    if (page.inspection_blocked) {
+      return 'blocked: ' + page.inspection_blocked;
+    }
+    const hints = (page.php_hints || []).filter((hint) => !(start.php_hints || []).includes(hint)).join(', ');
+    if (page.x_powered_by && page.x_powered_by !== start.x_powered_by) {
+      return group('span', [el('code', page.x_powered_by), hints ? ' ' + hints : '']);
+    }
+    if (hints) {
+      return hints;
+    }
+    return (page.php_hints || []).length > 0 ? 'nothing new' : 'no PHP signs';
+  }
+
+  const signals = { cookie: 'default cookie', assets: 'script files', generator: 'generator tag', diagnostic: 'error page' };
+
+  function frameworks(pages) {
+    const found = new Map();
+    for (const page of pages) {
+      for (const fingerprint of page.fingerprints || []) {
+        const key = fingerprint.technology + '|' + fingerprint.signal;
+        if (!found.has(key)) {
+          found.set(key, fingerprint);
+        }
+      }
+    }
+    if (found.size === 0) {
+      return null;
+    }
+    const list = el('ul', undefined, 'plain');
+    for (const fingerprint of found.values()) {
+      const signal = signals[fingerprint.signal] || fingerprint.signal + ' header';
+      const item = el('li', fingerprint.technology + ', ' + signal + ', ' + fingerprint.confidence + ' confidence');
+      if (/^https:\/\//.test(fingerprint.source)) {
+        const link = el('a', 'source');
+        link.href = fingerprint.source;
+        link.rel = 'noreferrer';
+        item.append(' (', link, ')');
+      }
+      list.append(item);
+    }
+    return list;
+  }
+
+  function reading(request) {
+    if (request.inspection_blocked) {
+      return 'blocked: ' + request.inspection_blocked;
+    }
+    const counts = 'ID too long ' + request.invalid_id + ', read failed ' + request.failed_read + ', write failed ' + request.failed_write;
+    let answer = 'no session warnings';
+    if (request.invalid_id > 0 && request.failed_read > 0) {
+      answer = request.failed_write > 0 ? 'like an unpatched release' : 'like a patched release';
+    }
+    return group('span', [answer, ' ', el('span', counts, 'muted')]);
+  }
+
+  function renderEvidence(evidence, target) {
+    const start = evidence.passive || {};
+    let origin = '';
+    try {
+      origin = new URL(start.final_url || target).origin;
+    } catch (err) {
+      origin = '';
+    }
+    const short = (address) => relative(address, origin);
+    const pages = evidence.discovery || [];
+    const requests = evidence.oracle_requests || [];
+    const children = [
+      el('h4', 'Start page'),
+      facts([
+        ['Address', codes([start.final_url || target])],
+        ['Status', start.status ? String(start.status) : 'no answer'],
+        ['Redirects', start.redirects ? codes([target, ...start.redirects].map(short), ' \u2192 ') : null],
+        ['Not followed', codes(start.redirect_not_followed ? [start.redirect_not_followed] : [])],
+        ['Server', codes(start.server ? [start.server] : [])],
+        ['X-Powered-By', codes(start.x_powered_by ? [start.x_powered_by] : [])],
+        ['Cookies', codes(start.cookies)],
+        ['PHP signs', (start.php_hints || []).join(', ')],
+        ['PHP links', codes((start.discovered_paths || []).map(short))],
+        ['Blocked', start.inspection_blocked],
+        ['Error', start.error],
+      ]),
+    ];
+    if (pages.length > 0) {
+      children.push(el('h4', 'Other PHP pages'), table(['Page', 'Status', 'Seen'], pages.map((page) => [
+        el('code', short(page.final_url)), page.status ? String(page.status) : '', pageSeen(page, start),
+      ])));
+    }
+    const known = frameworks([start, ...pages]);
+    if (known) {
+      children.push(el('h4', 'Frameworks'), known);
+    }
+    if (requests.length > 0) {
+      children.push(el('h4', 'Patch-state requests'), table(['Page', 'Status', 'PHP answered'], requests.map((request) => [
+        el('code', short(request.url)), request.status ? String(request.status) : '', reading(request),
+      ])));
+    }
+    const raw = el('details');
+    raw.append(el('summary', 'Raw JSON'), el('pre', JSON.stringify(evidence, null, 2)));
+    children.push(raw);
+    return children;
+  }
+
   function show(className, children) {
     result.className = 'result ' + (className || '');
     result.replaceChildren(...children);
@@ -62,8 +213,8 @@
     children.push(local);
 
     if (report.evidence) {
-      const evidence = el('details');
-      evidence.append(el('summary', 'What the check saw'), el('pre', JSON.stringify(report.evidence, null, 2)));
+      const evidence = el('details', undefined, 'evidence');
+      evidence.append(el('summary', 'What the check saw'), ...renderEvidence(report.evidence, report.target));
       children.push(evidence);
     }
     show(label[1], children);
