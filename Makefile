@@ -71,7 +71,11 @@ vulncheck:
 
 # Packaging: one .deb and one .rpm per architecture, built with nfpm. The tag
 # is the only place a version number is written.
-VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null | sed 's/^v//')
+# Without a tag, the Go pseudo-version the binary reports, as packages need a
+# leading digit.
+GIT_TAG_VERSION = $(shell git describe --tags --dirty 2>/dev/null | sed 's/^v//')
+GIT_PSEUDO_VERSION = $(shell TZ=UTC git log -1 --abbrev=12 --date=format-local:%Y%m%d%H%M%S --format=0.0.0-%cd-%h 2>/dev/null)
+VERSION ?= $(or $(GIT_TAG_VERSION),$(GIT_PSEUDO_VERSION))
 PACKAGE_ARCHES ?= amd64 arm64
 DIST := dist
 PKG_DIR := $(DIST)/packages

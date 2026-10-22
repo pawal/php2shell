@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- Untagged builds package under the Go pseudo-version.
+
 - Add fifty sourced PHP application fingerprints with scoped markup, CSS, cookie and diagnostic evidence.
 
 - The page takes a dark terminal look with an ASCII banner.
