@@ -69,7 +69,8 @@ type Config struct {
 	MaxConcurrentChecks int             `json:"max_concurrent_checks"`
 	CheckTimeout        Duration        `json:"check_timeout"`
 	// LogFile receives one line per check; empty logs nothing.
-	LogFile string `json:"log_file,omitempty"`
+	LogFile         string `json:"log_file,omitempty"`
+	FingerprintFile string `json:"fingerprint_file,omitempty"`
 	// AllowNonGlobalAddresses lifts the address and port policy, for a lab.
 	AllowNonGlobalAddresses bool     `json:"allow_non_global_addresses,omitempty"`
 	MaxBodySize             int64    `json:"max_body_size"`
@@ -112,6 +113,7 @@ var stringKeys = []key[string]{
 	{"source-url", "SOURCE_URL", "where the source code is published", func(c *Config) *string { return &c.SourceURL }},
 	{"contact", "CONTACT", "address for opt-out requests, shown on the about page", func(c *Config) *string { return &c.Contact }},
 	{"log-file", "LOG_FILE", "file receiving one line per check, empty for none", func(c *Config) *string { return &c.LogFile }},
+	{"fingerprints", "FINGERPRINT_FILE", "optional PHP fingerprint database file", func(c *Config) *string { return &c.FingerprintFile }},
 }
 
 var intKeys = []key[int]{

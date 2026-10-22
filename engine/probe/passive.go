@@ -36,6 +36,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 		if req.Response != nil {
 			out.Hints = append(out.Hints, applicationHints(req.Response, "")...)
 			out.Fingerprints = mergeFingerprints(out.Fingerprints, applicationFingerprints(req.Response, ""))
+			out.addExternal(s.prober.Fingerprints.Match(req.Response, ""))
 			for _, cookie := range req.Response.Cookies() {
 				out.Cookies = append(out.Cookies, cookie.Name)
 			}
@@ -78,9 +79,18 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 	if out.Blocked == "" {
 		out.Hints = dedupe(append(out.Hints, applicationHints(resp, text)...))
 		out.Fingerprints = mergeFingerprints(out.Fingerprints, applicationFingerprints(resp, text))
+		out.addExternal(s.prober.Fingerprints.Match(resp, text))
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			out.Paths = discoveredPaths(out.FinalURL, text)
 		}
 	}
 	return out, nil
+}
+
+func (p *Passive) addExternal(matches []Fingerprint) {
+	p.Fingerprints = mergeFingerprints(p.Fingerprints, matches)
+	for _, match := range matches {
+		p.Hints = append(p.Hints, match.hint())
+	}
+	p.Hints = dedupe(p.Hints)
 }

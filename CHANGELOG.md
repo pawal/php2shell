@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- Optional PHP-focused WebAppAnalyzer database with sourced passive evidence.
+
 - Broader passive application detection for Bludit, ProcessWire, Serendipity and Piwigo.
 
 - The Debian package enables the service on a first install.

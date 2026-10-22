@@ -29,6 +29,7 @@ type Prober struct {
 	RequestTimeout time.Duration
 	MaxBody        int64
 	MaxRedirects   int
+	Fingerprints   *FingerprintDatabase
 }
 
 func (p *Prober) resolver() Resolver {

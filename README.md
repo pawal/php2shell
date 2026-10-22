@@ -31,6 +31,9 @@ and [docs/fingerprints.md](docs/fingerprints.md) lists the twenty framework
 families in the sourced fingerprint catalogue.
 [docs/applications.md](docs/applications.md) lists 53 further PHP
 applications and their supported signals.
+An optional [external PHP database](docs/external-fingerprints.md) adds
+261 technology labels from WebAppAnalyzer, evaluated against existing
+responses with no additional requests.
 
 Only public domain names and public IP addresses are checked, on ports 80,
 443, 8080 and 8443. Non-public addresses are refused before any request is

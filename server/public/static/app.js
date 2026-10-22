@@ -94,7 +94,10 @@
     return (page.php_hints || []).length > 0 ? 'nothing new' : 'no PHP signs';
   }
 
-  const signals = { cookie: 'default cookie', assets: 'script files', generator: 'generator tag', diagnostic: 'error page' };
+  const signals = {
+    cookie: 'default cookie', assets: 'asset files', generator: 'generator tag', diagnostic: 'error page', markup: 'page markup',
+    database_cookie: 'cookie', database_header: 'response header', database_meta: 'meta tag', database_scriptSrc: 'script file'
+  };
 
   function frameworks(pages) {
     const found = new Map();

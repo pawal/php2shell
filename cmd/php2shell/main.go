@@ -44,6 +44,7 @@ const checkFlags = `Check flags:
   -passive           read the advertised version only; send no session request
   -allow-non-global  check non-global addresses and any port, for a lab
   -timeout <dur>     wall clock the whole check may take (default 15s)
+  -fingerprints <file>  add a separately downloaded PHP fingerprint database
 `
 
 const serveFlags = `Serve flags:
@@ -88,6 +89,7 @@ func check(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	passive := set.Bool("passive", false, "")
 	allowNonGlobal := set.Bool("allow-non-global", false, "")
 	timeout := set.Duration("timeout", 15*time.Second, "")
+	fingerprints := set.String("fingerprints", "", "")
 	if err := set.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			fmt.Fprint(stdout, checkFlags)
@@ -108,6 +110,13 @@ func check(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	ctx, cancel := context.WithTimeout(ctx, *timeout)
 	defer cancel()
 	prober := &probe.Prober{AllowNonGlobal: *allowNonGlobal, UserAgent: userAgent("")}
+	if *fingerprints != "" {
+		prober.Fingerprints, err = probe.LoadFingerprintDatabase(*fingerprints)
+		if err != nil {
+			fmt.Fprintf(stderr, "php2shell check: %v\n", err)
+			return exitUsage
+		}
+	}
 	input, evidence, err := prober.Check(ctx, target, !*passive)
 	if err != nil {
 		fmt.Fprintf(stderr, "php2shell check: %v\n", err)
@@ -155,6 +164,13 @@ func serve(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	}
 	logger := slog.New(slog.NewTextHandler(stderr, nil))
 	prober := &probe.Prober{AllowNonGlobal: cfg.AllowNonGlobalAddresses, UserAgent: userAgent(cfg.Origin())}
+	if cfg.FingerprintFile != "" {
+		prober.Fingerprints, err = probe.LoadFingerprintDatabase(cfg.FingerprintFile)
+		if err != nil {
+			fmt.Fprintf(stderr, "php2shell serve: %v\n", err)
+			return exitUsage
+		}
+	}
 	srv, err := server.New(cfg, buildVersion(), prober, logger)
 	if err != nil {
 		fmt.Fprintf(stderr, "php2shell serve: %v\n", err)

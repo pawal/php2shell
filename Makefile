@@ -5,13 +5,20 @@ PKGS := ./...
 PUBLIC := server/public
 LAB := lab
 
-.PHONY: all test test-go fmt fmt-check vet csp-check build test-lab test-live vulncheck \
+.PHONY: all test test-go test-fingerprint-db fingerprints fmt fmt-check vet csp-check build test-lab test-live vulncheck \
 	package-binaries packages clean
 
 all: test
 
 # The canonical "did I break something" target.
 test: fmt-check vet test-go csp-check
+
+# External GPL rules are downloaded separately and are not packaged with the binary.
+fingerprints:
+	$(GO) run ./cmd/fingerprint-import
+
+test-fingerprint-db:
+	PHP2SHELL_FINGERPRINT_DB="$(CURDIR)/local/fingerprints/php.json" $(GO) test -count=1 -v -run '^TestExternalDatabase$$' ./engine/probe/
 
 test-go:
 	$(GO) test -race $(PKGS)
@@ -41,7 +48,7 @@ csp-check:
 		echo "inline scripts are not allowed"; fail=1; \
 	fi; \
 	if LC_ALL=C grep -rnI --exclude-dir=.git --exclude-dir=$(BIN) --exclude-dir=dist \
-		--exclude-dir=plans -e '$(TYPOGRAPHIC)' .; then \
+		--exclude-dir=plans --exclude-dir=local -e '$(TYPOGRAPHIC)' .; then \
 		echo "typographic dashes and quotation marks are not allowed"; fail=1; \
 	fi; \
 	exit $$fail

@@ -76,6 +76,10 @@ Notes on the keys:
 - `max_concurrent_checks` bounds checks in flight; past it a check is refused
   with 503 and `Retry-After`. `check_timeout` bounds one check.
 - `log_file` receives one line per check; see below. Empty logs nothing.
+- `fingerprint_file` MAY name a separately downloaded PHP fingerprint database.
+  It loads once at startup; invalid files prevent startup. See
+  [external-fingerprints.md](external-fingerprints.md) for installation,
+  coverage and the external data licence.
 - `allow_non_global_addresses` lifts the address and port policy, so private
   addresses and any port can be checked. It exists for the lab and MUST NOT
   be set on a public instance. A node that sets it logs a warning at start,

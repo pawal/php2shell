@@ -6,6 +6,7 @@ plans/
 /bin/
 /php2shell
 /dist/
+/local/
 
 # Test and coverage artifacts
 *.test

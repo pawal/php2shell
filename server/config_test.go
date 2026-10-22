@@ -20,12 +20,12 @@ func TestConfigLayering(t *testing.T) {
 	if err := os.WriteFile(path, []byte(`{"listen_addr":"127.0.0.1:1","target_cooldown":"1m","rate_limit":{"enabled":true,"max":3,"window":"1h"}}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	env := map[string]string{"PHP2SHELL_TARGET_COOLDOWN": "2m", "PHP2SHELL_RATE_LIMIT_MAX": "7", "PHP2SHELL_MAX_CONCURRENT_CHECKS": "x"}
+	env := map[string]string{"PHP2SHELL_TARGET_COOLDOWN": "2m", "PHP2SHELL_RATE_LIMIT_MAX": "7", "PHP2SHELL_MAX_CONCURRENT_CHECKS": "x", "PHP2SHELL_FINGERPRINT_FILE": "/test/php.json"}
 	cfg, _, err := LoadConfig([]string{"-config", path, "-rate-limit-max", "9"}, func(k string) string { return env[k] }, io.Discard)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cfg.ListenAddr != "127.0.0.1:1" || cfg.TargetCooldown.Duration != 2*time.Minute || cfg.RateLimit.Max != 9 || cfg.MaxConcurrentChecks != 10 {
+	if cfg.ListenAddr != "127.0.0.1:1" || cfg.TargetCooldown.Duration != 2*time.Minute || cfg.RateLimit.Max != 9 || cfg.MaxConcurrentChecks != 10 || cfg.FingerprintFile != "/test/php.json" {
 		t.Errorf("layering: %+v", cfg)
 	}
 }
