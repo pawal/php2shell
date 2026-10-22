@@ -9,6 +9,7 @@
 
 <h2>How it works</h2>
 <p>The check reads the PHP version your server advertises and compares it with the fixed releases. When you confirm that you own the site, it adds one small request whose answer differs between patched and unpatched PHP. Nothing is written to your server and nothing is attempted beyond that request.</p>
+<p>The check reports patch state, not exploitability. How hard the flaws are to exploit varies by server setup; the PHP project rates Apache with mod_php as the highest risk, and an unpatched release is worth fixing whatever the setup.</p>
 
 <h2>What it cannot see</h2>
 <p>A server that hides its version and its errors gives no signal, patched or not. Distribution packages may carry the fix under an older version number. The check never reports a site as safe; it reports what it saw.</p>
