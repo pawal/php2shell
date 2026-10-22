@@ -270,6 +270,15 @@ func TestScanLog(t *testing.T) {
 	}
 }
 
+func TestFailureLabel(t *testing.T) {
+	if got := failureLabel(&probe.PolicyError{Host: "h", Reason: "r"}); got != "refused:"+codeNonGlobalAddress {
+		t.Errorf("policy: %s", got)
+	}
+	if got := failureLabel(probe.ErrNotImplemented); got != "error:"+codeCheckFailed {
+		t.Errorf("failure: %s", got)
+	}
+}
+
 func TestInfoReportsTheLabSwitch(t *testing.T) {
 	h := newTestServer(t, func(c *Config) { c.AllowNonGlobalAddresses = true }, nil).Handler()
 	rec := httptest.NewRecorder()

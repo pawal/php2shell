@@ -75,7 +75,7 @@ func (s *Server) run(ctx context.Context, target probe.Target, oracle bool) (Rep
 	input, evidence, err := s.checker.Check(ctx, target, oracle)
 	mode := map[bool]string{true: "oracle", false: "passive"}[oracle]
 	if err != nil {
-		s.scanlog.record(s.now(), target.Host, "refused:"+errorCode(err), mode)
+		s.scanlog.record(s.now(), target.Host, failureLabel(err), mode)
 		return Report{}, err
 	}
 	result := verdict.Judge(input)
@@ -104,6 +104,16 @@ func errorCode(err error) string {
 		return codeCheckTimeout
 	}
 	return codeCheckFailed
+}
+
+// failureLabel is the log outcome of a check that drew no verdict.
+func failureLabel(err error) string {
+	switch code := errorCode(err); code {
+	case codeNonGlobalAddress, codeUnresolvable:
+		return "refused:" + code
+	default:
+		return "error:" + code
+	}
 }
 
 func (s *Server) writeCheckError(w http.ResponseWriter, target probe.Target, err error) {

@@ -1,0 +1,38 @@
+[Unit]
+Description=PHP2Shell check service
+Documentation=file:/usr/share/doc/php2shell/deploy.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/php2shell serve -config /etc/php2shell/config.json
+EnvironmentFile=-/etc/php2shell/php2shell.env
+DynamicUser=yes
+StateDirectory=php2shell
+UMask=0027
+Restart=on-failure
+RestartSec=5s
+LimitNOFILE=8192
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

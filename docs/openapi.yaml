@@ -1,0 +1,108 @@
+openapi: 3.1.0
+info:
+  title: PHP2Shell check
+  version: "1"
+  license:
+    name: BSD-2-Clause
+paths:
+  /api/v1/check:
+    post:
+      summary: Check one website
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  description: A host name, an address or an http(s) URL.
+                attested:
+                  type: boolean
+                  description: The visitor owns the site or may test it; adds the session request.
+      responses:
+        "200":
+          description: The verdict, cached when the host was checked within the cooldown.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+        "400":
+          description: invalid_request, invalid_target, non_global_address or unresolvable.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: csrf_origin_mismatch.
+        "413":
+          description: request_too_large.
+        "429":
+          description: rate_limited, with Retry-After.
+        "502":
+          description: check_failed.
+        "503":
+          description: busy, with Retry-After.
+        "504":
+          description: check_timeout.
+  /api/v1/version:
+    get:
+      summary: The build version
+      responses:
+        "200":
+          description: The version.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version: { type: string }
+  /api/v1/info:
+    get:
+      summary: This instance's limits
+      responses:
+        "200":
+          description: The version, the rate limit, the cooldown and the lab switch.
+components:
+  schemas:
+    Report:
+      type: object
+      required: [target, verdict, confidence, summary, recommendations, oracle_run, local_check, checked_at, cached]
+      properties:
+        target: { type: string }
+        verdict:
+          type: string
+          enum: [vulnerable, patched, likely_vulnerable, possibly_backported, eol_branch, likely_patched, inconclusive, no_php_signal, unreachable]
+        confidence:
+          type: string
+          enum: [high, medium, low]
+        summary: { type: string }
+        php_version:
+          type: object
+          properties:
+            raw: { type: string }
+            major: { type: integer }
+            minor: { type: integer }
+            patch: { type: integer }
+            suffix: { type: string }
+            distro: { type: string }
+        recommendations:
+          type: array
+          items: { type: string }
+        oracle_run: { type: boolean }
+        evidence:
+          type: object
+        local_check:
+          type: array
+          items: { type: string }
+        checked_at: { type: string, format: date-time }
+        cached: { type: boolean }
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }

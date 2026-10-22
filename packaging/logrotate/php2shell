@@ -1,0 +1,9 @@
+/var/lib/php2shell/checks.log {
+	daily
+	rotate 30
+	missingok
+	notifempty
+	compress
+	delaycompress
+	copytruncate
+}

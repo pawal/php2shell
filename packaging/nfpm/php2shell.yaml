@@ -1,0 +1,68 @@
+name: php2shell
+arch: ${ARCH}
+platform: linux
+version: ${VERSION}
+section: net
+priority: optional
+maintainer: Patrik Wallström <pawal@amplitut.de>
+description: |
+  PHP2Shell check service.
+  Tells site owners whether their website runs a PHP release exposed to
+  CVE-2026-109618 and CVE-2026-109619. One static binary: a command line
+  check and a web service with the page embedded.
+vendor: Patrik Wallström
+homepage: https://github.com/pawal/php2shell
+license: BSD-2-Clause
+
+contents:
+  - src: dist/linux_${ARCH}/php2shell
+    dst: /usr/bin/php2shell
+    file_info:
+      mode: 0755
+
+  - src: packaging/systemd/php2shell.service
+    dst: /usr/lib/systemd/system/php2shell.service
+    file_info:
+      mode: 0644
+
+  - src: packaging/config/config.json
+    dst: /etc/php2shell/config.json
+    type: config|noreplace
+    file_info:
+      mode: 0644
+
+  - src: packaging/logrotate/php2shell
+    dst: /etc/logrotate.d/php2shell
+    type: config|noreplace
+    file_info:
+      mode: 0644
+
+  - src: packaging/caddy/Caddyfile
+    dst: /usr/share/doc/php2shell/Caddyfile
+    file_info:
+      mode: 0644
+
+  - src: LICENSE
+    dst: /usr/share/doc/php2shell/LICENSE
+    file_info:
+      mode: 0644
+
+  - src: CHANGELOG.md
+    dst: /usr/share/doc/php2shell/CHANGELOG.md
+    file_info:
+      mode: 0644
+
+  - src: README.md
+    dst: /usr/share/doc/php2shell/README.md
+    file_info:
+      mode: 0644
+
+  - src: docs/deploy.md
+    dst: /usr/share/doc/php2shell/deploy.md
+    file_info:
+      mode: 0644
+
+scripts:
+  postinstall: packaging/scripts/postinstall.sh
+  preremove: packaging/scripts/preremove.sh
+  postremove: packaging/scripts/postremove.sh
