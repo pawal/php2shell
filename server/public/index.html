@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body>
+{{template "header" .}}
+<main>
+<h1>Is your website exposed to PHP2Shell?</h1>
+<p class="lead">PHP2Shell is a pair of critical PHP flaws, CVE-2026-109618 and CVE-2026-109619. Enter your site to see which PHP release it advertises and, with your permission, whether it behaves like a patched release.</p>
+
+<form id="check-form" class="check" novalidate>
+<label for="url">Website address</label>
+<div class="row">
+<input id="url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="example.com" required>
+<button type="submit">Check</button>
+</div>
+<label class="attest"><input type="checkbox" name="attested"> I own this site or am authorized to test it. This adds one small request that shows the patch state.</label>
+<p class="hint">Only public domain names and public IP addresses are checked, on ports 80, 443, 8080 and 8443.</p>
+</form>
+<noscript><p class="notice">The check needs JavaScript. Everything below reads without it.</p></noscript>
+<section id="result" class="result" aria-live="polite" hidden></section>
+
+<h2>What the check does</h2>
+<p>It fetches your start page once, as a browser would, and reads the PHP version the server advertises. That version is compared with the releases that carry the fix.</p>
+<p>If you confirm that the site is yours, it adds one small, harmless request that shows whether the PHP serving the page carries the fix. It changes nothing on your server. The <a href="/about">about page</a> explains more.</p>
+
+<h2>What it cannot see</h2>
+<p>A hardened server advertises no version and shows no errors. Distributions such as Ubuntu and Red Hat also fix PHP without changing the version number. A result without a finding is therefore not proof of safety. Only a check on the server itself is conclusive.</p>
+
+<h2>If your site is flagged</h2>
+<ul>
+<li>Upgrade PHP to 8.5.12, 8.4.27, 8.3.36 or 8.2.35, or install your vendor's fixed package.</li>
+<li>Restart every PHP worker afterwards, so the old code is no longer running.</li>
+<li>Follow the <a href="https://www.php.net/archive/2026.php#2026-10-21-5">PHP security advisory</a> for interim measures.</li>
+</ul>
+</main>
+{{template "footer" .}}
+</body>
+</html>

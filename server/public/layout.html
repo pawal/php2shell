@@ -1,0 +1,27 @@
+{{define "head"}}<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>{{.Title}}</title>
+<meta name="description" content="{{.Description}}">
+{{- if .Canonical}}
+<link rel="canonical" href="{{.Canonical}}">
+<meta property="og:url" content="{{.Canonical}}">
+{{- end}}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{.Title}}">
+<meta property="og:description" content="{{.Description}}">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/styles.css?v={{.Version}}">
+<script src="/static/app.js?v={{.Version}}" defer></script>
+</head>{{end}}
+
+{{define "header"}}<header class="site">
+<a class="brand" href="/">PHP2Shell check</a>
+<nav><a href="/about">About</a></nav>
+</header>{{end}}
+
+{{define "footer"}}<footer class="site">
+<p>This service is provided by <a href="{{.ProviderURL}}">{{.Provider}}</a>.</p>
+<p><a href="/about">About</a> <span aria-hidden="true">&middot;</span> <a href="{{.SourceURL}}">Source</a> <span aria-hidden="true">&middot;</span> <span class="version">{{.Version}}</span></p>
+</footer>{{end}}

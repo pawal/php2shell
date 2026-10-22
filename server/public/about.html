@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body>
+{{template "header" .}}
+<main>
+<h1>About the PHP2Shell check</h1>
+<p class="lead">A free service that tells site owners whether their PHP is still exposed to CVE-2026-109618 and CVE-2026-109619, and what to do about it.</p>
+
+<h2>How it works</h2>
+<p>The check reads the PHP version your server advertises and compares it with the fixed releases. When you confirm that you own the site, it adds one small request whose answer differs between patched and unpatched PHP. Nothing is written to your server and nothing is attempted beyond that request.</p>
+
+<h2>What it cannot see</h2>
+<p>A server that hides its version and its errors gives no signal, patched or not. Distribution packages may carry the fix under an older version number. The check never reports a site as safe; it reports what it saw.</p>
+
+<h2>Which targets are checked</h2>
+<p>Public domain names and public IP addresses only, on ports 80, 443, 8080 and 8443. Private, loopback, link-local and other non-public addresses are refused, including IPv4 addresses carried inside IPv6. Each site is checked at most once every few minutes; a repeated request receives the earlier result.</p>
+
+<h2>What is recorded</h2>
+<p>One line per check: the time, the host name or address that was checked, and the verdict. Your own address is not recorded. Lines are kept for 30 days.</p>
+{{- if .Contact}}
+<p>To have a site excluded or a record removed, write to <a href="mailto:{{.Contact}}">{{.Contact}}</a>.</p>
+{{- end}}
+
+<h2>Recognising the check in your logs</h2>
+<p>Requests carry a <code>User-Agent</code> beginning with <code>php2shell-check</code> and a link to this page.</p>
+
+<h2>Source</h2>
+<p>The service is free software under the BSD 2-Clause license. The source is at <a href="{{.SourceURL}}">{{.SourceURL}}</a>.</p>
+</main>
+{{template "footer" .}}
+</body>
+</html>
