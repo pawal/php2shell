@@ -22,3 +22,16 @@ Expected: vuln shows "Failed to write session data" in the oracle response,
 patched shows only the two "read" warnings, vuln-hardened shows nothing.
 The fix returns early when session initialization fails; before it, PHP
 forced the session active and tried to write it anyway.
+
+## Ordinary OOM control
+
+`make test-oom-control`, run from the repository root, compares ordinary
+application allocation failures on PHP 8.5.11 and 8.5.12 with errors shown
+and hidden. It uses disposable containers with networking disabled and no
+published ports. The test requests its fixtures over container loopback,
+checks worker survival and removes its containers afterwards.
+
+The fatal-error text occurs on both releases. This is a negative control
+for error-message detection, not a CVE-triggering or exploit test. See
+[the results and limitations](../docs/oom-detection.md). The test is skipped
+during ordinary `make test` and runs only through `make test-oom-control`.

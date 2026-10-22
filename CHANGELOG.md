@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- Document the isolated OOM-control experiment and detection limits.
+
 ## v1.0.3 (2026-10-22)
 
 - The start page names the covered CVEs and their first fixed PHP releases.
