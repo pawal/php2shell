@@ -6,6 +6,7 @@ number is written.
 ## Unreleased
 
 - Document the isolated OOM-control experiment and detection limits.
+- Narrow screens hide the logo.
 
 ## v1.0.3 (2026-10-22)
 

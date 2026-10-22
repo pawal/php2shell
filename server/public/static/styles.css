@@ -327,6 +327,7 @@ footer.site p::before { content: "# "; content: "# " / ""; color: var(--accent-d
 footer.site .version { color: var(--fg); }
 
 @media (max-width: 30rem) {
+  .banner { display: none; }
   h1 { font-size: 1.3rem; }
   .check .row { flex-direction: column; }
   .evidence .facts { grid-template-columns: 1fr; gap: 0; }
