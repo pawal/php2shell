@@ -45,23 +45,15 @@ func (s *session) fetch(ctx context.Context, target Target) (Passive, error) {
 	if err != nil {
 		return out, err
 	}
-	resp, _, err := s.do(ctx, client, req)
+	resp, text, err := s.do(ctx, client, req)
 	if err != nil {
 		return out, err
 	}
 	out.FinalURL, out.Status = resp.Request.URL.String(), resp.StatusCode
 	out.Server, out.PoweredBy = resp.Header.Get("Server"), resp.Header.Get("X-Powered-By")
-	if strings.Contains(strings.ToLower(out.Server+" "+out.PoweredBy), "php") {
-		out.Hints = append(out.Hints, "PHP header")
-	}
 	for _, cookie := range resp.Cookies() {
 		out.Cookies = append(out.Cookies, cookie.Name)
-		if strings.EqualFold(cookie.Name, "PHPSESSID") {
-			out.Hints = append(out.Hints, "PHPSESSID cookie")
-		}
 	}
-	if strings.HasSuffix(strings.ToLower(resp.Request.URL.Path), ".php") {
-		out.Hints = append(out.Hints, ".php final URL")
-	}
+	out.Hints = applicationHints(resp, text)
 	return out, nil
 }

@@ -1,6 +1,9 @@
 package verdict
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Oracle is what the session-path request showed.
 type Oracle string
@@ -71,7 +74,7 @@ func Judge(in Input) Result {
 		return judgeVersion(v, in.Oracle)
 	}
 	if len(in.Hints) > 0 {
-		return result(Inconclusive, "low", "PHP is present but advertises no version, and the session request showed nothing."+silentNote(in.Oracle), nil)
+		return result(Inconclusive, "low", fmt.Sprintf("PHP is present (%s) but advertises no version.", strings.Join(in.Hints, ", "))+silentNote(in.Oracle), nil)
 	}
 	return result(NoPHPSignal, "low", "Nothing in the answers shows PHP. A hardened PHP site looks the same."+silentNote(in.Oracle), nil)
 }
