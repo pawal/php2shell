@@ -5,7 +5,7 @@ PKGS := ./...
 PUBLIC := server/public
 LAB := lab
 
-.PHONY: all test test-go fmt fmt-check vet csp-check build test-lab vulncheck \
+.PHONY: all test test-go fmt fmt-check vet csp-check build test-lab test-live vulncheck \
 	package-binaries packages clean
 
 all: test
@@ -57,6 +57,13 @@ test-lab:
 	status=$$?; \
 	docker compose -f $(LAB)/docker-compose.yml down --rmi local; \
 	exit $$status
+
+# The lab's expectations against public instances of our own, under the
+# public address policy. Name them in PHP2SHELL_LIVE_UNPATCHED,
+# PHP2SHELL_LIVE_PATCHED and PHP2SHELL_LIVE_STATIC; an unset one is skipped.
+# Network-dependent and never part of `test`.
+test-live:
+	$(GO) test -count=1 -run Live -v ./engine/probe/
 
 # Network-dependent and never part of `test`.
 vulncheck:

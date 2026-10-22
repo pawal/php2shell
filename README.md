@@ -62,6 +62,7 @@ the Caddy configuration and the security headers.
 
     make test        # gofmt, vet, race tests, content policy
     make test-lab    # live acceptance tests against the Docker lab
+    make test-live   # the same against public instances named in PHP2SHELL_LIVE_*
 
 `make test` is the gate. `make test-lab` needs Docker; the lab in
 [lab/README.md](lab/README.md) runs an unpatched, a patched and a hardened

@@ -45,3 +45,43 @@ func TestLab(t *testing.T) {
 		t.Error("the default policy reached the lab")
 	}
 }
+
+// TestLive runs the lab's expectations against public instances of our own,
+// under the default policy. make test-live names them in PHP2SHELL_LIVE_*.
+func TestLive(t *testing.T) {
+	cases := []struct {
+		env    string
+		want   string
+		oracle bool
+	}{
+		{"PHP2SHELL_LIVE_UNPATCHED", verdict.Vulnerable, true},
+		{"PHP2SHELL_LIVE_PATCHED", verdict.Patched, true},
+		{"PHP2SHELL_LIVE_STATIC", verdict.NoPHPSignal, true},
+	}
+	ran := false
+	for _, c := range cases {
+		address := os.Getenv(c.env)
+		if address == "" {
+			continue
+		}
+		ran = true
+		target, err := ParseTarget(address)
+		if err != nil {
+			t.Errorf("%s=%q: %v", c.env, address, err)
+			continue
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		in, evidence, err := (&Prober{}).Check(ctx, target, c.oracle)
+		cancel()
+		if err != nil {
+			t.Errorf("%s: %v", c.env, err)
+			continue
+		}
+		if got := verdict.Judge(in).Verdict; got != c.want {
+			t.Errorf("%s: got %s, want %s; evidence %+v", c.env, got, c.want, evidence)
+		}
+	}
+	if !ran {
+		t.Skip("no PHP2SHELL_LIVE_* variable is set")
+	}
+}
