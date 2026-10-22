@@ -3,39 +3,6 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.0 (2026-10-22)
 
-- Untagged builds package under the Go pseudo-version.
-
-- Add fifty sourced PHP application fingerprints with scoped markup, CSS, cookie and diagnostic evidence.
-
-- The page takes a dark terminal look with an ASCII banner.
-
-- Recognise Roundcube cookies, generator declarations and paired application script paths.
-
-- The page shows what the check saw as lists and tables, with the raw JSON one click away.
-
-- A sourced catalogue of twenty PHP framework families adds scoped evidence and per-signal confidence.
-
-- Combine PHP links, forms, diagnostics, generator tags and redirect evidence across bounded discovery.
-- Report challenges and access controls as `inspection_blocked` and stop further probes.
-
-- Recognise vBulletin from its generator, script assets and default session cookie.
-
-- Attested checks try `/wp-login.php` when WordPress is detected and earlier paths are silent.
-
-- Passive fetching and the session patch-state request, with bounded redirects and pinned addresses.
-- Lab acceptance passes for unpatched, patched, hardened PHP and a static server.
-- `make test-live` runs the lab's expectations against public instances under the public policy.
-- A PHP application behind a cache is recognised from its cookies, its Link header and its page markers, not only from a PHP header.
-
-- Targets are public names and addresses on ports 80, 443, 8080 and 8443.
-- IPv4 carried in IPv6 is refused in every form, not unwrapped.
-- A host is resolved once per check and only its validated addresses are dialled.
-- The verdict matrix reads the advertised version, the distribution and the session request.
-- `php2shell check`, `serve` and `version`.
-- The page and the about page, with canonical links, robots.txt and sitemap.xml.
-- Security headers on every route; a content policy with no inline style or script.
-- Rate limit per client, cooldown per host, a cap on checks in flight.
-- The check log holds time, host and verdict, never the client.
-- deb and rpm packages with a hardened unit, logrotate and the Caddy example.
+Initial release.
