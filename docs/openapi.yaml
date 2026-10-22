@@ -22,7 +22,7 @@ paths:
                   description: A host name, an address or an http(s) URL.
                 attested:
                   type: boolean
-                  description: The visitor owns the site or may test it; adds the session request.
+                  description: The visitor owns the site or may test it; adds the session request and, without a version, the phpinfo() requests.
       responses:
         "200":
           description: The verdict, cached when the host was checked within the cooldown.
@@ -96,6 +96,9 @@ components:
           properties:
             passive: { $ref: "#/components/schemas/PageEvidence" }
             discovery:
+              type: array
+              items: { $ref: "#/components/schemas/PageEvidence" }
+            phpinfo_requests:
               type: array
               items: { $ref: "#/components/schemas/PageEvidence" }
         local_check:

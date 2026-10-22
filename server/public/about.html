@@ -8,7 +8,7 @@
 <p class="lead">A free service that tells site owners whether their PHP is still exposed to CVE-2026-109618 and CVE-2026-109619, and what to do about it.</p>
 
 <h2>How it works</h2>
-<p>The check reads the PHP version your server advertises and compares it with the fixed releases. When you confirm that you own the site, it adds one small request whose answer differs between patched and unpatched PHP. Nothing is written to your server and nothing is attempted beyond that request.</p>
+<p>The check reads the PHP version your server advertises and compares it with the fixed releases. When you confirm that you own the site, it adds one small request whose answer differs between patched and unpatched PHP, and asks for /phpinfo.php and /info.php if no version shows. Nothing is written to your server and nothing is attempted beyond those requests.</p>
 <p>The check reports patch state, not exploitability. How hard the flaws are to exploit varies by server setup; the PHP project rates Apache with mod_php as the highest risk, and an unpatched release is worth fixing whatever the setup.</p>
 
 <h2>What it cannot see</h2>

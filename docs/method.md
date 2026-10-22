@@ -17,8 +17,11 @@ compared with the fixed release of its branch.
 
 When no header carries a version and the start page or a discovered page
 is phpinfo() output, the version that page shows is used instead, and the
-result advises removing the page. The check never requests a phpinfo() page
-it was not given or linked to.
+result advises removing the page. When the visitor attests that the site is
+theirs and nothing has shown a version, the check also asks for
+`/phpinfo.php` and then `/info.php` on the final origin, without following
+redirects, and stops at the first phpinfo() page or blocked answer. Passive
+checks ask for no page they were not given or linked to.
 
 The header is often absent: `expose_php=Off` removes it, and proxies and CDNs
 strip it. Its number is not always upstream's either. Ubuntu and Red Hat fix

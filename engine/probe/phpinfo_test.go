@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/pawal/php2shell/engine/verdict"
@@ -48,5 +49,58 @@ func TestCheckReadsPHPInfo(t *testing.T) {
 		if got := verdict.Judge(in).Verdict; got != verdict.LikelyPatched {
 			t.Errorf("%s: verdict %s", address, got)
 		}
+	}
+}
+
+func TestFindPHPInfoOnlyWhenAttested(t *testing.T) {
+	var asked []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Server", "nginx")
+		if r.Method != http.MethodGet {
+			return
+		}
+		asked = append(asked, r.URL.Path)
+		switch r.URL.Path {
+		case "/info.php":
+			fmt.Fprint(w, phpinfoPage)
+		case "/phpinfo.php":
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+	in, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if in.PHPInfo != "" || strings.Join(asked, ",") != "/" {
+		t.Fatalf("passive check asked %v, version %q", asked, in.PHPInfo)
+	}
+	asked = nil
+	in, evidence, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if in.PHPInfo != "8.4.27" || len(evidence.PHPInfo) != 2 || evidence.PHPInfo[0].Status != http.StatusNotFound {
+		t.Fatalf("attested check: version %q, evidence %+v", in.PHPInfo, evidence.PHPInfo)
+	}
+	if got := strings.Join(asked, ","); got != "/,/phpinfo.php,/info.php" {
+		t.Errorf("asked %s", got)
+	}
+}
+
+func TestFindPHPInfoSkippedWithAVersion(t *testing.T) {
+	var asked []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Powered-By", "PHP/8.4.27")
+		if r.Method == http.MethodGet {
+			asked = append(asked, r.URL.Path)
+		}
+	}))
+	defer srv.Close()
+	if _, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, true); err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Join(asked, ","); got != "/" {
+		t.Errorf("asked %s", got)
 	}
 }

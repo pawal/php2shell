@@ -90,8 +90,12 @@ func TestCheckVerdicts(t *testing.T) {
 			if got := verdict.Judge(in).Verdict; got != c.want {
 				t.Errorf("got %s, want %s", got, c.want)
 			}
-			if gets.Load() != 1 {
-				t.Errorf("GET count %d", gets.Load())
+			wantGets := int32(1)
+			if c.oracle && c.poweredBy == "" && c.server == "" {
+				wantGets += int32(len(phpinfoPaths))
+			}
+			if gets.Load() != wantGets {
+				t.Errorf("GET count %d, want %d", gets.Load(), wantGets)
 			}
 			wantPosts := int32(0)
 			if c.oracle {
@@ -134,7 +138,7 @@ func TestCheckRedirects(t *testing.T) {
 	if in.Oracle != verdict.OraclePatched || evidence.Passive.FinalURL != srv.URL+"/home.php" || len(evidence.Passive.Redirects) != 1 {
 		t.Fatalf("%+v %+v", in, evidence)
 	}
-	if got := strings.Join(paths, ","); got != "GET /,GET /home.php,POST /,POST /index.php,POST /home.php" {
+	if got := strings.Join(paths, ","); got != "GET /,GET /home.php,GET /phpinfo.php,GET /info.php,POST /,POST /index.php,POST /home.php" {
 		t.Error(got)
 	}
 }

@@ -45,7 +45,7 @@ Usage:
 
 const checkFlags = `Check flags:
   -json              print the report as JSON
-  -passive           read the advertised version only; send no session request
+  -passive           read the advertised version only; send no session or phpinfo() request
   -allow-non-global  check non-global addresses and any port, for a lab
   -timeout <dur>     wall clock the whole check may take (default 15s)
   -fingerprints <file>

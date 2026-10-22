@@ -11,6 +11,7 @@ import (
 type Evidence struct {
 	Passive  Passive             `json:"passive"`
 	Pages    []Passive           `json:"discovery,omitempty"`
+	PHPInfo  []Passive           `json:"phpinfo_requests,omitempty"`
 	Requests []OracleObservation `json:"oracle_requests,omitempty"`
 }
 
@@ -63,6 +64,15 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		}
 		if page.Status >= 200 && page.Status < 300 && page.Stopped == "" {
 			oraclePage.Paths = append(oraclePage.Paths, page.FinalURL)
+		}
+	}
+	if _, versioned := verdict.ParseVersion(in.PoweredBy, in.Server); oracle && !versioned && in.PHPInfo == "" {
+		evidence.PHPInfo = s.findPHPInfo(ctx, passive)
+		for _, page := range evidence.PHPInfo {
+			if page.PHPInfo != "" {
+				in.PHPInfo = page.PHPInfo
+				in.Hints = dedupe(append(in.Hints, "phpinfo() page"))
+			}
 		}
 	}
 	if _, versioned := verdict.ParseVersion(in.PoweredBy, in.Server); !versioned && len(in.Hints) == 0 {

@@ -17,7 +17,8 @@ Colima. The manual Firefox pass and public deployment remain to be verified.
 
 A check reads the PHP version a site advertises and compares it with the
 fixed releases. When the visitor attests that the site is theirs, it adds one
-small request whose answer differs between patched and unpatched PHP. A
+small request whose answer differs between patched and unpatched PHP, and
+asks for `/phpinfo.php` and `/info.php` when nothing shows a version. A
 remote check can show that a site is unpatched but never that it is safe, so
 every result says what it was drawn from and how to settle the question on
 the server. [docs/method.md](docs/method.md) describes what is observed and
@@ -57,9 +58,9 @@ unit; [docs/deploy.md](docs/deploy.md) says what they place where.
     php2shell serve -config /etc/php2shell/config.json
     php2shell version
 
-`check` sends the session request unless `-passive` is given, since the
-person at the command line is taken to own the target. `-allow-non-global`
-lifts the address and port policy for the lab.
+`check` sends the session and phpinfo() requests unless `-passive` is
+given, since the person at the command line is taken to own the target.
+`-allow-non-global` lifts the address and port policy for the lab.
 
 ## Service
 

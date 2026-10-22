@@ -175,6 +175,12 @@
         el('code', short(page.final_url)), page.status ? String(page.status) : '', pageSeen(page, start),
       ])));
     }
+    const probes = evidence.phpinfo_requests || [];
+    if (probes.length > 0) {
+      children.push(el('h4', 'phpinfo() pages'), table(['Page', 'Status', 'Seen'], probes.map((page) => [
+        el('code', short(page.final_url)), page.status ? String(page.status) : '', pageSeen(page, start),
+      ])));
+    }
     const known = frameworks([start, ...pages]);
     if (known) {
       children.push(el('h4', 'Frameworks'), known);

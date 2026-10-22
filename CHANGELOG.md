@@ -11,6 +11,7 @@ number is written.
 - The server check reports the session extension's version.
 - FreeBSD sites get `pkg` and `service` commands for the server check.
 - A phpinfo() page supplies the PHP version when no header carries one.
+- Attested checks without a version ask for `/phpinfo.php` and `/info.php`.
 
 ## v1.0.3 (2026-10-22)
 
