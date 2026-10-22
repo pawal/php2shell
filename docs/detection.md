@@ -25,7 +25,7 @@ A GET of 99musik.se returned HTTP 200 with a `One moment, please...` title,
 script execution and a `wsidchk` marker. Their combination is recognised as
 a JavaScript challenge; the title alone is insufficient.
 
-Three header and cookie hints come from the applications' own code.
+Four header and cookie hints come from the applications' own code.
 WordPress sends `X-Redirect-By: WordPress` on its redirects
 ([source](https://raw.githubusercontent.com/WordPress/WordPress/master/wp-includes/pluggable.php)).
 Drupal core sends `X-Drupal-Dynamic-Cache`
@@ -37,6 +37,10 @@ phpBB names its session cookies `phpbb3_` in 3.3
 and `phpbb_` in 4.0
 ([source](https://raw.githubusercontent.com/phpbb/phpbb/master/phpBB/phpbb/install/module/install_database/task/add_config_settings.php)),
 each followed by five random characters and `_sid`, `_u` or `_k`.
+Shopware 6 names its session `session-`
+([source](https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/Framework/Resources/config/packages/framework.yaml))
+and Shopware 5 `session-` followed by the shop ID
+([source](https://raw.githubusercontent.com/shopware5/shopware/5.7/engine/Shopware/Components/DependencyInjection/Bridge/Session.php)).
 
 The checker SHOULD combine independent hints and retain their source URLs.
 Generator and application versions MUST NOT become PHP versions. A PHP

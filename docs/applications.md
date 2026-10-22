@@ -1,6 +1,6 @@
 # Additional PHP application coverage
 
-Reviewed 2026-10-22. This catalogue update adds 53 applications beyond
+Reviewed 2026-10-22. This catalogue update adds 59 applications beyond
 Roundcube and the previously recognised CMS/application names. The set
 covers common deployment categories; it is not a statistical ranking of
 the most popular PHP products. Frameworks remain a separate catalogue.
@@ -14,7 +14,7 @@ are independently written, not copied from a third-party scanner database.
 | Category | New applications |
 |---|---|
 | Forums | 6 |
-| CMS | 3 |
+| CMS | 4 |
 | Publishing | 1 |
 | Wikis | 5 |
 | Database administration | 3 |
@@ -25,6 +25,10 @@ are independently written, not copied from a third-party scanner database.
 | Analytics and publishing | 7 |
 | Galleries | 4 |
 | Business tools | 6 |
+| Commerce | 1 |
+| Monitoring | 1 |
+| Social networking | 1 |
+| Webmail | 2 |
 
 ## Coverage and sources
 
@@ -88,12 +92,22 @@ MUST NOT become a PHP version.
 | Snipe-IT | Business tools | cookie `snipeitv6_session` | [Source](https://raw.githubusercontent.com/grokability/snipe-it/master/config/session.php) |
 | Kanboard | Business tools | cookie `KB_SID` | [Source](https://raw.githubusercontent.com/kanboard/kanboard/main/app/Core/Session/SessionManager.php) |
 | phpList | Business tools | paired branded icon links | [Source](https://raw.githubusercontent.com/phpList/phplist3/main/public_html/lists/admin/ui/default/header.inc) |
+| XOOPS | CMS | generator meta tag | [Source](https://raw.githubusercontent.com/XOOPS/XoopsCore25/master/htdocs/themes/xbootstrap/theme.tpl) |
+| Zen Cart | Commerce | cookie `zenid` | [Source](https://raw.githubusercontent.com/zencart/zencart/master/includes/init_includes/init_sessions.php) |
+| Zabbix | Monitoring | cookie `zbx_session` | [Source](https://raw.githubusercontent.com/zabbix/zabbix/master/ui/include/defines.inc.php) |
+| Elgg | Social networking | cookie `Elgg` | [Source](https://raw.githubusercontent.com/Elgg/Elgg/master/engine/classes/Elgg/Config.php) |
+| SquirrelMail | Webmail | cookie `SQMSESSID` | [Source](https://sourceforge.net/p/squirrelmail/code/HEAD/tree/branches/SM-1_4-STABLE/squirrelmail/functions/global.php) |
+| Horde | Webmail | cookie `Horde` | [Source](https://raw.githubusercontent.com/horde/base/master/config/conf.xml) |
 
 ## Conditions and limits
 
 - Cookie names are low-confidence hints. Names, prefixes and application
-  names are configurable. MyBB, Flarum and wallabag cookies may appear only
-  in authenticated or remembered-session contexts; their absence says nothing.
+  names are configurable. MyBB and wallabag cookies and Flarum's
+  `flarum_remember` may appear only in authenticated or remembered-session
+  contexts; their absence says nothing.
+- GLPI and LimeSurvey session names carry an installation-specific part.
+  The rules require its exact length and alphabet. Elgg and Horde session
+  names are configurable; only their defaults are recognised.
 - Nextcloud protected-cookie variants are recognised explicitly. Generic
   ownCloud/Nextcloud session IDs are not used to distinguish the products.
 - Invoice Ninja and Akaunting cookie names are derived from the shipped
@@ -123,10 +137,12 @@ Additional references establish configurable defaults or emitted branding:
 - Dolibarr: [reference](https://raw.githubusercontent.com/Dolibarr/dolibarr/develop/htdocs/core/lib/functions.lib.php).
 - Invoice Ninja: [reference](https://raw.githubusercontent.com/invoiceninja/invoiceninja/v5-stable/.env.example).
 - Akaunting: [reference](https://raw.githubusercontent.com/akaunting/akaunting/master/.env.example).
+- Zen Cart: [reference](https://raw.githubusercontent.com/zencart/zencart/master/includes/application_top.php).
+- Zabbix: [reference](https://raw.githubusercontent.com/zabbix/zabbix/master/ui/include/classes/core/ZBase.php).
 
 ## Verification
 
-Each of the 53 entries has a separate synthetic response fixture derived
+Each of the 59 entries has a separate synthetic response fixture derived
 from the cited producers or documentation. Tests verify the detected name,
 provenance, confidence, verdict integration and PHP-version separation.
 Negative cases cover generic cookies, lookalikes, invalid hash suffixes,
@@ -136,7 +152,7 @@ not copied into fingerprint evidence.
 
 The catalogue consumes existing bounded responses. It adds no target
 requests, login attempts or authenticated inspection. These fixtures are
-not live acceptance tests against 53 deployed applications. See
+not live acceptance tests against 59 deployed applications. See
 [fingerprints.md](fingerprints.md) for framework and Roundcube coverage, and
 [detection.md](detection.md) for discovery and blocked inspection.
 

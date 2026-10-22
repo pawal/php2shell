@@ -412,5 +412,61 @@
     "status": 200,
     "headers": {},
     "body": "<meta name=\"generator\" content=\"Serendipity v.2.5.0\">"
+  },
+  {
+    "technology": "Zen Cart",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "zenid=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Zabbix",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "zbx_session=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Elgg",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "Elgg=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "SquirrelMail",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "SQMSESSID=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Horde",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "Horde=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "XOOPS",
+    "status": 200,
+    "headers": {},
+    "body": "<head><meta name=\"generator\" content=\"XOOPS\"></head>"
   }
 ]

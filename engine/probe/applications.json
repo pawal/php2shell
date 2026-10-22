@@ -1106,5 +1106,107 @@
     "confidence": "medium",
     "source": "https://raw.githubusercontent.com/s9y/Serendipity/master/templates/2k11/index.tpl",
     "emits_generator": true
+  },
+  {
+    "technology": "Zen Cart",
+    "category": "Commerce",
+    "aliases": [
+      "Zen Cart"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/zencart/zencart/master/includes/init_includes/init_sessions.php",
+    "cookies": [
+      {
+        "name": "zenid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/zencart/zencart/master/includes/init_includes/init_sessions.php"
+      }
+    ],
+    "references": [
+      "https://raw.githubusercontent.com/zencart/zencart/master/includes/application_top.php"
+    ]
+  },
+  {
+    "technology": "Zabbix",
+    "category": "Monitoring",
+    "aliases": [
+      "Zabbix"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/zabbix/zabbix/master/ui/include/defines.inc.php",
+    "cookies": [
+      {
+        "name": "zbx_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/zabbix/zabbix/master/ui/include/defines.inc.php"
+      }
+    ],
+    "references": [
+      "https://raw.githubusercontent.com/zabbix/zabbix/master/ui/include/classes/core/ZBase.php"
+    ]
+  },
+  {
+    "technology": "Elgg",
+    "category": "Social networking",
+    "aliases": [
+      "Elgg"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/Elgg/Elgg/master/engine/classes/Elgg/Config.php",
+    "cookies": [
+      {
+        "name": "Elgg",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/Elgg/Elgg/master/engine/classes/Elgg/Config.php"
+      }
+    ]
+  },
+  {
+    "technology": "SquirrelMail",
+    "category": "Webmail",
+    "aliases": [
+      "SquirrelMail"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://sourceforge.net/p/squirrelmail/code/HEAD/tree/branches/SM-1_4-STABLE/squirrelmail/functions/global.php",
+    "cookies": [
+      {
+        "name": "SQMSESSID",
+        "confidence": "low",
+        "source": "https://sourceforge.net/p/squirrelmail/code/HEAD/tree/branches/SM-1_4-STABLE/squirrelmail/functions/global.php"
+      }
+    ]
+  },
+  {
+    "technology": "Horde",
+    "category": "Webmail",
+    "aliases": [
+      "Horde"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/horde/base/master/config/conf.xml",
+    "cookies": [
+      {
+        "name": "Horde",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/horde/base/master/config/conf.xml"
+      }
+    ]
+  },
+  {
+    "technology": "XOOPS",
+    "category": "CMS",
+    "aliases": [
+      "XOOPS"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/XOOPS/XoopsCore25/master/htdocs/themes/xbootstrap/theme.tpl",
+    "emits_generator": true
   }
 ]

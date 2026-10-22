@@ -35,8 +35,8 @@ func applicationFixtures(t *testing.T) []applicationFixture {
 
 func TestAdditionalApplicationFingerprints(t *testing.T) {
 	fixtures := applicationFixtures(t)
-	if len(fixtures) != 53 {
-		t.Fatalf("expected 53 additional application fixtures, got %d", len(fixtures))
+	if len(fixtures) != 59 {
+		t.Fatalf("expected 59 additional application fixtures, got %d", len(fixtures))
 	}
 	for _, fixture := range fixtures {
 		t.Run(fixture.Technology, func(t *testing.T) {
@@ -76,7 +76,7 @@ func TestApplicationCatalogueCoverage(t *testing.T) {
 	for _, fixture := range applicationFixtures(t) {
 		expected[fixture.Technology] = true
 	}
-	if len(expected) != 54 || len(applicationCatalogue) != len(expected) {
+	if len(expected) != 60 || len(applicationCatalogue) != len(expected) {
 		t.Fatalf("catalogue and fixture coverage differ: %d versus %d", len(applicationCatalogue), len(expected))
 	}
 	source := func(value string) {

@@ -46,6 +46,8 @@ var (
 	drupalSession = regexp.MustCompile(`^S?SESS[0-9a-f]{32}$`)
 	// phpBB 3.3 names its cookies phpbb3_ and five random characters, 4.0 phpbb_.
 	phpbbSession = regexp.MustCompile(`^phpbb3?_[a-z0-9]{5}_(?:sid|u|k)$`)
+	// Shopware 6 names its session session-, Shopware 5 session- and the shop ID.
+	shopwareSession = regexp.MustCompile(`^session-[0-9]*$`)
 	// PHP hosts that name themselves in X-Powered-By instead of PHP.
 	poweredByHosts = []string{"wp engine", "pressable", "kinsta"}
 )
@@ -86,6 +88,9 @@ func applicationHints(resp *http.Response, body string) []string {
 		}
 		if phpbbSession.MatchString(cookie.Name) {
 			hints = append(hints, "phpBB cookie")
+		}
+		if shopwareSession.MatchString(cookie.Name) {
+			hints = append(hints, "Shopware cookie")
 		}
 	}
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 && phpPath(resp.Request.URL.Path) {

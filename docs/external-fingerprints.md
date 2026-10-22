@@ -88,7 +88,7 @@ or the patch state. See [method.md](method.md).
 `make test-fingerprint-db` compiles the downloaded rules and checks saved
 synthetic responses for nine application/framework signals. It also compares
 the external rules against the existing application fixtures. The pinned
-subset identifies 11 of the 53 existing fixtures; those fixtures exercise
+subset identifies 12 of the 59 existing fixtures; those fixtures exercise
 signals that often differ from the upstream database. Built-in rules remain
 enabled to preserve that coverage. These are fixture results, not a measured
 detection rate on public websites.

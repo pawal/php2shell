@@ -5,8 +5,9 @@ number is written.
 
 ## Unreleased
 
-- WordPress redirects, Drupal cache headers and phpBB cookies count as PHP hints.
+- WordPress redirects, Drupal cache headers, and phpBB and Shopware cookies count as PHP hints.
 - Session cookies identify Flarum, GLPI, Chamilo and LimeSurvey, and a request header Matomo.
+- Zen Cart, Zabbix, Elgg, SquirrelMail, Horde and XOOPS join the application catalogue.
 
 ## v1.0.4 (2026-10-22)
 

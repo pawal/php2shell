@@ -30,7 +30,7 @@ challenge page or an access denial is reported as blocked inspection.
 [docs/detection.md](docs/detection.md) records the research and its limits,
 and [docs/fingerprints.md](docs/fingerprints.md) lists the twenty framework
 families in the sourced fingerprint catalogue.
-[docs/applications.md](docs/applications.md) lists 53 further PHP
+[docs/applications.md](docs/applications.md) lists 59 further PHP
 applications and their supported signals.
 An optional [external PHP database](docs/external-fingerprints.md) adds
 261 technology labels from WebAppAnalyzer, evaluated against existing
