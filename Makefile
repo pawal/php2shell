@@ -36,15 +36,15 @@ vet:
 	$(GO) vet $(PKGS)
 
 # The content policy admits no inline style and no inline script, and no text
-# carries a typographic dash or quotation mark. The bytes are spelled in octal
-# so this file passes its own check.
+# carries a typographic dash or quotation mark. A JSON-LD block is data, not
+# script. The bytes are spelled in octal so this file passes its own check.
 TYPOGRAPHIC := $(shell printf '\342\200[\223\224\230\231\234\235]')
 csp-check:
 	@fail=0; \
 	if grep -rnE '(style="|<style)' $(PUBLIC); then \
 		echo "inline styles are not allowed"; fail=1; \
 	fi; \
-	if grep -rn '<script' $(PUBLIC) | grep -v 'src='; then \
+	if grep -rn '<script' $(PUBLIC) | grep -v -e 'src=' -e 'type="application/ld+json"'; then \
 		echo "inline scripts are not allowed"; fail=1; \
 	fi; \
 	if LC_ALL=C grep -rnI --exclude-dir=.git --exclude-dir=$(BIN) --exclude-dir=dist \
