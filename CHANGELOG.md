@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- The start page names the covered CVEs and their first fixed PHP releases.
+
 - The address field has focus when the page loads.
 
 ## v1.0.2 (2026-10-22)
