@@ -1,8 +1,6 @@
 php2shell.evilbit.de {
 	encode zstd gzip
-	header {
-		Strict-Transport-Security "max-age=31536000"
-		-Server
-	}
+	header Strict-Transport-Security "max-age=31536000"
+	header -Server
 	reverse_proxy 127.0.0.1:8080
 }

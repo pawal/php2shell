@@ -149,10 +149,8 @@ on the loopback:
 ```caddyfile
 php2shell.evilbit.de {
 	encode zstd gzip
-	header {
-		Strict-Transport-Security "max-age=31536000"
-		-Server
-	}
+	header Strict-Transport-Security "max-age=31536000"
+	header -Server
 	reverse_proxy 127.0.0.1:8080
 }
 ```
@@ -164,7 +162,10 @@ through and sets `X-Forwarded-For` and `X-Forwarded-Proto`. Five rules:
   matches the request's own host.
 - Set `Strict-Transport-Security` at the proxy. The binary does not know
   that TLS terminates in front of it.
-- Drop the `Server` header Caddy adds. It names the proxy to every client.
+- Drop the `Server` header Caddy adds, on a `header` line of its own. A
+  delete defers every operation on its line to the upstream response, so
+  HSTS beside it would be missing from the errors Caddy writes itself. Those
+  errors and the HTTP redirect still name Caddy.
 - Add no Content-Security-Policy. The binary sets its own per route, and a
   second policy intersects with it and can only break the page.
 - Enable no access log. Caddy logs no requests unless told to. An access log
