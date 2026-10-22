@@ -3,6 +3,11 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- WordPress redirects, Drupal cache headers and phpBB cookies count as PHP hints.
+- Session cookies identify Flarum, GLPI, Chamilo and LimeSurvey, and a request header Matomo.
+
 ## v1.0.4 (2026-10-22)
 
 Results draw on phpinfo() pages and Apache server signatures, name

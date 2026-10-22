@@ -162,6 +162,11 @@
         "name": "flarum_remember",
         "confidence": "low",
         "source": "https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Http/CookieFactory.php"
+      },
+      {
+        "name": "flarum_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Foundation/InstalledSite.php"
       }
     ],
     "references": [
@@ -484,6 +489,18 @@
         "confidence": "low",
         "source": "https://raw.githubusercontent.com/glpi-project/glpi/main/templates/layout/parts/head.html.twig"
       }
+    ],
+    "cookies": [
+      {
+        "pattern": "^glpi_[0-9a-f]{32}$",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/glpi-project/glpi/10.0/bugfixes/src/Session.php"
+      },
+      {
+        "pattern": "^glpi_[0-9a-f]{128}$",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/glpi-project/glpi/main/src/Glpi/Application/SystemConfigurator.php"
+      }
     ]
   },
   {
@@ -667,7 +684,14 @@
     "diagnostics": [],
     "confidence": "medium",
     "source": "https://raw.githubusercontent.com/chamilo/chamilo-lms/1.11.x/main/template/default/layout/head.tpl",
-    "emits_generator": true
+    "emits_generator": true,
+    "cookies": [
+      {
+        "name": "ch_sid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/chamilo/chamilo-lms/1.11.x/main/inc/lib/chamilo_session.class.php"
+      }
+    ]
   },
   {
     "technology": "ILIAS",
@@ -706,7 +730,14 @@
     "diagnostics": [],
     "confidence": "medium",
     "source": "https://raw.githubusercontent.com/LimeSurvey/LimeSurvey/master/themes/survey/vanilla/views/subviews/header/head.twig",
-    "emits_generator": true
+    "emits_generator": true,
+    "cookies": [
+      {
+        "pattern": "^LS-[A-Z]{16}$",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/LimeSurvey/LimeSurvey/master/application/controllers/InstallerController.php"
+      }
+    ]
   },
   {
     "technology": "Matomo",
@@ -722,6 +753,15 @@
         "name": "MATOMO_SESSID",
         "confidence": "low",
         "source": "https://raw.githubusercontent.com/matomo-org/matomo/5.x-dev/core/Session.php"
+      }
+    ],
+    "headers": [
+      {
+        "name": "X-Matomo-Request-Id",
+        "pattern": "^[0-9a-f]{5}$",
+        "scope": "declared",
+        "confidence": "medium",
+        "source": "https://raw.githubusercontent.com/matomo-org/matomo/5.x-dev/core/FrontController.php"
       }
     ]
   },

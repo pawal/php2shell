@@ -106,6 +106,12 @@ func TestApplicationCatalogueCoverage(t *testing.T) {
 				t.Fatalf("unsafe cookie rule %+v", cookie)
 			}
 		}
+		for _, header := range spec.Headers {
+			source(header.Source)
+			if header.Name == "" || header.Confidence != "medium" || header.Scope == "" || !strings.HasPrefix(header.Pattern, "^") || !strings.HasSuffix(header.Pattern, "$") {
+				t.Fatalf("unsafe header rule %+v", header)
+			}
+		}
 		for _, asset := range spec.Assets {
 			source(asset.Source)
 			if asset.Confidence != "low" || len(asset.Names) == 0 || asset.Tag != "" && asset.Tag != "link" {
@@ -200,6 +206,38 @@ func TestExtendedApplicationSignals(t *testing.T) {
 			}
 			if len(got) != 1 || got[0].Technology != c.want || got[0].Confidence != "low" || strings.Contains(fmt.Sprint(got), "sample-secret") {
 				t.Fatalf("unexpected evidence: %+v", got)
+			}
+		})
+	}
+}
+
+// Session cookies and headers the applications send to anonymous visitors.
+func TestApplicationSessionSignals(t *testing.T) {
+	cases := []struct {
+		name, want string
+		headers    map[string][]string
+	}{
+		{"flarum session", "Flarum", map[string][]string{"Set-Cookie": {"flarum_session=abc; Path=/; HttpOnly"}}},
+		{"glpi 10 session", "GLPI", map[string][]string{"Set-Cookie": {"glpi_" + strings.Repeat("a1", 16) + "=abc; Path=/"}}},
+		{"glpi 11 session", "GLPI", map[string][]string{"Set-Cookie": {"glpi_" + strings.Repeat("0f", 64) + "=abc; Path=/"}}},
+		{"glpi lookalike", "", map[string][]string{"Set-Cookie": {"glpi_" + strings.Repeat("a", 40) + "=abc; Path=/"}}},
+		{"chamilo session", "Chamilo", map[string][]string{"Set-Cookie": {"ch_sid=abc; Path=/"}}},
+		{"limesurvey session", "LimeSurvey", map[string][]string{"Set-Cookie": {"LS-HIQBFUVHDRJIFHMG=abc; Path=/"}}},
+		{"limesurvey lookalike", "", map[string][]string{"Set-Cookie": {"LS-hiqbfuvhdrjifhmg=abc; Path=/"}}},
+		{"matomo request id", "Matomo", map[string][]string{"X-Matomo-Request-Id": {"3fa9c"}}},
+		{"matomo lookalike", "", map[string][]string{"X-Matomo-Request-Id": {"not-an-id"}}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			matches := applicationFingerprints(response("/", c.headers), "")
+			if c.want == "" {
+				if len(matches) != 0 {
+					t.Fatalf("%+v", matches)
+				}
+				return
+			}
+			if len(matches) != 1 || matches[0].Technology != c.want || matches[0].Source == "" {
+				t.Fatalf("%+v", matches)
 			}
 		})
 	}

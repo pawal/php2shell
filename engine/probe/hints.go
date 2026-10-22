@@ -44,6 +44,8 @@ var cookieHints = []struct{ name, hint string }{
 
 var (
 	drupalSession = regexp.MustCompile(`^S?SESS[0-9a-f]{32}$`)
+	// phpBB 3.3 names its cookies phpbb3_ and five random characters, 4.0 phpbb_.
+	phpbbSession = regexp.MustCompile(`^phpbb3?_[a-z0-9]{5}_(?:sid|u|k)$`)
 	// PHP hosts that name themselves in X-Powered-By instead of PHP.
 	poweredByHosts = []string{"wp engine", "pressable", "kinsta"}
 )
@@ -66,6 +68,12 @@ func applicationHints(resp *http.Response, body string) []string {
 			hints = append(hints, "WordPress REST API link")
 		}
 	}
+	if strings.EqualFold(resp.Header.Get("X-Redirect-By"), "WordPress") {
+		hints = append(hints, "WordPress redirect header")
+	}
+	if resp.Header.Get("X-Drupal-Dynamic-Cache") != "" || resp.Header.Get("X-Drupal-Cache") != "" {
+		hints = append(hints, "Drupal cache header")
+	}
 	for _, cookie := range resp.Cookies() {
 		name := strings.ToLower(cookie.Name)
 		for _, c := range cookieHints {
@@ -75,6 +83,9 @@ func applicationHints(resp *http.Response, body string) []string {
 		}
 		if drupalSession.MatchString(cookie.Name) {
 			hints = append(hints, "Drupal cookie")
+		}
+		if phpbbSession.MatchString(cookie.Name) {
+			hints = append(hints, "phpBB cookie")
 		}
 	}
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 && phpPath(resp.Request.URL.Path) {

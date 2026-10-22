@@ -25,6 +25,19 @@ A GET of 99musik.se returned HTTP 200 with a `One moment, please...` title,
 script execution and a `wsidchk` marker. Their combination is recognised as
 a JavaScript challenge; the title alone is insufficient.
 
+Three header and cookie hints come from the applications' own code.
+WordPress sends `X-Redirect-By: WordPress` on its redirects
+([source](https://raw.githubusercontent.com/WordPress/WordPress/master/wp-includes/pluggable.php)).
+Drupal core sends `X-Drupal-Dynamic-Cache`
+([source](https://raw.githubusercontent.com/drupal/drupal/11.x/core/modules/dynamic_page_cache/src/EventSubscriber/DynamicPageCacheSubscriber.php))
+and `X-Drupal-Cache`
+([source](https://raw.githubusercontent.com/drupal/drupal/11.x/core/modules/page_cache/src/StackMiddleware/PageCache.php)).
+phpBB names its session cookies `phpbb3_` in 3.3
+([source](https://raw.githubusercontent.com/phpbb/phpbb/3.3.x/phpBB/phpbb/install/module/install_database/task/add_config_settings.php))
+and `phpbb_` in 4.0
+([source](https://raw.githubusercontent.com/phpbb/phpbb/master/phpBB/phpbb/install/module/install_database/task/add_config_settings.php)),
+each followed by five random characters and `_sid`, `_u` or `_k`.
+
 The checker SHOULD combine independent hints and retain their source URLs.
 Generator and application versions MUST NOT become PHP versions. A PHP
 extension or application asset SHOULD be reported as an indicator rather

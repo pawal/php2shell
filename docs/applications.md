@@ -43,7 +43,7 @@ MUST NOT become a PHP version.
 | ProcessWire | CMS | cookies `wire`, `wires` | [Source](https://raw.githubusercontent.com/processwire/processwire/master/wire/config.php) |
 | Serendipity | Publishing | generator meta tag | [Source](https://raw.githubusercontent.com/s9y/Serendipity/master/templates/2k11/index.tpl) |
 | MODX | CMS | HTTP 5xx diagnostic identifier `MODX\Revolution\` | [Source](https://raw.githubusercontent.com/modxcms/revolution/3.x/core/src/Revolution/modX.php) |
-| Flarum | Forums | cookie `flarum_remember` | [Source](https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Http/CookieFactory.php) |
+| Flarum | Forums | cookie `flarum_remember`; cookie `flarum_session` | [Source](https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Http/CookieFactory.php), [Source](https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Foundation/InstalledSite.php) |
 | bbPress | Forums | CSS `css/bbpress.css` | [Source](https://raw.githubusercontent.com/bbpress/bbPress/trunk/src/templates/default/bbpress-functions.php) |
 | DokuWiki | Wikis | generator meta tag | [Source](https://raw.githubusercontent.com/dokuwiki/dokuwiki/master/inc/template.php) |
 | PmWiki | Wikis | CSS `pmwiki-core.css` | [Source](https://www.pmwiki.org/wiki/PmWiki/Requirements) |
@@ -58,7 +58,7 @@ MUST NOT become a PHP version.
 | FileGator | Files and collaboration | HTTP 5xx diagnostic identifier `Filegator\` | [Source](https://raw.githubusercontent.com/filegator/filegator/master/backend/Services/Session/Adapters/SessionStorage.php) |
 | Tiny File Manager | Files and collaboration | login field pair inside one form | [Source](https://raw.githubusercontent.com/prasathmani/tinyfilemanager/master/tinyfilemanager.php) |
 | osTicket | Help desks | cookie `OSTSESSID` | [Source](https://raw.githubusercontent.com/osTicket/osTicket/develop/include/class.ostsession.php) |
-| GLPI | Help desks | GLPI theme and request-ID attributes on the same HTML element | [Source](https://raw.githubusercontent.com/glpi-project/glpi/main/templates/layout/parts/head.html.twig) |
+| GLPI | Help desks | GLPI theme and request-ID attributes on the same HTML element; cookie `^glpi_[0-9a-f]{32}$` (10.0); cookie `^glpi_[0-9a-f]{128}$` (11) | [Source](https://raw.githubusercontent.com/glpi-project/glpi/main/templates/layout/parts/head.html.twig), [Source](https://raw.githubusercontent.com/glpi-project/glpi/10.0/bugfixes/src/Session.php), [Source](https://raw.githubusercontent.com/glpi-project/glpi/main/src/Glpi/Application/SystemConfigurator.php) |
 | FreeScout | Help desks | branded link within the application footer | [Source](https://raw.githubusercontent.com/freescout-helpdesk/freescout/dist/resources/views/layouts/app.blade.php) |
 | UVdesk | Help desks | script `bundles/uvdeskcoreframework/js/_dropdown.js`, `bundles/uvdeskcoreframework/js/viewer.js` | [Source](https://raw.githubusercontent.com/uvdesk/core-framework/master/Resources/views/Templates/layout.html.twig) |
 | Dolibarr | CRM and business | cookie `^DOLSESSID_[0-9a-f]{40}$` | [Source](https://raw.githubusercontent.com/Dolibarr/dolibarr/develop/htdocs/main.inc.php) |
@@ -68,11 +68,11 @@ MUST NOT become a PHP version.
 | CiviCRM | CRM and business | HTTP 5xx diagnostic identifier `CRM_Core_Session` | [Source](https://raw.githubusercontent.com/civicrm/civicrm-core/master/CRM/Core/Session.php) |
 | Mautic | CRM and business | HTTP 5xx diagnostic identifier `Mautic\` | [Source](https://raw.githubusercontent.com/mautic/mautic/5.x/app/config/config.php) |
 | Moodle | Learning | cookie `MoodleSession` | [Source](https://raw.githubusercontent.com/moodle/moodle/MOODLE_405_STABLE/lib/classes/session/manager.php) |
-| Chamilo | Learning | generator meta tag | [Source](https://raw.githubusercontent.com/chamilo/chamilo-lms/1.11.x/main/template/default/layout/head.tpl) |
+| Chamilo | Learning | generator meta tag; cookie `ch_sid` | [Source](https://raw.githubusercontent.com/chamilo/chamilo-lms/1.11.x/main/template/default/layout/head.tpl), [Source](https://raw.githubusercontent.com/chamilo/chamilo-lms/1.11.x/main/inc/lib/chamilo_session.class.php) |
 | ILIAS | Learning | cookie `ilClientId` | [Source](https://raw.githubusercontent.com/ILIAS-eLearning/ILIAS/HEAD/components/ILIAS/Init/classes/class.ilInitialisation.php) |
 | Mahara | Learning | generator meta tag | [Source](https://raw.githubusercontent.com/MaharaProject/mahara/master/htdocs/theme/raw/templates/header/head.tpl) |
-| LimeSurvey | Analytics and publishing | generator meta tag | [Source](https://raw.githubusercontent.com/LimeSurvey/LimeSurvey/master/themes/survey/vanilla/views/subviews/header/head.twig) |
-| Matomo | Analytics and publishing | cookie `MATOMO_SESSID` | [Source](https://raw.githubusercontent.com/matomo-org/matomo/5.x-dev/core/Session.php) |
+| LimeSurvey | Analytics and publishing | generator meta tag; cookie `^LS-[A-Z]{16}$` | [Source](https://raw.githubusercontent.com/LimeSurvey/LimeSurvey/master/themes/survey/vanilla/views/subviews/header/head.twig), [Source](https://raw.githubusercontent.com/LimeSurvey/LimeSurvey/master/application/controllers/InstallerController.php) |
+| Matomo | Analytics and publishing | cookie `MATOMO_SESSID`; header `X-Matomo-Request-Id` | [Source](https://raw.githubusercontent.com/matomo-org/matomo/5.x-dev/core/Session.php), [Source](https://raw.githubusercontent.com/matomo-org/matomo/5.x-dev/core/FrontController.php) |
 | YOURLS | Analytics and publishing | generator meta tag | [Source](https://raw.githubusercontent.com/YOURLS/YOURLS/master/includes/functions-html.php) |
 | wallabag | Analytics and publishing | cookie `wllbg_trusted_computer` | [Source](https://raw.githubusercontent.com/wallabag/wallabag/master/app/config/config.yml) |
 | FreshRSS | Analytics and publishing | cookie `FreshRSS` | [Source](https://raw.githubusercontent.com/FreshRSS/FreshRSS/edge/app/FreshRSS.php) |
