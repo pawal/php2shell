@@ -8,7 +8,7 @@ import (
 )
 
 func response(path string, headers map[string][]string) *http.Response {
-	return &http.Response{Header: http.Header(headers), Request: &http.Request{URL: &url.URL{Path: path}}}
+	return &http.Response{StatusCode: 200, Header: http.Header(headers), Request: &http.Request{URL: &url.URL{Path: path}}}
 }
 
 func TestApplicationHints(t *testing.T) {
@@ -21,7 +21,7 @@ func TestApplicationHints(t *testing.T) {
 	}{
 		{"nothing", "/", nil, "<html><body>hello</body></html>", nil},
 		{"php header", "/", map[string][]string{"X-Powered-By": {"PHP/8.5.11"}}, "", []string{"PHP header"}},
-		{"php final url", "/index.php", nil, "", []string{".php final URL"}},
+		{"php final url", "/index.php", nil, "", []string{"PHP extension in final URL"}},
 		{"wp engine behind a cache", "/",
 			map[string][]string{"Server": {"nginx"}, "X-Powered-By": {"WP Engine"},
 				"Link": {`<https://example.com/wp-json/>; rel="https://api.w.org/"`}},
@@ -37,6 +37,20 @@ func TestApplicationHints(t *testing.T) {
 		{"vbulletin assets", "/", nil, `<script src="/clientscript/vbulletin-core.js?v=425"></script><script src="/clientscript/vbulletin_global.js"></script>`, []string{"vBulletin assets"}},
 		{"vbulletin cookie", "/", map[string][]string{"Set-Cookie": {"bb_sessionhash=abc; Path=/; HttpOnly"}}, "", []string{"vBulletin cookie"}},
 		{"mention is not detection", "/", nil, `<p>We used to run vBulletin.</p>`, nil},
+		{"generator attributes reordered", "/", nil, `<meta data-x="a > b" CONTENT='WordPress 6.8' NAME=generator>`, []string{"generator WordPress"}},
+		{"multiple generators", "/", nil, `<meta name=generator content=Hugo><meta content="Drupal 11" name=generator>`, []string{"generator Drupal"}},
+		{"generator in script ignored", "/", nil, `<script>var s = '<meta name="generator" content="WordPress">';</script>`, nil},
+		{"generator prefix false positive", "/", nil, `<meta name=generator content=WordPressish>`, nil},
+		{"x generator", "/", map[string][]string{"X-Generator": {"Drupal 11"}}, "", []string{"X-Generator Drupal"}},
+		{"cookie exact name", "/", map[string][]string{"Set-Cookie": {"PHPSESSID_fake=x"}}, "", nil},
+		{"phtml", "/home.phtml", nil, "", []string{"PHP extension in final URL"}},
+		{"diagnostic", "/", nil, `PHP Warning: example in /var/www/index.php on line 42`, []string{"PHP diagnostic"}},
+		{"php navigation", "/", nil, `<a href="showthread.php?t=42">thread</a>`, []string{"PHP endpoint in page"}},
+		{"php form", "/", nil, `<form action="login.php" method=post>`, []string{"PHP endpoint in page"}},
+		{"external php link", "/", nil, `<a href="https://elsewhere.example/index.php">external</a>`, nil},
+		{"unicode before generator", "/", nil, `İ<title>İ</title><meta name=generator content=WordPress>`, []string{"generator WordPress"}},
+		{"unclosed script", "/", nil, `<script>var s='<meta name=generator content=WordPress>'`, nil},
+		{"unclosed comment", "/", nil, `<!-- <meta name=generator content=WordPress>`, nil},
 		{"unknown generator", "/", nil, `<meta name="generator" content="Hugo 0.150">`, nil},
 		{"duplicates collapse", "/", map[string][]string{"X-Powered-By": {"PHP/8.3.6"}, "Server": {"Apache PHP/8.3.6"}},
 			`/wp-content/a /wp-content/b /wp-includes/c`, []string{"PHP header", "WordPress assets"}},

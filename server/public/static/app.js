@@ -16,6 +16,7 @@
     inconclusive: ['Inconclusive', 'warn'],
     no_php_signal: ['No PHP signal', 'warn'],
     unreachable: ['Unreachable', 'warn'],
+    inspection_blocked: ['Inspection blocked', 'warn'],
     likely_patched: ['Likely patched', 'good'],
     patched: ['Patched', 'good'],
   };
@@ -44,7 +45,7 @@
     if (report.php_version) {
       meta.push('PHP ' + report.php_version.raw.replace(/^PHP\//i, ''));
     }
-    meta.push(report.oracle_run ? 'patch-state request sent' : 'version only');
+    meta.push(report.oracle_run ? 'patch-state request sent' : 'HTTP fingerprinting only');
     if (report.cached) {
       meta.push('earlier result from ' + new Date(report.checked_at).toLocaleTimeString());
     }

@@ -5,6 +5,9 @@ number is written.
 
 ## Unreleased
 
+- Combine PHP links, forms, diagnostics, generator tags and redirect evidence across bounded discovery.
+- Report challenges and access controls as `inspection_blocked` and stop further probes.
+
 - Recognise vBulletin from its generator, script assets and default session cookie.
 
 - Attested checks try `/wp-login.php` when WordPress is detected and earlier paths are silent.

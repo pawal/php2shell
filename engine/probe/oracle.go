@@ -13,6 +13,7 @@ import (
 
 // OracleObservation counts the warnings returned by one session request.
 type OracleObservation struct {
+	Blocked     string `json:"inspection_blocked,omitempty"`
 	URL         string `json:"url"`
 	Status      int    `json:"status,omitempty"`
 	InvalidID   int    `json:"invalid_id"`
@@ -55,6 +56,7 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		observation := OracleObservation{URL: path}
 		if resp != nil {
 			observation.Status = resp.StatusCode
+			observation.Blocked = inspectionBlock(resp, text)
 		}
 		observation.InvalidID = strings.Count(text, "Session ID is too long")
 		observation.FailedRead = strings.Count(text, "Failed to read session data")
@@ -69,6 +71,9 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 				return verdict.OracleSilent, observations, err
 			}
 			continue
+		}
+		if observation.Blocked != "" {
+			return verdict.OracleSilent, observations, nil
 		}
 		if observation.InvalidID > 0 && observation.FailedRead > 0 {
 			if observation.FailedWrite > 0 {
@@ -92,5 +97,6 @@ func oraclePaths(target Target, passive Passive) []string {
 			break
 		}
 	}
-	return paths
+	paths = append(paths, passive.Paths...)
+	return dedupe(paths)
 }

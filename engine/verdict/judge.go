@@ -26,15 +26,17 @@ const (
 	Inconclusive       = "inconclusive"
 	NoPHPSignal        = "no_php_signal"
 	Unreachable        = "unreachable"
+	InspectionBlocked  = "inspection_blocked"
 )
 
 // Input is everything a verdict is drawn from.
 type Input struct {
-	Reachable bool
-	PoweredBy string
-	Server    string
-	Hints     []string
-	Oracle    Oracle
+	InspectionBlocked string
+	Reachable         bool
+	PoweredBy         string
+	Server            string
+	Hints             []string
+	Oracle            Oracle
 }
 
 // Result is the verdict with its grounds and what to do next.
@@ -70,11 +72,14 @@ func Judge(in Input) Result {
 		}
 		return result(Patched, "high", summary, vp)
 	}
+	if in.InspectionBlocked != "" {
+		return result(InspectionBlocked, "low", fmt.Sprintf("Inspection was blocked (%s). The response does not establish the site's PHP patch state.", in.InspectionBlocked), vp)
+	}
 	if versioned {
 		return judgeVersion(v, in.Oracle)
 	}
 	if len(in.Hints) > 0 {
-		return result(Inconclusive, "low", fmt.Sprintf("PHP is present (%s) but advertises no version.", strings.Join(in.Hints, ", "))+silentNote(in.Oracle), nil)
+		return result(Inconclusive, "low", fmt.Sprintf("PHP indicators were found (%s), but no PHP version was advertised.", strings.Join(in.Hints, ", "))+silentNote(in.Oracle), nil)
 	}
 	return result(NoPHPSignal, "low", "Nothing in the answers shows PHP. A hardened PHP site looks the same."+silentNote(in.Oracle), nil)
 }

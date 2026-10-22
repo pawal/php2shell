@@ -2,11 +2,12 @@ package probe
 
 import (
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 )
 
-// Markers only PHP applications leave in a page.
+// Application artifacts are hints, not proof of the runtime serving a path.
 var bodyMarkers = []struct{ needle, hint string }{
 	{"/wp-content/", "WordPress assets"},
 	{"/wp-includes/", "WordPress assets"},
@@ -29,7 +30,7 @@ var generatorApps = []string{
 	"concrete5", "Grav", "Kirby", "October CMS", "SilverStripe", "Contao",
 }
 
-// Session cookie names only PHP applications set.
+// Default session cookie names used by PHP applications.
 var cookieHints = []struct{ name, hint string }{
 	{"phpsessid", "PHPSESSID cookie"},
 	{"bb_sessionhash", "vBulletin cookie"},
@@ -44,7 +45,6 @@ var cookieHints = []struct{ name, hint string }{
 
 var (
 	drupalSession = regexp.MustCompile(`^S?SESS[0-9a-f]{32}$`)
-	generatorMeta = regexp.MustCompile(`(?i)<meta\s+name=["']generator["']\s+content=["']([^"']+)["']`)
 	// PHP hosts that name themselves in X-Powered-By instead of PHP.
 	poweredByHosts = []string{"wp engine", "pressable", "kinsta"}
 )
@@ -70,7 +70,7 @@ func applicationHints(resp *http.Response, body string) []string {
 	for _, cookie := range resp.Cookies() {
 		name := strings.ToLower(cookie.Name)
 		for _, c := range cookieHints {
-			if strings.HasPrefix(name, c.name) {
+			if name == c.name || (strings.HasSuffix(c.name, "_") || strings.HasSuffix(c.name, "-")) && strings.HasPrefix(name, c.name) {
 				hints = append(hints, c.hint)
 			}
 		}
@@ -78,22 +78,49 @@ func applicationHints(resp *http.Response, body string) []string {
 			hints = append(hints, "Drupal cookie")
 		}
 	}
-	if strings.HasSuffix(strings.ToLower(resp.Request.URL.Path), ".php") {
-		hints = append(hints, ".php final URL")
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 && phpPath(resp.Request.URL.Path) {
+		hints = append(hints, "PHP extension in final URL")
 	}
 	for _, m := range bodyMarkers {
 		if strings.Contains(body, m.needle) {
 			hints = append(hints, m.hint)
 		}
 	}
-	if m := generatorMeta.FindStringSubmatch(body); m != nil {
-		for _, app := range generatorApps {
-			if strings.HasPrefix(strings.ToLower(m[1]), strings.ToLower(app)) {
+	for _, key := range []string{"X-Generator", "X-Powered-By"} {
+		if app := generatorApp(resp.Header.Get(key)); app != "" {
+			hints = append(hints, key+" "+app)
+		}
+	}
+	for _, tag := range pageTags(body) {
+		attribute := ""
+		if tag.name == "a" {
+			attribute = "href"
+		}
+		if tag.name == "form" {
+			attribute = "action"
+		}
+		if attribute != "" {
+			if reference, err := url.Parse(strings.TrimSpace(tag.attrs[attribute])); err == nil && reference.String() != "" {
+				endpoint := resp.Request.URL.ResolveReference(reference)
+				if endpoint.User == nil && strings.EqualFold(endpoint.Scheme, resp.Request.URL.Scheme) && strings.EqualFold(endpoint.Host, resp.Request.URL.Host) && phpPath(endpoint.Path) {
+					hints = append(hints, "PHP endpoint in page")
+				}
+			}
+		}
+
+		if tag.name == "meta" && strings.EqualFold(tag.attrs["name"], "generator") {
+			if app := generatorApp(tag.attrs["content"]); app != "" {
 				hints = append(hints, "generator "+app)
-				break
 			}
 		}
 	}
+	if phpDiagnostic.MatchString(body) {
+		hints = append(hints, "PHP diagnostic")
+	}
+	if resp.Header.Get("Php-Warning") != "" {
+		hints = append(hints, "PHP warning header")
+	}
+
 	return dedupe(hints)
 }
 
@@ -107,4 +134,18 @@ func dedupe(items []string) []string {
 		}
 	}
 	return out
+}
+
+var phpDiagnostic = regexp.MustCompile(`(?is)(?:PHP (?:Warning|Fatal error|Parse error|Notice):|<(?:b|strong)>(?:Warning|Fatal error|Parse error|Notice)</(?:b|strong)>:)[^\r\n]{0,1000}\.php(?:</b>)? (?:on line|:)[^\r\n]{0,32}[0-9]`)
+
+func generatorApp(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	for _, app := range generatorApps {
+		if rest, ok := strings.CutPrefix(value, strings.ToLower(app)); ok {
+			if rest == "" || strings.ContainsAny(rest[:1], " /;(-0123456789") {
+				return app
+			}
+		}
+	}
+	return ""
 }

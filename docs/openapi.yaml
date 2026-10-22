@@ -73,7 +73,7 @@ components:
         target: { type: string }
         verdict:
           type: string
-          enum: [vulnerable, patched, likely_vulnerable, possibly_backported, eol_branch, likely_patched, inconclusive, no_php_signal, unreachable]
+          enum: [vulnerable, patched, likely_vulnerable, possibly_backported, eol_branch, likely_patched, inconclusive, no_php_signal, unreachable, inspection_blocked]
         confidence:
           type: string
           enum: [high, medium, low]

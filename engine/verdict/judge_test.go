@@ -20,6 +20,8 @@ func TestJudge(t *testing.T) {
 		{"eol header", Input{Reachable: true, PoweredBy: "PHP/7.4.33"}, EOLBranch},
 		{"future branch", Input{Reachable: true, PoweredBy: "PHP/9.0.0"}, Inconclusive},
 		{"hints only", Input{Reachable: true, Hints: []string{"PHPSESSID cookie"}, Oracle: OracleSilent}, Inconclusive},
+		{"inspection blocked", Input{Reachable: true, InspectionBlocked: "JavaScript bot challenge", Oracle: OracleNotRun}, InspectionBlocked},
+		{"version on a blocked path", Input{Reachable: true, PoweredBy: "PHP/8.5.12", InspectionBlocked: "HTTP 403 access denied"}, InspectionBlocked},
 		{"nothing", Input{Reachable: true, Oracle: OracleSilent}, NoPHPSignal},
 	}
 	for _, c := range cases {
@@ -35,7 +37,7 @@ func TestJudge(t *testing.T) {
 
 // Every verdict code carries advice.
 func TestRecommendationsCoverEveryVerdict(t *testing.T) {
-	for _, code := range []string{Vulnerable, Patched, LikelyVulnerable, PossiblyBackported, EOLBranch, LikelyPatched, Inconclusive, NoPHPSignal, Unreachable} {
+	for _, code := range []string{Vulnerable, Patched, LikelyVulnerable, PossiblyBackported, EOLBranch, LikelyPatched, Inconclusive, NoPHPSignal, Unreachable, InspectionBlocked} {
 		if len(recommendations[code]) == 0 {
 			t.Errorf("%s has no recommendations", code)
 		}

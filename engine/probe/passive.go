@@ -8,6 +8,9 @@ import (
 
 // Passive is what one GET of the start URL shows.
 type Passive struct {
+	Paths     []string `json:"discovered_paths,omitempty"`
+	Blocked   string   `json:"inspection_blocked,omitempty"`
+	Error     string   `json:"error,omitempty"`
 	FinalURL  string   `json:"final_url"`
 	Status    int      `json:"status"`
 	Server    string   `json:"server,omitempty"`
@@ -21,11 +24,25 @@ type Passive struct {
 
 // fetch follows admitted redirects and collects only passive evidence.
 func (s *session) fetch(ctx context.Context, target Target) (Passive, error) {
+	return s.fetchPage(ctx, target, true)
+}
+
+// fetchPage can stop redirects to keep discovery to one request per endpoint.
+func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Passive, error) {
 	out := Passive{FinalURL: target.URL()}
 	client := &http.Client{Transport: s.transport}
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		if req.Response != nil {
+			out.Hints = append(out.Hints, applicationHints(req.Response, "")...)
+			for _, cookie := range req.Response.Cookies() {
+				out.Cookies = append(out.Cookies, cookie.Name)
+			}
+		}
 		stop := func() error { out.Stopped = req.URL.String(); return http.ErrUseLastResponse }
 		if len(via) > s.prober.maxRedirects() || !sameSite(target.Host, strings.ToLower(strings.TrimSuffix(req.URL.Hostname(), "."))) {
+			return stop()
+		}
+		if !follow {
 			return stop()
 		}
 		next, err := ParseTarget(req.URL.String())
@@ -54,6 +71,13 @@ func (s *session) fetch(ctx context.Context, target Target) (Passive, error) {
 	for _, cookie := range resp.Cookies() {
 		out.Cookies = append(out.Cookies, cookie.Name)
 	}
-	out.Hints = applicationHints(resp, text)
+	out.Cookies = dedupe(out.Cookies)
+	out.Blocked = inspectionBlock(resp, text)
+	if out.Blocked == "" {
+		out.Hints = dedupe(append(out.Hints, applicationHints(resp, text)...))
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			out.Paths = discoveredPaths(out.FinalURL, text)
+		}
+	}
 	return out, nil
 }

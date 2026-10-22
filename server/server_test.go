@@ -287,3 +287,18 @@ func TestInfoReportsTheLabSwitch(t *testing.T) {
 		t.Errorf("info: %s", rec.Body.String())
 	}
 }
+
+func TestInspectionBlockedReport(t *testing.T) {
+	checker := &fakeChecker{fn: func(probe.Target, bool) (verdict.Input, any, error) {
+		return verdict.Input{Reachable: true, InspectionBlocked: "Cloudflare challenge", Oracle: verdict.OracleNotRun}, map[string]string{"inspection_blocked": "Cloudflare challenge"}, nil
+	}}
+	h := newTestServer(t, nil, checker).Handler()
+	rec := post(t, h, `{"url":"example.com","attested":true}`)
+	var report Report
+	if err := json.Unmarshal(rec.Body.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if rec.Code != http.StatusOK || report.Verdict != verdict.InspectionBlocked || report.OracleRun || len(report.Recommendations) == 0 {
+		t.Fatalf("%d %+v", rec.Code, report)
+	}
+}

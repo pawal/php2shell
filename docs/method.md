@@ -24,22 +24,40 @@ whether the workers were restarted after an upgrade.
 
 ## Recognising PHP without a version
 
-A site behind a cache or a managed host often shows no PHP header and sets
-no cookie on its start page. The check then reads what the page itself
-carries: a WordPress, Drupal, Joomla, TYPO3, PrestaShop, Magento or vBulletin asset
-path, a generator tag naming a PHP application, a REST API link, or a
-session cookie only PHP software sets. These prove PHP is present with no
-version, and the verdict is `inconclusive` rather than `no_php_signal`.
-A bot challenge can hide the application page and its markers. The check
-does not execute JavaScript or solve challenges, so those responses can
-still yield `no_php_signal`.
+The check combines headers, cookies, redirect responses, generator tags,
+application asset paths, PHP diagnostics, and same-origin navigation or form
+URLs with PHP extensions. Generator attributes may appear in any order;
+comments and script text are not treated as navigation or generator tags.
+A CMS version is never treated as a PHP version. The resulting hints are
+indicators rather than proof of the runtime behind every path. Exported
+static pages and proxies can preserve old application markers.
+
+The check reads at most two discovered, query-free PHP endpoints on the
+final origin. It does not follow their redirects or recurse, and shares a
+three-second discovery budget. Paths naming actions such as logout,
+delete, reset or installation are excluded. The address policy, pinned
+connections, body cap and User-Agent apply to every request. A discovery
+failure is recorded in the evidence and does not discard the start page.
+Evidence identifies each inspected URL and its observations.
+
+Challenge pages, authentication requirements, access denials and rate limits
+produce `inspection_blocked` rather than an ordinary absence of PHP evidence.
+A blocked start page ends the check before discovery or session requests.
+Cloudflare's documented challenge header and known challenge-page signatures
+are recognised, including the JavaScript challenge observed at 99musik.se.
+A challenge encountered during the session request also stops further probes.
+The checker does not execute JavaScript or solve challenges.
+
+The research and implementation choices are described in
+[detection.md](detection.md).
 
 ## The session request
 
 When the visitor attests that the site is theirs, the check adds one small
 request to the start page, then `/index.php` and the final redirect URL
 when earlier paths give no answer. When the page identifies WordPress, the
-check also tries `/wp-login.php` on the final origin. Passive checks send no
+check also tries `/wp-login.php` on the final origin. Successfully inspected
+discovered endpoints are additional candidates. Passive checks send no
 session requests. Patched and unpatched releases answer differently when the server
 displays PHP warnings. The request writes nothing on the server, triggers no
 fault, and is a few hundred bytes.
@@ -58,8 +76,9 @@ file handler, or when the path is not served by PHP.
 | `possibly_backported` | As above, from a distribution that fixes without renumbering | low |
 | `eol_branch` | The advertised version is 8.1 or older | medium |
 | `likely_patched` | The advertised version carries the fix | medium |
-| `inconclusive` | PHP is present but showed neither version nor answer | low |
+| `inconclusive` | PHP indicators were found without a version or patch-state answer | low |
 | `no_php_signal` | Nothing showed PHP | low |
+| `inspection_blocked` | A challenge or access control prevented inspection | low |
 | `unreachable` | The site did not answer | low |
 
 The session request outranks the header: a patched answer under an old
