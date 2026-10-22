@@ -1,12 +1,14 @@
 # php2shell detection lab
 
-Three official PHP Apache images with a one-line index.php baked in:
+Three official PHP Apache images with a one-line index.php baked in, and a
+static nginx for contrast:
 
 | Service | Port | Image | Config |
 |---|---|---|---|
 | vuln | 18081 | php:8.5.11-apache | defaults (display_errors on, expose_php on) |
 | patched | 18082 | php:8.5.12-apache | defaults |
 | vuln-hardened | 18083 | php:8.5.11-apache | display_errors=Off, expose_php=Off |
+| static | 18084 | nginx:1.29-alpine | no PHP at all |
 
 ```
 docker compose up -d --build

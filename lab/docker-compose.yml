@@ -8,3 +8,6 @@ services:
   vuln-hardened:
     build: { context: ., args: { BASE: "php:8.5.11-apache", HARDEN: "yes" } }
     ports: ["18083:80"]
+  static:
+    image: nginx:1.29-alpine
+    ports: ["18084:80"]
