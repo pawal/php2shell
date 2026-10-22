@@ -6,6 +6,7 @@ number is written.
 ## Unreleased
 
 - Passive fetching and the session patch-state request, with bounded redirects and pinned addresses.
+- Lab acceptance passes for unpatched, patched, hardened PHP and a static server.
 
 - Targets are public names and addresses on ports 80, 443, 8080 and 8443.
 - IPv4 carried in IPv6 is refused in every form, not unwrapped.
