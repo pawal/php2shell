@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- The page takes a dark terminal look with an ASCII banner.
+
 - Recognise Roundcube cookies, generator declarations and paired application script paths.
 
 - The page shows what the check saw as lists and tables, with the raw JSON one click away.
