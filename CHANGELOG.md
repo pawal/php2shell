@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- Attested checks try `/wp-login.php` when WordPress is detected and earlier paths are silent.
+
 - Passive fetching and the session patch-state request, with bounded redirects and pinned addresses.
 - Lab acceptance passes for unpatched, patched, hardened PHP and a static server.
 - `make test-live` runs the lab's expectations against public instances under the public policy.

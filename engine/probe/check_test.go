@@ -257,3 +257,46 @@ func TestPinnedTLSHostAndSNI(t *testing.T) {
 		t.Fatalf("%+v, lookups %d", out, resolver.calls.Load())
 	}
 }
+
+func TestWordPressLoginFallback(t *testing.T) {
+	for _, oracle := range []bool{false, true} {
+		t.Run(fmt.Sprint(oracle), func(t *testing.T) {
+			var posts []string
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodGet {
+					fmt.Fprint(w, `<link href="/wp-content/themes/site/style.css">`)
+					return
+				}
+				posts = append(posts, r.URL.Path)
+				if r.URL.Path == "/wp-login.php" {
+					fmt.Fprint(w, readWarnings+" Failed to write session data")
+				}
+			}))
+			defer srv.Close()
+			in, evidence, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, oracle)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !oracle {
+				if len(posts) != 0 || in.Oracle != verdict.OracleNotRun {
+					t.Fatalf("passive check sent posts: %v", posts)
+				}
+				return
+			}
+			if got := strings.Join(posts, ","); got != "/,/index.php,/wp-login.php" {
+				t.Fatal(got)
+			}
+			if in.Oracle != verdict.OracleUnpatched || len(evidence.Requests) != 3 {
+				t.Fatalf("%+v %+v", in, evidence)
+			}
+		})
+	}
+}
+
+func TestWordPressFallbackUsesFinalOrigin(t *testing.T) {
+	target := Target{Scheme: "https", Host: "example.com", Port: "443", Path: "/"}
+	paths := oraclePaths(target, Passive{FinalURL: "https://www.example.com/home", Hints: []string{"WordPress assets"}})
+	if got := paths[len(paths)-1]; got != "https://www.example.com/wp-login.php" {
+		t.Fatal(got)
+	}
+}

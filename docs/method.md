@@ -34,8 +34,10 @@ version, and the verdict is `inconclusive` rather than `no_php_signal`.
 ## The session request
 
 When the visitor attests that the site is theirs, the check adds one small
-request to the start page, and to `/index.php` when the first gives no
-answer. Patched and unpatched releases answer it differently when the server
+request to the start page, then `/index.php` and the final redirect URL
+when earlier paths give no answer. When the page identifies WordPress, the
+check also tries `/wp-login.php` on the final origin. Passive checks send no
+session requests. Patched and unpatched releases answer differently when the server
 displays PHP warnings. The request writes nothing on the server, triggers no
 fault, and is a few hundred bytes.
 

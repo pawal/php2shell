@@ -5,6 +5,7 @@ import (
 	"context"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/pawal/php2shell/engine/verdict"
@@ -20,7 +21,7 @@ type OracleObservation struct {
 }
 
 // oracle uses only the invalid session key in the lab reference request.
-func (s *session) oracle(ctx context.Context, target Target, finalURL string) (verdict.Oracle, []OracleObservation, error) {
+func (s *session) oracle(ctx context.Context, target Target, passive Passive) (verdict.Oracle, []OracleObservation, error) {
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
 	if err := writer.WriteField("PHP_SESSION_UPLOAD_PROGRESS", "probe"); err != nil {
@@ -39,7 +40,7 @@ func (s *session) oracle(ctx context.Context, target Target, finalURL string) (v
 	client := &http.Client{Transport: s.transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	seen := map[string]bool{}
 	var observations []OracleObservation
-	for _, path := range []string{target.URL(), target.Origin() + "/index.php", finalURL} {
+	for _, path := range oraclePaths(target, passive) {
 		if path == "" || seen[path] {
 			continue
 		}
@@ -77,4 +78,19 @@ func (s *session) oracle(ctx context.Context, target Target, finalURL string) (v
 		}
 	}
 	return verdict.OracleSilent, observations, nil
+}
+
+// oraclePaths adds a WordPress login fallback only when the page identifies it.
+func oraclePaths(target Target, passive Passive) []string {
+	paths := []string{target.URL(), target.Origin() + "/index.php", passive.FinalURL}
+	for _, hint := range passive.Hints {
+		if strings.Contains(strings.ToLower(hint), "wordpress") {
+			base, err := url.Parse(passive.FinalURL)
+			if err == nil && base.Host != "" {
+				paths = append(paths, base.ResolveReference(&url.URL{Path: "/wp-login.php"}).String())
+			}
+			break
+		}
+	}
+	return paths
 }

@@ -37,7 +37,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 	in.Reachable = true
 	in.PoweredBy, in.Server, in.Hints = passive.PoweredBy, passive.Server, passive.Hints
 	if oracle {
-		in.Oracle, evidence.Requests, err = s.oracle(ctx, target, passive.FinalURL)
+		in.Oracle, evidence.Requests, err = s.oracle(ctx, target, passive)
 	}
 	return in, evidence, err
 }
