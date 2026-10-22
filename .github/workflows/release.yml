@@ -1,0 +1,81 @@
+# A tag is a release: one .deb and one .rpm per architecture, the same
+# binaries as archives, and the section of CHANGELOG.md the tag names as the
+# release notes.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # First, so a missing section fails before anything is built.
+      - name: release notes
+        run: |
+          set -eu
+          mkdir -p dist
+          awk -v v="$GITHUB_REF_NAME" '
+            $0 ~ "^## " v "([ (]|$)" { f = 1; next }
+            f && /^## / { exit }
+            f { print }
+          ' CHANGELOG.md > dist/notes.md
+          test -s dist/notes.md || { echo "CHANGELOG.md carries no section for $GITHUB_REF_NAME"; exit 1; }
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - run: make test
+
+      - name: packages
+        run: make packages VERSION="${GITHUB_REF_NAME#v}"
+
+      - name: install on debian and fedora
+        run: packaging/install-check.sh
+
+      - name: archives
+        run: |
+          set -eu
+          for arch in amd64 arm64; do
+            stage="dist/stage/linux_$arch"
+            mkdir -p "$stage"
+            cp dist/linux_$arch/php2shell LICENSE README.md CHANGELOG.md packaging/caddy/Caddyfile "$stage/"
+            tar czf "dist/php2shell_${GITHUB_REF_NAME}_linux_$arch.tar.gz" -C "$stage" .
+          done
+          rm -rf dist/stage
+
+      - name: stage and checksum
+        run: |
+          set -eu
+          mkdir -p dist/release
+          cp dist/packages/* dist/*.tar.gz dist/release/
+          cd dist/release && sha256sum php2shell* > checksums.txt
+
+      - name: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          case "$GITHUB_REF_NAME" in
+            *-*) prerelease=--prerelease ;;
+            *)   prerelease= ;;
+          esac
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --notes-file dist/notes.md $prerelease
+            gh release upload "$GITHUB_REF_NAME" dist/release/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --title "php2shell $GITHUB_REF_NAME" \
+              --notes-file dist/notes.md $prerelease \
+              dist/release/*
+          fi

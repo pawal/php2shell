@@ -1,0 +1,45 @@
+# The canonical "did I break something" targets of the Makefile. Anything
+# that needs Docker beyond the package check stays out: the lab is run by hand.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      # fmt-check, vet, the race tests and the content policy check.
+      - run: make test
+      - run: make build
+      - name: the shipped configuration loads
+        run: ./bin/php2shell serve -config packaging/config/config.json -dump-config > /dev/null
+
+  packages:
+    name: packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Version comes from the tags, so the whole history is fetched.
+          fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      # Builds what the release builds and installs it on Debian and Fedora.
+      - run: make packages
+      - run: packaging/install-check.sh
