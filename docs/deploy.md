@@ -63,9 +63,9 @@ Notes on the keys:
   page. `contact`, when set, is offered on the about page for opt-out
   requests.
 - `trusted_proxy_cidrs` lists the peers whose forwarded client address and
-  protocol are trusted. From any other peer those headers are stripped, so
-  the list is what makes the rate limit count the client rather than the
-  proxy, and what lets the origin check see `https`.
+  protocol are trusted. From any other peer those headers are stripped.
+  Without the proxy in the list, the rate limit counts the proxy instead of
+  the client and the origin check cannot see `https`.
 - `rate_limit` bounds checks per client address: `max` per `window`, counted
   on every POST to `/api/v1/check`. A refusal is 429 with `Retry-After`. The
   counters live in the process and are forgotten when they leave the window.
@@ -86,8 +86,9 @@ A target is a public domain name or a public IP address, on port 80, 443,
 8080 or 8443. A name must have at least two labels and a top label that is
 not numeric. Every address the name resolves to must be public unicast; if
 any is not, the target is refused with 400 `non_global_address` before a
-request is sent. Declined are the IANA special purpose ranges that are not
-globally reachable, multicast, and every IPv6 address outside `2000::/3`.
+request is sent. The policy declines the IANA special-purpose ranges that
+are not globally reachable, multicast, and every IPv6 address outside
+`2000::/3`.
 Every form that carries an IPv4 address inside IPv6 is refused rather than
 unwrapped: IPv4-mapped, IPv4-compatible, IPv4-translated, NAT64, 6to4,
 Teredo and ISATAP. A host is resolved once per check and only the validated
@@ -156,14 +157,14 @@ php2shell.evilbit.de {
 Caddy obtains the certificate, redirects plain HTTP to HTTPS, passes `Host`
 through and sets `X-Forwarded-For` and `X-Forwarded-Proto`. Four rules:
 
-- **Pass `Host` through unchanged.** A check is accepted only when its
-  `Origin` matches the request's own host.
-- **Set `Strict-Transport-Security` at the proxy.** The binary does not know
+- Pass `Host` through unchanged. A check is accepted only when its `Origin`
+  matches the request's own host.
+- Set `Strict-Transport-Security` at the proxy. The binary does not know
   that TLS terminates in front of it.
-- **Add no Content-Security-Policy.** The binary sets its own per route; a
+- Add no Content-Security-Policy. The binary sets its own per route, and a
   second policy intersects with it and can only break the page.
-- **Enable no access log.** Caddy logs no requests unless told to. An access
-  log records client addresses, which the service promises not to keep.
+- Enable no access log. Caddy logs no requests unless told to. An access log
+  records client addresses, which the service promises not to keep.
 
 ## Security headers
 

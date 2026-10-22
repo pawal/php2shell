@@ -10,12 +10,12 @@ proof that PHP is absent.
 
 [WhatWeb's PHP detector](https://github.com/urbanadventurer/WhatWeb/blob/master/plugins/php.rb)
 uses several independent channels, including HTTP headers, diagnostics and
-file extensions. [WhatCMS](https://whatcms.org/Support) similarly describes
-pattern matching on software artifacts. Its
-[per-page detection model](https://whatcms.org/About) is relevant: a PHP
+file extensions. [WhatCMS](https://whatcms.org/Support) also matches
+patterns in software artifacts, and its
+[per-page detection model](https://whatcms.org/About) applies here: a PHP
 application on one path does not establish the runtime on every other path.
-The implementation uses independently written rules and does not import
-WhatWeb's code or signature catalogue. It adds no runtime dependency.
+The php2shell rules are written independently. Neither WhatWeb's code nor its
+signature catalogue is imported, and no runtime dependency is added.
 
 [Cloudflare documents](https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/detect-response/)
 `cf-mitigated: challenge` as a challenge indicator even when the response is
@@ -40,20 +40,18 @@ can join the attested session-request candidates; passive checks perform
 only GETs. An intercepted start page stops discovery and session requests.
 
 The small attribute scanner handles quoted and unquoted attributes, HTML
-entities and attribute order. It skips comments and raw-text elements. It
-is intentionally conservative and is not a browser or a full HTML5 parser.
-Bodies remain bounded by the existing limit. Malformed or truncated HTML
-can therefore reduce detection coverage.
+entities and attribute order, and skips comments and raw-text elements. It
+is deliberately conservative and is no browser or full HTML5 parser, so
+malformed HTML, or a body cut off at the size cap, can reduce coverage.
 
 A sourced framework catalogue supplements these generic signals.
 [fingerprints.md](fingerprints.md) lists all twenty framework families, the
 per-signal sources and confidence, and the distinction between declared
 identity, default-cookie hints and component evidence.
 
-These changes improve coverage without claiming universal identification.
 Unknown challenge products, hidden warnings, static exports and stripped
-headers remain limitations. [method.md](method.md) defines the resulting
-verdicts and the owner's local verification step.
+headers still limit what the check can see. [method.md](method.md) defines
+the resulting verdicts and the owner's local verification step.
 
 ## Verification
 

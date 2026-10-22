@@ -24,47 +24,48 @@ whether the workers were restarted after an upgrade.
 
 ## Recognising PHP without a version
 
-The check combines headers, cookies, redirect responses, generator tags,
-application asset paths, sourced framework fingerprints, PHP diagnostics,
-and same-origin navigation or form
-URLs with PHP extensions. Generator attributes may appear in any order;
-comments and script text are not treated as navigation or generator tags.
-A CMS version is never treated as a PHP version. The resulting hints are
-indicators rather than proof of the runtime behind every path. Exported
-static pages and proxies can preserve old application markers.
+Without a version, the check looks for other signs of PHP: headers,
+cookies, redirect responses, generator tags, application asset paths,
+sourced framework fingerprints, PHP diagnostics, and same-origin navigation
+or form URLs with PHP extensions. Generator attributes may appear in any
+order; comments and script text are not read as navigation or generator
+tags. A CMS version is never taken for a PHP version. A hint shows PHP
+somewhere on the site and is no proof of the runtime behind every path, and
+exported static pages and proxies can preserve old application markers.
 
 The check reads at most two discovered, query-free PHP endpoints on the
-final origin. It does not follow their redirects or recurse, and shares a
-three-second discovery budget. Paths naming actions such as logout,
-delete, reset or installation are excluded. The address policy, pinned
-connections, body cap and User-Agent apply to every request. A discovery
-failure is recorded in the evidence and does not discard the start page.
-Evidence identifies each inspected URL and its observations. Framework
-fingerprints include their source, confidence and whether they indicate a
-declaration, default cookie or component. [fingerprints.md](fingerprints.md)
-documents the twenty covered families and their detection limits.
+final origin, within a shared three-second budget, and neither follows
+their redirects nor recurses. Paths naming actions such as logout, delete,
+reset or installation are excluded. The address policy, pinned connections,
+body cap and User-Agent apply to every request. A failed discovery request
+is recorded in the evidence and does not discard the start page.
+
+The evidence names each inspected URL and what it showed. A framework
+fingerprint carries its source, its confidence and whether it is a
+declaration, a default cookie or a component.
+[fingerprints.md](fingerprints.md) documents the twenty covered families and
+their detection limits.
 
 Challenge pages, authentication requirements, access denials and rate limits
-produce `inspection_blocked` rather than an ordinary absence of PHP evidence.
-A blocked start page ends the check before discovery or session requests.
+produce `inspection_blocked` instead of an ordinary absence of PHP evidence.
+A blocked start page ends the check before discovery or session requests,
+and a challenge met during the session request stops further probes.
 Cloudflare's documented challenge header and known challenge-page signatures
 are recognised, including the JavaScript challenge observed at 99musik.se.
-A challenge encountered during the session request also stops further probes.
 The checker does not execute JavaScript or solve challenges.
 
-The research and implementation choices are described in
-[detection.md](detection.md).
+[detection.md](detection.md) records the research behind these choices.
 
 ## The session request
 
 When the visitor attests that the site is theirs, the check adds one small
 request to the start page, then `/index.php` and the final redirect URL
 when earlier paths give no answer. When the page identifies WordPress, the
-check also tries `/wp-login.php` on the final origin. Successfully inspected
-discovered endpoints are additional candidates. Passive checks send no
-session requests. Patched and unpatched releases answer differently when the server
-displays PHP warnings. The request writes nothing on the server, triggers no
-fault, and is a few hundred bytes.
+check also tries `/wp-login.php` on the final origin, and discovered
+endpoints that were inspected successfully are further candidates. Passive
+checks send no session requests. Patched and unpatched releases answer
+differently when the server displays PHP warnings. The request writes
+nothing on the server, triggers no fault, and is a few hundred bytes.
 
 It shows nothing when warnings are hidden, which is the production default,
 when session upload progress is disabled, when the session handler is not the

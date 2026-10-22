@@ -1,13 +1,14 @@
 # Framework fingerprint coverage
 
 Reviewed 2026-10-22. The embedded [catalogue](../engine/probe/frameworks.json)
-contains 20 PHP framework families. This is a selected coverage set, not a
-ranking of the twenty most popular frameworks. It supplements the existing
-CMS, forum, hosting and generic PHP hints.
+covers 20 PHP framework families. They were selected for coverage and are
+not the twenty most popular. The catalogue adds to the CMS, forum, hosting
+and generic PHP hints.
 
-Every family accepts an explicit name in `X-Powered-By`, `X-Generator` or a
-generator meta tag. This does not mean these frameworks normally expose
-those fields. Alias boundaries are checked to reject lookalike names.
+Every family is recognised by an explicit name in `X-Powered-By`,
+`X-Generator` or a generator meta tag, although the frameworks do not
+necessarily set those fields. Alias boundaries are checked to reject
+lookalike names.
 
 Every family also has a namespace or class-prefix signature for diagnostics
 already returned with HTTP 5xx and an exception, stack trace or fatal-error
@@ -41,10 +42,10 @@ identifies a component family, not the entire application.
 
 ## Signal sources and limits
 
-Additional signal sources are recorded on the individual catalogue rules:
+The cookie, header and asset rules cite these sources, which the catalogue
+records on each rule:
 
-- Laravel cookies: [source](https://raw.githubusercontent.com/laravel/laravel/11.x/config/session.php).
-- Laravel cookies: [source](https://raw.githubusercontent.com/laravel/laravel/12.x/config/session.php).
+- Laravel cookies: [11.x](https://raw.githubusercontent.com/laravel/laravel/11.x/config/session.php) and [12.x](https://raw.githubusercontent.com/laravel/laravel/12.x/config/session.php).
 - Symfony headers: [source](https://symfony.com/doc/current/profiler.html).
 - CodeIgniter cookies: [source](https://raw.githubusercontent.com/codeigniter4/CodeIgniter4/develop/app/Config/Session.php).
 - CakePHP cookies: [source](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework).
@@ -69,32 +70,32 @@ confidence component hint.
 
 ## Evidence and confidence
 
-Each matched framework fingerprint records the technology, signal, scope,
-confidence, source and observed URL in the existing evidence panel and API.
-Raw cookie values, debug tokens and stack-trace contents are not stored.
-The source is the rule reference; the URL identifies the response inspected.
+Each matched fingerprint records the technology, signal, scope, confidence,
+source and observed URL, in the evidence on the page and in the API. The
+source is the rule's reference and the URL is the response inspected. Raw
+cookie values, debug tokens and stack-trace contents are not stored.
 
 | Scope | Meaning | Confidence |
 |---|---|---|
 | `declared` | The response explicitly names the framework | medium |
-| `component` | A framework component or its artifacts were observed | medium for diagnostics/profiler; low for browser assets |
+| `component` | A framework component or its artifacts were observed | medium for diagnostics and the profiler; low for browser assets |
 | `default_cookie` | A known default cookie name was observed | low |
 
-Fingerprint confidence describes the technology indication, not the PHP
-patch state. No fingerprint supplies a PHP version; only the existing PHP
-version parser and session-request observations affect that assessment.
-A framework version MUST NOT become a PHP version.
+Fingerprint confidence describes how strongly a technology is indicated,
+not the PHP patch state. A framework version MUST NOT become a PHP version;
+only the PHP version parser and the session-request observations affect the
+patch assessment.
 
-Fixtures cover all twenty diagnostic families, explicit declarations,
-production cookie/header/asset signals, provenance, privacy and negative
-cases. These are synthetic regression responses based on the linked
-sources, not live acceptance tests against twenty deployed applications.
+Fixtures cover all twenty diagnostic families, explicit declarations, the
+production cookie, header and asset signals, provenance, privacy and
+negative cases. They are synthetic responses built from the linked sources,
+not live tests against twenty deployed applications.
 
 Custom cookies, disabled diagnostics, stripped identity headers, static
 exports and challenge pages can hide every framework-specific signal.
 Such deployments remain undetectable through this catalogue. See
 [detection.md](detection.md) for discovery and challenge handling.
 
-`make test`, `make build` and `make test-lab` pass with the expanded catalogue.
-The existing lab verifies unpatched, patched and hardened PHP plus a static
-server; it does not substitute for the twenty-family synthetic fixtures.
+`make test`, `make build` and `make test-lab` pass with the catalogue. The
+lab verifies unpatched, patched and hardened PHP plus a static server;
+framework coverage rests on the synthetic fixtures.

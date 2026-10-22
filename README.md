@@ -15,19 +15,20 @@ Colima. The manual Firefox pass and public deployment remain to be verified.
 
 ## Overview
 
-PHP detection combines response evidence with bounded same-origin page
-discovery. Challenges and access denials are reported as blocked inspection.
-[docs/detection.md](docs/detection.md) records the research and limits;
-[docs/fingerprints.md](docs/fingerprints.md) lists the twenty framework
-families in the sourced fingerprint catalogue.
-
 A check reads the PHP version a site advertises and compares it with the
 fixed releases. When the visitor attests that the site is theirs, it adds one
 small request whose answer differs between patched and unpatched PHP. A
-remote check can show that a site is unpatched but never that it is safe;
+remote check can show that a site is unpatched but never that it is safe, so
 every result says what it was drawn from and how to settle the question on
 the server. [docs/method.md](docs/method.md) describes what is observed and
 what each verdict means.
+
+Without a version, the check looks for other signs of PHP in the response
+and in up to two PHP pages the start page links to on the same origin. A
+challenge page or an access denial is reported as blocked inspection.
+[docs/detection.md](docs/detection.md) records the research and its limits,
+and [docs/fingerprints.md](docs/fingerprints.md) lists the twenty framework
+families in the sourced fingerprint catalogue.
 
 Only public domain names and public IP addresses are checked, on ports 80,
 443, 8080 and 8443. Non-public addresses are refused before any request is
