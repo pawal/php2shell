@@ -70,3 +70,32 @@ func TestPHPInfoVersion(t *testing.T) {
 		t.Error("advice leaked into the shared recommendations")
 	}
 }
+
+// phpinfo() settings explain a silent session request, credit the interim
+// measure and name what to restart.
+func TestPHPInfoSettings(t *testing.T) {
+	hidden := Judge(Input{Reachable: true, PHPInfo: "8.4.26", Oracle: OracleSilent,
+		PHPInfoSettings: map[string]string{ServerAPI: "FPM/FastCGI", DisplayErrors: "Off", UploadProgress: "On", SaveHandler: "files"}})
+	if hidden.Verdict != LikelyVulnerable || !strings.Contains(hidden.Summary, "phpinfo() page shows display_errors Off.") || strings.Contains(hidden.Summary, "interim") {
+		t.Errorf("hidden errors: %s", hidden.Summary)
+	}
+	if slices.Contains(hidden.Recommendations, Restart) || !slices.ContainsFunc(hidden.Recommendations, func(s string) bool { return strings.HasPrefix(s, "Restart every PHP-FPM pool") }) {
+		t.Errorf("restart advice: %v", hidden.Recommendations)
+	}
+	measured := Judge(Input{Reachable: true, PHPInfo: "8.3.30", Oracle: OracleNotRun,
+		PHPInfoSettings: map[string]string{UploadProgress: "Off", ServerAPI: "Apache 2.0 Handler"}})
+	if !strings.Contains(measured.Summary, "session.upload_progress.enabled Off, the interim measure") {
+		t.Errorf("measure: %s", measured.Summary)
+	}
+	if !slices.ContainsFunc(measured.Recommendations, func(s string) bool { return strings.HasPrefix(s, "Restart Apache") }) {
+		t.Errorf("apache restart: %v", measured.Recommendations)
+	}
+	fixed := Judge(Input{Reachable: true, PHPInfo: "8.4.27", PHPInfoSettings: map[string]string{UploadProgress: "Off"}})
+	if strings.Contains(fixed.Summary, "interim") {
+		t.Errorf("a fixed version needs no measure: %s", fixed.Summary)
+	}
+	plain := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.26", Oracle: OracleSilent})
+	if !strings.Contains(plain.Summary, "errors are hidden, upload progress is off") || !slices.Contains(plain.Recommendations, Restart) {
+		t.Errorf("without phpinfo(): %+v", plain)
+	}
+}

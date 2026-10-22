@@ -8,17 +8,18 @@ import (
 
 // Passive is what one GET of the start URL shows.
 type Passive struct {
-	Fingerprints []Fingerprint `json:"fingerprints,omitempty"`
-	Paths        []string      `json:"discovered_paths,omitempty"`
-	Blocked      string        `json:"inspection_blocked,omitempty"`
-	Error        string        `json:"error,omitempty"`
-	FinalURL     string        `json:"final_url"`
-	Status       int           `json:"status"`
-	Server       string        `json:"server,omitempty"`
-	PoweredBy    string        `json:"x_powered_by,omitempty"`
-	PHPInfo      string        `json:"phpinfo_version,omitempty"`
-	Cookies      []string      `json:"cookies,omitempty"`
-	Redirects    []string      `json:"redirects,omitempty"`
+	Fingerprints []Fingerprint     `json:"fingerprints,omitempty"`
+	Paths        []string          `json:"discovered_paths,omitempty"`
+	Blocked      string            `json:"inspection_blocked,omitempty"`
+	Error        string            `json:"error,omitempty"`
+	FinalURL     string            `json:"final_url"`
+	Status       int               `json:"status"`
+	Server       string            `json:"server,omitempty"`
+	PoweredBy    string            `json:"x_powered_by,omitempty"`
+	PHPInfo      string            `json:"phpinfo_version,omitempty"`
+	Settings     map[string]string `json:"phpinfo_settings,omitempty"`
+	Cookies      []string          `json:"cookies,omitempty"`
+	Redirects    []string          `json:"redirects,omitempty"`
 	// Stopped is a redirect left unfollowed, off the site or past the limit.
 	Stopped string   `json:"redirect_not_followed,omitempty"`
 	Hints   []string `json:"php_hints,omitempty"`
@@ -83,7 +84,9 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 		out.addExternal(s.prober.Fingerprints.Match(resp, text))
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			out.Paths = discoveredPaths(out.FinalURL, text)
-			out.PHPInfo = phpinfoVersion(text)
+			if out.PHPInfo = phpinfoVersion(text); out.PHPInfo != "" {
+				out.Settings = phpinfoSettings(text)
+			}
 		}
 	}
 	return out, nil

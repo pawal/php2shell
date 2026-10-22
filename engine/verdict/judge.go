@@ -37,6 +37,7 @@ type Input struct {
 	PoweredBy         string
 	Server            string
 	PHPInfo           string // the version a phpinfo() page shows
+	PHPInfoSettings   map[string]string
 	Hints             []string
 	Oracle            Oracle
 }
@@ -57,7 +58,13 @@ func Judge(in Input) Result {
 	}
 	out := judge(in)
 	if in.PHPInfo != "" {
-		out.Recommendations = append(slices.Clip(out.Recommendations), RemovePHPInfo)
+		advice := slices.Clone(out.Recommendations)
+		if i := slices.Index(advice, Restart); i >= 0 {
+			if restart := restartFor(in.PHPInfoSettings[ServerAPI]); restart != "" {
+				advice[i] = restart
+			}
+		}
+		out.Recommendations = append(advice, RemovePHPInfo)
 	}
 	return out
 }
@@ -92,39 +99,42 @@ func judge(in Input) Result {
 		return result(InspectionBlocked, "low", fmt.Sprintf("Inspection was blocked (%s). The response does not establish the site's PHP patch state.", in.InspectionBlocked), vp)
 	}
 	if versioned {
-		return judgeVersion(v, source, in.Oracle)
+		return judgeVersion(v, source, in)
 	}
 	if len(in.Hints) > 0 {
-		return result(Inconclusive, "low", fmt.Sprintf("PHP indicators were found (%s), but no PHP version was advertised.", strings.Join(in.Hints, ", "))+silentNote(in.Oracle), nil)
+		return result(Inconclusive, "low", fmt.Sprintf("PHP indicators were found (%s), but no PHP version was advertised.", strings.Join(in.Hints, ", "))+silentNote(in), nil)
 	}
-	return result(NoPHPSignal, "low", "Nothing in the answers shows PHP. A hardened PHP site looks the same."+silentNote(in.Oracle), nil)
+	return result(NoPHPSignal, "low", "Nothing in the answers shows PHP. A hardened PHP site looks the same."+silentNote(in), nil)
 }
 
-func judgeVersion(v Version, source string, oracle Oracle) Result {
-	note := silentNote(oracle)
+func judgeVersion(v Version, source string, in Input) Result {
+	note := silentNote(in)
 	switch v.Standing() {
 	case BranchFixed:
 		return result(LikelyPatched, "medium", fmt.Sprintf("The %s shows %s, which carries the fix.", source, v)+note, &v)
 	case BranchAffected:
 		if v.Backports() {
-			return result(PossiblyBackported, "low", fmt.Sprintf("The %s shows %s from %s, which fixes releases without changing the version.", source, v, v.Distro)+note, &v)
+			return result(PossiblyBackported, "low", fmt.Sprintf("The %s shows %s from %s, which fixes releases without changing the version.", source, v, v.Distro)+note+measureNote(in), &v)
 		}
-		return result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s; the fix is in %s.", source, v, v.FixedIn())+note, &v)
+		return result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s; the fix is in %s.", source, v, v.FixedIn())+note+measureNote(in), &v)
 	case BranchEOL:
 		summary := fmt.Sprintf("The %s shows %s, a branch the PHP project no longer fixes.", source, v)
 		if v.Distro != "" {
 			summary += " Only a vendor backport from " + v.Distro + " can carry the fix."
 		}
-		return result(EOLBranch, "medium", summary+note, &v)
+		return result(EOLBranch, "medium", summary+note+measureNote(in), &v)
 	}
 	return result(Inconclusive, "low", fmt.Sprintf("The %s shows %s, a branch outside the advisory.", source, v)+note, &v)
 }
 
-func silentNote(oracle Oracle) string {
-	if oracle == OracleSilent {
-		return " The session request showed nothing: errors are hidden, upload progress is off, or the path does not reach PHP."
+func silentNote(in Input) string {
+	if in.Oracle != OracleSilent {
+		return ""
 	}
-	return ""
+	if reasons := hiding(in.PHPInfoSettings); len(reasons) > 0 {
+		return " The session request showed nothing; the phpinfo() page shows " + strings.Join(reasons, " and ") + "."
+	}
+	return " The session request showed nothing: errors are hidden, upload progress is off, or the path does not reach PHP."
 }
 
 func result(verdict, confidence, summary string, v *Version) Result {

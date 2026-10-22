@@ -77,6 +77,10 @@
     return group('div', [group('table', [group('thead', [head]), body])], 'scroll');
   }
 
+  function settings(page) {
+    return Object.entries(page.phpinfo_settings || {}).map(([name, value]) => name + ' ' + value).join(', ');
+  }
+
   function pageSeen(page, start) {
     if (page.error) {
       return page.error;
@@ -89,7 +93,7 @@
       return group('span', [el('code', page.x_powered_by), hints ? ' ' + hints : '']);
     }
     if (page.phpinfo_version && page.phpinfo_version !== start.phpinfo_version) {
-      return group('span', [el('code', 'PHP ' + page.phpinfo_version), hints ? ' ' + hints : '']);
+      return group('span', [el('code', 'PHP ' + page.phpinfo_version), settings(page) ? ' ' + settings(page) : '']);
     }
     if (hints) {
       return hints;
@@ -163,6 +167,7 @@
         ['Server', codes(start.server ? [start.server] : [])],
         ['X-Powered-By', codes(start.x_powered_by ? [start.x_powered_by] : [])],
         ['phpinfo()', codes(start.phpinfo_version ? ['PHP ' + start.phpinfo_version] : [])],
+        ['phpinfo() settings', settings(start)],
         ['Cookies', codes(start.cookies)],
         ['PHP signs', (start.php_hints || []).join(', ')],
         ['PHP links', codes((start.discovered_paths || []).map(short))],

@@ -37,7 +37,8 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		return in, evidence, nil
 	}
 	in.Reachable = true
-	in.PoweredBy, in.Server, in.Hints, in.PHPInfo = passive.PoweredBy, passive.Server, passive.Hints, passive.PHPInfo
+	in.PoweredBy, in.Server, in.Hints = passive.PoweredBy, passive.Server, passive.Hints
+	in.PHPInfo, in.PHPInfoSettings = passive.PHPInfo, passive.Settings
 	in.InspectionBlocked = passive.Blocked
 	if passive.Blocked != "" {
 		return in, evidence, nil
@@ -60,7 +61,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 			}
 		}
 		if in.PHPInfo == "" {
-			in.PHPInfo = page.PHPInfo
+			in.PHPInfo, in.PHPInfoSettings = page.PHPInfo, page.Settings
 		}
 		if page.Status >= 200 && page.Status < 300 && page.Stopped == "" {
 			oraclePage.Paths = append(oraclePage.Paths, page.FinalURL)
@@ -70,7 +71,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		evidence.PHPInfo = s.findPHPInfo(ctx, passive)
 		for _, page := range evidence.PHPInfo {
 			if page.PHPInfo != "" {
-				in.PHPInfo = page.PHPInfo
+				in.PHPInfo, in.PHPInfoSettings = page.PHPInfo, page.Settings
 				in.Hints = dedupe(append(in.Hints, "phpinfo() page"))
 			}
 		}

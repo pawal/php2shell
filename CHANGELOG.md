@@ -12,6 +12,7 @@ number is written.
 - FreeBSD sites get `pkg` and `service` commands for the server check.
 - A phpinfo() page supplies the PHP version when no header carries one.
 - Attested checks without a version ask for `/phpinfo.php` and `/info.php`.
+- A phpinfo() page's server API and session settings shape the summary and advice.
 
 ## v1.0.3 (2026-10-22)
 

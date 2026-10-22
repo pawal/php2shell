@@ -104,3 +104,48 @@ func TestFindPHPInfoSkippedWithAVersion(t *testing.T) {
 		t.Errorf("asked %s", got)
 	}
 }
+
+// phpinfoRow is one phpinfo() table row as PHP prints it.
+func phpinfoRow(name string, values ...string) string {
+	row := `<tr><td class="e">` + name + `</td>`
+	for _, value := range values {
+		row += `<td class="v">` + value + `</td>`
+	}
+	return row + "</tr>\n"
+}
+
+func TestPHPInfoSettings(t *testing.T) {
+	body := phpinfoPage + phpinfoRow("Server API ", "FPM/FastCGI ") + phpinfoRow("display_errors", "Off", "Off") +
+		phpinfoRow("session.save_handler", "files", "files") + phpinfoRow("session.upload_progress.enabled", "On", "Off") +
+		phpinfoRow("session.save_path", "<i>no value</i>", "<i>no value</i>")
+	got := phpinfoSettings(body)
+	want := map[string]string{verdict.ServerAPI: "FPM/FastCGI", verdict.DisplayErrors: "Off", verdict.SaveHandler: "files", verdict.UploadProgress: "On"}
+	if fmt.Sprint(got) != fmt.Sprint(want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+	if phpinfoSettings("<p>display_errors Off</p>") != nil {
+		t.Error("settings outside phpinfo() rows")
+	}
+}
+
+// The session section sits past the usual body cap on a large phpinfo() page.
+func TestPHPInfoReadPastTheCap(t *testing.T) {
+	padding := strings.Repeat(phpinfoRow("mysqlnd", "enabled"), (DefaultMaxBody/40)+1)
+	body := phpinfoPage + phpinfoRow("Server API ", "Apache 2.0 Handler ") + padding + phpinfoRow("session.upload_progress.enabled", "Off", "Off")
+	if len(body) < DefaultMaxBody+1000 || len(body) > maxPHPInfoBody {
+		t.Fatalf("fixture is %d bytes", len(body))
+	}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			fmt.Fprint(w, body)
+		}
+	}))
+	defer srv.Close()
+	in, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL+"/phpinfo.php", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if in.PHPInfoSettings[verdict.UploadProgress] != "Off" || in.PHPInfoSettings[verdict.ServerAPI] != "Apache 2.0 Handler" {
+		t.Errorf("settings %v", in.PHPInfoSettings)
+	}
+}

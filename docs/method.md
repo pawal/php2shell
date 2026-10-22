@@ -23,6 +23,13 @@ theirs and nothing has shown a version, the check also asks for
 redirects, and stops at the first phpinfo() page or blocked answer. Passive
 checks ask for no page they were not given or linked to.
 
+From a phpinfo() page the check keeps four settings and nothing else:
+`Server API`, `display_errors`, `session.save_handler` and
+`session.upload_progress.enabled`. They explain a silent session request,
+show whether the interim measure is in place, and name the processes to
+restart. Such a page is read up to 256 KiB, since phpinfo() prints the
+session section late.
+
 The header is often absent: `expose_php=Off` removes it, and proxies and CDNs
 strip it. Its number is not always upstream's either. Ubuntu and Red Hat fix
 PHP without changing the version they advertise, and Debian does so on

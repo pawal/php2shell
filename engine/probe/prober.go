@@ -105,7 +105,13 @@ func (s *session) do(ctx context.Context, client *http.Client, req *http.Request
 		return nil, "", unwrapURLError(err)
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(io.LimitReader(resp.Body, s.prober.maxBody()))
+	limit := s.prober.maxBody()
+	body, err := io.ReadAll(io.LimitReader(resp.Body, limit))
+	// phpinfo() output may pass the cap before its session section.
+	if err == nil && int64(len(body)) == limit && limit < maxPHPInfoBody && phpinfoVersion(string(body)) != "" {
+		rest, _ := io.ReadAll(io.LimitReader(resp.Body, maxPHPInfoBody-limit))
+		body = append(body, rest...)
+	}
 	if err != nil && len(body) == 0 {
 		return resp, "", unwrapURLError(err)
 	}
