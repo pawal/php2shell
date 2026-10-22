@@ -1,0 +1,390 @@
+[
+  {
+    "technology": "XenForo",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "xf_session=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Invision Community",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "ips4_IPSSessionFront=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "MyBB",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "mybbuser=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Simple Machines Forum",
+    "status": 200,
+    "headers": {},
+    "body": "<img id=\"smflogo\" alt=\"Simple Machines Forum\" src=\"/Themes/default/images/smflogo.svg\">"
+  },
+  {
+    "technology": "MODX",
+    "status": 500,
+    "headers": {},
+    "body": "<h1>Unhandled exception</h1><pre>Stack trace: MODX\\Revolution\\modX at /private/source.php:20</pre>"
+  },
+  {
+    "technology": "Flarum",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "flarum_remember=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "bbPress",
+    "status": 200,
+    "headers": {},
+    "body": "<link rel=\"stylesheet\" href=\"/install/css/bbpress.css?v=123\">"
+  },
+  {
+    "technology": "DokuWiki",
+    "status": 200,
+    "headers": {},
+    "body": "<meta content=\"DokuWiki 1.2.3\" name=\"generator\">"
+  },
+  {
+    "technology": "PmWiki",
+    "status": 200,
+    "headers": {},
+    "body": "<link rel=\"stylesheet\" href=\"/install/pmwiki-core.css?v=123\">"
+  },
+  {
+    "technology": "Tiki Wiki",
+    "status": 200,
+    "headers": {},
+    "body": "<meta content=\"Tiki Wiki CMS Groupware - https://tiki.org\" name=\"generator\">"
+  },
+  {
+    "technology": "WackoWiki",
+    "status": 200,
+    "headers": {},
+    "body": "<link rel=\"stylesheet\" href=\"/install/css/wacko.css?v=123\">"
+  },
+  {
+    "technology": "BookStack",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "bookstack_session=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "phpMyAdmin",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "phpMyAdmin=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Adminer",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "adminer_sid=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "phpPgAdmin",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "PPA_ID=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Nextcloud",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "nc_sameSiteCookielax=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "ownCloud",
+    "status": 200,
+    "headers": {},
+    "body": "<footer role=\"contentinfo\"><p class=\"info\"><a href=\"https://owncloud.com\">ownCloud</a></p></footer>"
+  },
+  {
+    "technology": "FileGator",
+    "status": 500,
+    "headers": {},
+    "body": "<h1>Unhandled exception</h1><pre>Stack trace: Filegator\\Services\\Session\\Adapters\\SessionStorage at /private/source.php:20</pre>"
+  },
+  {
+    "technology": "Tiny File Manager",
+    "status": 200,
+    "headers": {},
+    "body": "<form><input name=\"fm_usr\"><input name=\"fm_pwd\" type=\"password\"></form>"
+  },
+  {
+    "technology": "osTicket",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "OSTSESSID=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "GLPI",
+    "status": 200,
+    "headers": {},
+    "body": "<html data-glpi-theme=\"light\" data-glpi-request-id=\"12345678\">"
+  },
+  {
+    "technology": "FreeScout",
+    "status": 200,
+    "headers": {},
+    "body": "<div class=\"footer\"><a href=\"https://freescout.net\">FreeScout</a></div>"
+  },
+  {
+    "technology": "UVdesk",
+    "status": 200,
+    "headers": {},
+    "body": "<script src=\"/install/bundles/uvdeskcoreframework/js/_dropdown.js?v=123\"></script><script src=\"/install/bundles/uvdeskcoreframework/js/viewer.js?v=123\"></script>"
+  },
+  {
+    "technology": "Dolibarr",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "DOLSESSID_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=sample-secret-123; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "EspoCRM",
+    "status": 500,
+    "headers": {},
+    "body": "<h1>Unhandled exception</h1><pre>Stack trace: Espo\\Core\\Utils\\Config\\ConfigFileManager at /private/source.php:20</pre>"
+  },
+  {
+    "technology": "SuiteCRM",
+    "status": 200,
+    "headers": {},
+    "body": "<script src=\"/install/themes/SuiteP/js/jscolor.js?v=123\"></script><script src=\"/install/cache/include/javascript/sugar_field_grp.js?v=123\"></script>"
+  },
+  {
+    "technology": "Vtiger",
+    "status": 200,
+    "headers": {},
+    "body": "<script src=\"/install/include/js/vtlib.js?v=123\"></script><script src=\"/install/include/js/general.js?v=123\"></script>"
+  },
+  {
+    "technology": "CiviCRM",
+    "status": 500,
+    "headers": {},
+    "body": "<h1>Unhandled exception</h1><pre>Stack trace: CRM_Core_Session at /private/source.php:20</pre>"
+  },
+  {
+    "technology": "Mautic",
+    "status": 500,
+    "headers": {},
+    "body": "<h1>Unhandled exception</h1><pre>Stack trace: Mautic\\MessengerBundle\\Message\\TestEmail at /private/source.php:20</pre>"
+  },
+  {
+    "technology": "Moodle",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "MoodleSession=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Chamilo",
+    "status": 200,
+    "headers": {},
+    "body": "<meta content=\"Chamilo 1\" name=\"generator\">"
+  },
+  {
+    "technology": "ILIAS",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "ilClientId=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Mahara",
+    "status": 200,
+    "headers": {},
+    "body": "<meta content=\"Mahara 25.04 (https://mahara.org)\" name=\"generator\">"
+  },
+  {
+    "technology": "LimeSurvey",
+    "status": 200,
+    "headers": {},
+    "body": "<meta content=\"LimeSurvey http://www.limesurvey.org\" name=\"generator\">"
+  },
+  {
+    "technology": "Matomo",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "MATOMO_SESSID=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "YOURLS",
+    "status": 200,
+    "headers": {},
+    "body": "<meta content=\"YOURLS 1.2.3\" name=\"generator\">"
+  },
+  {
+    "technology": "wallabag",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "wllbg_trusted_computer=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "FreshRSS",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "FreshRSS=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Tiny Tiny RSS",
+    "status": 200,
+    "headers": {},
+    "body": "<script src=\"/install/js/tt-rss.js?v=123\"></script><script src=\"/install/lib/dojo/tt-rss-layer.js?v=123\"></script>"
+  },
+  {
+    "technology": "Shaarli",
+    "status": 200,
+    "headers": {},
+    "body": "<link rel=\"stylesheet\" href=\"/install/css/shaarli.min.css?v=123\">"
+  },
+  {
+    "technology": "Piwigo",
+    "status": 200,
+    "headers": {},
+    "body": "<meta content=\"Piwigo (aka PWG), see piwigo.org\" name=\"generator\">"
+  },
+  {
+    "technology": "Coppermine",
+    "status": 200,
+    "headers": {},
+    "body": "<link rel=\"stylesheet\" href=\"/install/css/coppermine.css?v=123\">"
+  },
+  {
+    "technology": "Zenphoto",
+    "status": 200,
+    "headers": {},
+    "body": "<script src=\"/install/js/zp_general.js?v=123\"></script>"
+  },
+  {
+    "technology": "Lychee",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "lychee_session=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Invoice Ninja",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "invoice_ninja_session=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "InvoicePlane",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "ip_session=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Akaunting",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "akaunting_session=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Snipe-IT",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "snipeitv6_session=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "Kanboard",
+    "status": 200,
+    "headers": {
+      "Set-Cookie": [
+        "KB_SID=sample-secret-123; Path=/; HttpOnly"
+      ]
+    },
+    "body": ""
+  },
+  {
+    "technology": "phpList",
+    "status": 200,
+    "headers": {},
+    "body": "<link rel=\"icon\" href=\"./images/phplist.ico\"><link rel=\"apple-touch-icon\" href=\"./images/phplist-touch-icon.png\">"
+  }
+]

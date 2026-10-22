@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- Add fifty sourced PHP application fingerprints with scoped markup, CSS, cookie and diagnostic evidence.
+
 - The page takes a dark terminal look with an ASCII banner.
 
 - Recognise Roundcube cookies, generator declarations and paired application script paths.

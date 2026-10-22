@@ -38,5 +38,971 @@
         "source": "https://raw.githubusercontent.com/roundcube/roundcubemail/master/program/include/rcmail_output_html.php"
       }
     ]
+  },
+  {
+    "technology": "XenForo",
+    "category": "Forums",
+    "aliases": [
+      "XenForo"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://xenforo.com/community/help/cookies/",
+    "cookies": [
+      {
+        "name": "xf_session",
+        "confidence": "low",
+        "source": "https://xenforo.com/community/help/cookies/"
+      },
+      {
+        "name": "xf_csrf",
+        "confidence": "low",
+        "source": "https://xenforo.com/community/help/cookies/"
+      },
+      {
+        "name": "xf_user",
+        "confidence": "low",
+        "source": "https://xenforo.com/community/help/cookies/"
+      }
+    ]
+  },
+  {
+    "technology": "Invision Community",
+    "category": "Forums",
+    "aliases": [
+      "Invision Community"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://invisioncommunity.com/cookies/",
+    "cookies": [
+      {
+        "name": "ips4_IPSSessionFront",
+        "confidence": "low",
+        "source": "https://invisioncommunity.com/cookies/"
+      },
+      {
+        "name": "ips4_member_id",
+        "confidence": "low",
+        "source": "https://invisioncommunity.com/cookies/"
+      },
+      {
+        "name": "ips4_login_key",
+        "confidence": "low",
+        "source": "https://invisioncommunity.com/cookies/"
+      }
+    ]
+  },
+  {
+    "technology": "MyBB",
+    "category": "Forums",
+    "aliases": [
+      "MyBB"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/mybb/mybb/feature/inc/class_session.php",
+    "cookies": [
+      {
+        "name": "mybbuser",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/mybb/mybb/feature/inc/class_session.php"
+      }
+    ]
+  },
+  {
+    "technology": "Simple Machines Forum",
+    "category": "Forums",
+    "aliases": [
+      "Simple Machines Forum",
+      "SMF"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/SimpleMachines/SMF/release-2.1/Themes/default/index.template.php",
+    "markup": [
+      {
+        "elements": [
+          {
+            "tag": "img",
+            "attributes": {
+              "id": "^smflogo$",
+              "alt": "^Simple Machines Forum$"
+            }
+          }
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/SimpleMachines/SMF/release-2.1/Themes/default/index.template.php"
+      }
+    ]
+  },
+  {
+    "technology": "MODX",
+    "category": "CMS",
+    "aliases": [
+      "MODX"
+    ],
+    "diagnostics": [
+      "MODX\\Revolution\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/modxcms/revolution/3.x/core/src/Revolution/modX.php"
+  },
+  {
+    "technology": "Flarum",
+    "category": "Forums",
+    "aliases": [
+      "Flarum"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Http/CookieFactory.php",
+    "cookies": [
+      {
+        "name": "flarum_remember",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Http/CookieFactory.php"
+      }
+    ],
+    "references": [
+      "https://raw.githubusercontent.com/flarum/framework/HEAD/framework/core/src/Http/Rememberer.php"
+    ]
+  },
+  {
+    "technology": "bbPress",
+    "category": "Forums",
+    "aliases": [
+      "bbPress"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/bbpress/bbPress/trunk/src/templates/default/bbpress-functions.php",
+    "assets": [
+      {
+        "tag": "link",
+        "names": [
+          "css/bbpress.css"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/bbpress/bbPress/trunk/src/templates/default/bbpress-functions.php"
+      }
+    ]
+  },
+  {
+    "technology": "DokuWiki",
+    "category": "Wikis",
+    "aliases": [
+      "DokuWiki"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/dokuwiki/dokuwiki/master/inc/template.php",
+    "emits_generator": true
+  },
+  {
+    "technology": "PmWiki",
+    "category": "Wikis",
+    "aliases": [
+      "PmWiki"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://www.pmwiki.org/wiki/PmWiki/Requirements",
+    "assets": [
+      {
+        "tag": "link",
+        "names": [
+          "pmwiki-core.css"
+        ],
+        "confidence": "low",
+        "source": "https://www.pmwiki.org/wiki/PmWiki/Requirements"
+      }
+    ]
+  },
+  {
+    "technology": "Tiki Wiki",
+    "category": "Wikis",
+    "aliases": [
+      "Tiki Wiki CMS Groupware",
+      "Tiki Wiki",
+      "Tiki"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://gitlab.com/tikiwiki/tiki/-/raw/master/templates/header.tpl",
+    "emits_generator": true
+  },
+  {
+    "technology": "WackoWiki",
+    "category": "Wikis",
+    "aliases": [
+      "WackoWiki"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/WackoWiki/wackowiki/HEAD/src/theme/_common/_header.tpl",
+    "assets": [
+      {
+        "tag": "link",
+        "names": [
+          "css/wacko.css"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/WackoWiki/wackowiki/HEAD/src/theme/_common/_header.tpl"
+      }
+    ]
+  },
+  {
+    "technology": "BookStack",
+    "category": "Wikis",
+    "aliases": [
+      "BookStack"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/BookStackApp/BookStack/HEAD/app/Config/session.php",
+    "cookies": [
+      {
+        "name": "bookstack_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/BookStackApp/BookStack/HEAD/app/Config/session.php"
+      }
+    ]
+  },
+  {
+    "technology": "phpMyAdmin",
+    "category": "Database administration",
+    "aliases": [
+      "phpMyAdmin"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/phpmyadmin/phpmyadmin/HEAD/src/Session.php",
+    "cookies": [
+      {
+        "name": "phpMyAdmin",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/phpmyadmin/phpmyadmin/HEAD/src/Session.php"
+      }
+    ]
+  },
+  {
+    "technology": "Adminer",
+    "category": "Database administration",
+    "aliases": [
+      "Adminer"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/vrana/adminer/master/adminer/include/bootstrap.inc.php",
+    "cookies": [
+      {
+        "name": "adminer_sid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/vrana/adminer/master/adminer/include/bootstrap.inc.php"
+      }
+    ]
+  },
+  {
+    "technology": "phpPgAdmin",
+    "category": "Database administration",
+    "aliases": [
+      "phpPgAdmin"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/phppgadmin/phppgadmin/master/libraries/lib.inc.php",
+    "cookies": [
+      {
+        "name": "PPA_ID",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/phppgadmin/phppgadmin/master/libraries/lib.inc.php"
+      }
+    ]
+  },
+  {
+    "technology": "Nextcloud",
+    "category": "Files and collaboration",
+    "aliases": [
+      "Nextcloud"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/nextcloud/server/master/lib/private/AppFramework/Http/Request.php",
+    "cookies": [
+      {
+        "name": "nc_sameSiteCookielax",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/nextcloud/server/master/lib/private/AppFramework/Http/Request.php"
+      },
+      {
+        "name": "nc_sameSiteCookiestrict",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/nextcloud/server/master/lib/private/AppFramework/Http/Request.php"
+      },
+      {
+        "name": "__Host-nc_sameSiteCookielax",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/nextcloud/server/master/lib/private/AppFramework/Http/Request.php"
+      },
+      {
+        "name": "__Host-nc_sameSiteCookiestrict",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/nextcloud/server/master/lib/private/AppFramework/Http/Request.php"
+      }
+    ]
+  },
+  {
+    "technology": "ownCloud",
+    "category": "Files and collaboration",
+    "aliases": [
+      "ownCloud"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/owncloud/core/master/core/templates/layout.guest.php",
+    "markup": [
+      {
+        "elements": [
+          {
+            "tag": "footer",
+            "attributes": {
+              "role": "^contentinfo$"
+            }
+          },
+          {
+            "tag": "p",
+            "attributes": {
+              "class": "(?:^|\\s)info(?:\\s|$)"
+            }
+          },
+          {
+            "tag": "a",
+            "attributes": {
+              "href": "^https://owncloud\\.com/?$"
+            }
+          }
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/owncloud/core/master/core/templates/layout.guest.php",
+        "container": {
+          "tag": "footer",
+          "attributes": {
+            "role": "^contentinfo$"
+          }
+        }
+      }
+    ],
+    "references": [
+      "https://raw.githubusercontent.com/owncloud/core/master/lib/private/legacy/defaults.php"
+    ]
+  },
+  {
+    "technology": "FileGator",
+    "category": "Files and collaboration",
+    "aliases": [
+      "FileGator"
+    ],
+    "diagnostics": [
+      "Filegator\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/filegator/filegator/master/backend/Services/Session/Adapters/SessionStorage.php"
+  },
+  {
+    "technology": "Tiny File Manager",
+    "category": "Files and collaboration",
+    "aliases": [
+      "Tiny File Manager"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/prasathmani/tinyfilemanager/master/tinyfilemanager.php",
+    "markup": [
+      {
+        "elements": [
+          {
+            "tag": "input",
+            "attributes": {
+              "name": "^fm_usr$"
+            }
+          },
+          {
+            "tag": "input",
+            "attributes": {
+              "name": "^fm_pwd$",
+              "type": "^password$"
+            }
+          }
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/prasathmani/tinyfilemanager/master/tinyfilemanager.php",
+        "container": {
+          "tag": "form",
+          "attributes": {}
+        }
+      }
+    ]
+  },
+  {
+    "technology": "osTicket",
+    "category": "Help desks",
+    "aliases": [
+      "osTicket"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/osTicket/osTicket/develop/include/class.ostsession.php",
+    "cookies": [
+      {
+        "name": "OSTSESSID",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/osTicket/osTicket/develop/include/class.ostsession.php"
+      }
+    ]
+  },
+  {
+    "technology": "GLPI",
+    "category": "Help desks",
+    "aliases": [
+      "GLPI"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/glpi-project/glpi/main/templates/layout/parts/head.html.twig",
+    "markup": [
+      {
+        "elements": [
+          {
+            "tag": "html",
+            "attributes": {
+              "data-glpi-theme": ".+",
+              "data-glpi-request-id": ".+"
+            }
+          }
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/glpi-project/glpi/main/templates/layout/parts/head.html.twig"
+      }
+    ]
+  },
+  {
+    "technology": "FreeScout",
+    "category": "Help desks",
+    "aliases": [
+      "FreeScout"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/freescout-helpdesk/freescout/dist/resources/views/layouts/app.blade.php",
+    "markup": [
+      {
+        "elements": [
+          {
+            "tag": "div",
+            "attributes": {
+              "class": "(?:^|\\s)footer(?:\\s|$)"
+            }
+          },
+          {
+            "tag": "a",
+            "attributes": {
+              "href": "^https://freescout\\.net/?$"
+            }
+          }
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/freescout-helpdesk/freescout/dist/resources/views/layouts/app.blade.php",
+        "container": {
+          "tag": "div",
+          "attributes": {
+            "class": "(?:^|\\s)footer(?:\\s|$)"
+          }
+        }
+      }
+    ],
+    "references": [
+      "https://raw.githubusercontent.com/freescout-helpdesk/freescout/dist/config/app.php"
+    ]
+  },
+  {
+    "technology": "UVdesk",
+    "category": "Help desks",
+    "aliases": [
+      "UVdesk"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/uvdesk/core-framework/master/Resources/views/Templates/layout.html.twig",
+    "assets": [
+      {
+        "names": [
+          "bundles/uvdeskcoreframework/js/_dropdown.js",
+          "bundles/uvdeskcoreframework/js/viewer.js"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/uvdesk/core-framework/master/Resources/views/Templates/layout.html.twig"
+      }
+    ]
+  },
+  {
+    "technology": "Dolibarr",
+    "category": "CRM and business",
+    "aliases": [
+      "Dolibarr"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/Dolibarr/dolibarr/develop/htdocs/main.inc.php",
+    "cookies": [
+      {
+        "pattern": "^DOLSESSID_[0-9a-f]{40}$",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/Dolibarr/dolibarr/develop/htdocs/main.inc.php"
+      }
+    ],
+    "references": [
+      "https://raw.githubusercontent.com/Dolibarr/dolibarr/develop/htdocs/core/lib/functions.lib.php"
+    ]
+  },
+  {
+    "technology": "EspoCRM",
+    "category": "CRM and business",
+    "aliases": [
+      "EspoCRM"
+    ],
+    "diagnostics": [
+      "Espo\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/espocrm/espocrm/master/application/Espo/Core/Utils/Config/ConfigFileManager.php"
+  },
+  {
+    "technology": "SuiteCRM",
+    "category": "CRM and business",
+    "aliases": [
+      "SuiteCRM"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/salesagility/SuiteCRM/master/themes/SuiteP/tpls/_head.tpl",
+    "assets": [
+      {
+        "names": [
+          "themes/SuiteP/js/jscolor.js",
+          "cache/include/javascript/sugar_field_grp.js"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/salesagility/SuiteCRM/master/themes/SuiteP/tpls/_head.tpl"
+      }
+    ]
+  },
+  {
+    "technology": "Vtiger",
+    "category": "CRM and business",
+    "aliases": [
+      "Vtiger"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/vtiger-crm/vtigercrm/master/Smarty/templates/Header.tpl",
+    "assets": [
+      {
+        "names": [
+          "include/js/vtlib.js",
+          "include/js/general.js"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/vtiger-crm/vtigercrm/master/Smarty/templates/Header.tpl"
+      }
+    ]
+  },
+  {
+    "technology": "CiviCRM",
+    "category": "CRM and business",
+    "aliases": [
+      "CiviCRM"
+    ],
+    "diagnostics": [
+      "CRM_Core_Session"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/civicrm/civicrm-core/master/CRM/Core/Session.php"
+  },
+  {
+    "technology": "Mautic",
+    "category": "CRM and business",
+    "aliases": [
+      "Mautic"
+    ],
+    "diagnostics": [
+      "Mautic\\"
+    ],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/mautic/mautic/5.x/app/config/config.php"
+  },
+  {
+    "technology": "Moodle",
+    "category": "Learning",
+    "aliases": [
+      "Moodle"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/moodle/moodle/MOODLE_405_STABLE/lib/classes/session/manager.php",
+    "cookies": [
+      {
+        "name": "MoodleSession",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/moodle/moodle/MOODLE_405_STABLE/lib/classes/session/manager.php"
+      }
+    ]
+  },
+  {
+    "technology": "Chamilo",
+    "category": "Learning",
+    "aliases": [
+      "Chamilo"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/chamilo/chamilo-lms/1.11.x/main/template/default/layout/head.tpl",
+    "emits_generator": true
+  },
+  {
+    "technology": "ILIAS",
+    "category": "Learning",
+    "aliases": [
+      "ILIAS"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/ILIAS-eLearning/ILIAS/HEAD/components/ILIAS/Init/classes/class.ilInitialisation.php",
+    "cookies": [
+      {
+        "name": "ilClientId",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/ILIAS-eLearning/ILIAS/HEAD/components/ILIAS/Init/classes/class.ilInitialisation.php"
+      }
+    ]
+  },
+  {
+    "technology": "Mahara",
+    "category": "Learning",
+    "aliases": [
+      "Mahara"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/MaharaProject/mahara/master/htdocs/theme/raw/templates/header/head.tpl",
+    "emits_generator": true
+  },
+  {
+    "technology": "LimeSurvey",
+    "category": "Analytics and publishing",
+    "aliases": [
+      "LimeSurvey"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/LimeSurvey/LimeSurvey/master/themes/survey/vanilla/views/subviews/header/head.twig",
+    "emits_generator": true
+  },
+  {
+    "technology": "Matomo",
+    "category": "Analytics and publishing",
+    "aliases": [
+      "Matomo"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/matomo-org/matomo/5.x-dev/core/Session.php",
+    "cookies": [
+      {
+        "name": "MATOMO_SESSID",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/matomo-org/matomo/5.x-dev/core/Session.php"
+      }
+    ]
+  },
+  {
+    "technology": "YOURLS",
+    "category": "Analytics and publishing",
+    "aliases": [
+      "YOURLS"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/YOURLS/YOURLS/master/includes/functions-html.php",
+    "emits_generator": true
+  },
+  {
+    "technology": "wallabag",
+    "category": "Analytics and publishing",
+    "aliases": [
+      "wallabag"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/wallabag/wallabag/master/app/config/config.yml",
+    "cookies": [
+      {
+        "name": "wllbg_trusted_computer",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/wallabag/wallabag/master/app/config/config.yml"
+      }
+    ]
+  },
+  {
+    "technology": "FreshRSS",
+    "category": "Analytics and publishing",
+    "aliases": [
+      "FreshRSS"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/FreshRSS/FreshRSS/edge/app/FreshRSS.php",
+    "cookies": [
+      {
+        "name": "FreshRSS",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/FreshRSS/FreshRSS/edge/app/FreshRSS.php"
+      }
+    ]
+  },
+  {
+    "technology": "Tiny Tiny RSS",
+    "category": "Analytics and publishing",
+    "aliases": [
+      "Tiny Tiny RSS"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/tt-rss/tt-rss/master/index.php",
+    "assets": [
+      {
+        "names": [
+          "js/tt-rss.js",
+          "lib/dojo/tt-rss-layer.js"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/tt-rss/tt-rss/master/index.php"
+      }
+    ]
+  },
+  {
+    "technology": "Shaarli",
+    "category": "Analytics and publishing",
+    "aliases": [
+      "Shaarli"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/shaarli/Shaarli/master/tpl/default/includes.html",
+    "assets": [
+      {
+        "tag": "link",
+        "names": [
+          "css/shaarli.min.css"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/shaarli/Shaarli/master/tpl/default/includes.html"
+      }
+    ]
+  },
+  {
+    "technology": "Piwigo",
+    "category": "Galleries",
+    "aliases": [
+      "Piwigo"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/Piwigo/Piwigo/master/themes/default/template/header.tpl",
+    "emits_generator": true
+  },
+  {
+    "technology": "Coppermine",
+    "category": "Galleries",
+    "aliases": [
+      "Coppermine"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/coppermine-gallery/cpg1.6.x/master/include/themes.inc.php",
+    "assets": [
+      {
+        "tag": "link",
+        "names": [
+          "css/coppermine.css"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/coppermine-gallery/cpg1.6.x/master/include/themes.inc.php"
+      }
+    ]
+  },
+  {
+    "technology": "Zenphoto",
+    "category": "Galleries",
+    "aliases": [
+      "Zenphoto"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/zenphoto/zenphoto/master/zp-core/template-functions/template-functions-general.php",
+    "assets": [
+      {
+        "names": [
+          "js/zp_general.js"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/zenphoto/zenphoto/master/zp-core/template-functions/template-functions-general.php"
+      }
+    ]
+  },
+  {
+    "technology": "Lychee",
+    "category": "Galleries",
+    "aliases": [
+      "Lychee"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/LycheeOrg/Lychee/master/config/session.php",
+    "cookies": [
+      {
+        "name": "lychee_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/LycheeOrg/Lychee/master/config/session.php"
+      }
+    ]
+  },
+  {
+    "technology": "Invoice Ninja",
+    "category": "Business tools",
+    "aliases": [
+      "Invoice Ninja"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/invoiceninja/invoiceninja/v5-stable/config/session.php",
+    "cookies": [
+      {
+        "name": "invoice_ninja_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/invoiceninja/invoiceninja/v5-stable/config/session.php"
+      }
+    ],
+    "references": [
+      "https://raw.githubusercontent.com/invoiceninja/invoiceninja/v5-stable/.env.example"
+    ]
+  },
+  {
+    "technology": "InvoicePlane",
+    "category": "Business tools",
+    "aliases": [
+      "InvoicePlane"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/InvoicePlane/InvoicePlane/development/application/config/config.php",
+    "cookies": [
+      {
+        "name": "ip_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/InvoicePlane/InvoicePlane/development/application/config/config.php"
+      },
+      {
+        "name": "ip_csrf_cookie",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/InvoicePlane/InvoicePlane/development/application/config/config.php"
+      }
+    ]
+  },
+  {
+    "technology": "Akaunting",
+    "category": "Business tools",
+    "aliases": [
+      "Akaunting"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/akaunting/akaunting/master/config/session.php",
+    "cookies": [
+      {
+        "name": "akaunting_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/akaunting/akaunting/master/config/session.php"
+      }
+    ],
+    "references": [
+      "https://raw.githubusercontent.com/akaunting/akaunting/master/.env.example"
+    ]
+  },
+  {
+    "technology": "Snipe-IT",
+    "category": "Business tools",
+    "aliases": [
+      "Snipe-IT"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/grokability/snipe-it/master/config/session.php",
+    "cookies": [
+      {
+        "name": "snipeitv6_session",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/grokability/snipe-it/master/config/session.php"
+      }
+    ]
+  },
+  {
+    "technology": "Kanboard",
+    "category": "Business tools",
+    "aliases": [
+      "Kanboard"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/kanboard/kanboard/main/app/Core/Session/SessionManager.php",
+    "cookies": [
+      {
+        "name": "KB_SID",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/kanboard/kanboard/main/app/Core/Session/SessionManager.php"
+      }
+    ]
+  },
+  {
+    "technology": "phpList",
+    "category": "Business tools",
+    "aliases": [
+      "phpList"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/phpList/phplist3/main/public_html/lists/admin/ui/default/header.inc",
+    "markup": [
+      {
+        "elements": [
+          {
+            "tag": "link",
+            "attributes": {
+              "rel": "^icon$",
+              "href": "(?:^|/)images/phplist\\.ico$"
+            }
+          },
+          {
+            "tag": "link",
+            "attributes": {
+              "rel": "^apple-touch-icon$",
+              "href": "(?:^|/)images/phplist-touch-icon\\.png$"
+            }
+          }
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/phpList/phplist3/main/public_html/lists/admin/ui/default/header.inc"
+      }
+    ]
   }
 ]

@@ -29,17 +29,23 @@ type Fingerprint struct {
 }
 
 type technologySpec struct {
-	Technology  string              `json:"technology"`
-	Aliases     []string            `json:"aliases"`
-	Diagnostics []string            `json:"diagnostics"`
-	Confidence  string              `json:"confidence"`
-	Source      string              `json:"source"`
-	Cookies     []cookieFingerprint `json:"cookies,omitempty"`
-	Assets      []assetFingerprint  `json:"assets,omitempty"`
-	Headers     []headerFingerprint `json:"headers,omitempty"`
+	Category       string              `json:"category,omitempty"`
+	Technology     string              `json:"technology"`
+	References     []string            `json:"references,omitempty"`
+	EmitsGenerator bool                `json:"emits_generator,omitempty"`
+	Aliases        []string            `json:"aliases"`
+	Diagnostics    []string            `json:"diagnostics"`
+	Confidence     string              `json:"confidence"`
+	Source         string              `json:"source"`
+	Cookies        []cookieFingerprint `json:"cookies,omitempty"`
+	Assets         []assetFingerprint  `json:"assets,omitempty"`
+	Markup         []markupFingerprint `json:"markup,omitempty"`
+	Headers        []headerFingerprint `json:"headers,omitempty"`
 }
 
 type cookieFingerprint struct {
+	Pattern    string `json:"pattern,omitempty"`
+	compiled   *regexp.Regexp
 	Name       string `json:"name"`
 	Confidence string `json:"confidence"`
 	Source     string `json:"source"`
@@ -56,9 +62,24 @@ type headerFingerprint struct {
 }
 
 type assetFingerprint struct {
+	Tag        string   `json:"tag,omitempty"`
 	Names      []string `json:"names"`
 	Confidence string   `json:"confidence"`
 	Source     string   `json:"source"`
+}
+
+type markupFingerprint struct {
+	Container  *elementFingerprint `json:"container,omitempty"`
+	closing    *regexp.Regexp
+	Elements   []elementFingerprint `json:"elements"`
+	Confidence string               `json:"confidence"`
+	Source     string               `json:"source"`
+}
+
+type elementFingerprint struct {
+	Tag        string            `json:"tag"`
+	Attributes map[string]string `json:"attributes"`
+	compiled   map[string]*regexp.Regexp
 }
 
 var frameworkCatalogue = loadCatalogue(frameworkCatalogueJSON)
@@ -71,6 +92,22 @@ func loadCatalogue(data []byte) []technologySpec {
 		panic(fmt.Sprintf("invalid fingerprint catalogue: %v", err))
 	}
 	for i := range specs {
+		for j := range specs[i].Cookies {
+			rule := &specs[i].Cookies[j]
+			if rule.Pattern != "" {
+				rule.compiled = regexp.MustCompile(rule.Pattern)
+			}
+		}
+		for j := range specs[i].Markup {
+			rule := &specs[i].Markup[j]
+			if rule.Container != nil {
+				compileElement(rule.Container)
+				rule.closing = regexp.MustCompile(`(?i)</` + regexp.QuoteMeta(rule.Container.Tag) + `\s*>`)
+			}
+			for k := range rule.Elements {
+				compileElement(&rule.Elements[k])
+			}
+		}
 		for j := range specs[i].Headers {
 			specs[i].Headers[j].compiled = regexp.MustCompile(specs[i].Headers[j].Pattern)
 		}
@@ -102,12 +139,20 @@ func matchFingerprints(resp *http.Response, body string, catalogue []technologyS
 	for _, cookie := range resp.Cookies() {
 		cookies[cookie.Name] = true
 	}
-	assets := map[string]bool{}
+	assets := map[string]map[string]bool{"script": {}, "link": {}}
 	var generators []string
-	for _, tag := range pageTags(body) {
+	tags := pageTags(body)
+	for _, tag := range tags {
+		attribute := ""
 		if tag.name == "script" {
-			if address, err := url.Parse(tag.attrs["src"]); err == nil && (address.Scheme == "" || address.Scheme == "http" || address.Scheme == "https") {
-				assets[address.Path] = true
+			attribute = "src"
+		}
+		if tag.name == "link" && strings.EqualFold(tag.attrs["rel"], "stylesheet") {
+			attribute = "href"
+		}
+		if attribute != "" {
+			if address, err := url.Parse(tag.attrs[attribute]); err == nil && (address.Scheme == "" || address.Scheme == "http" || address.Scheme == "https") {
+				assets[tag.name][address.Path] = true
 			}
 		}
 		if tag.name == "meta" && strings.EqualFold(tag.attrs["name"], "generator") {
@@ -138,7 +183,13 @@ func matchFingerprints(resp *http.Response, body string, catalogue []technologyS
 			}
 		}
 		for _, rule := range spec.Cookies {
-			if cookies[rule.Name] {
+			matched := rule.Name != "" && cookies[rule.Name]
+			if rule.compiled != nil {
+				for name := range cookies {
+					matched = matched || rule.compiled.MatchString(name)
+				}
+			}
+			if matched {
 				add("cookie", "default_cookie", rule.Confidence, rule.Source)
 			}
 		}
@@ -152,10 +203,14 @@ func matchFingerprints(resp *http.Response, body string, catalogue []technologyS
 			}
 		}
 		for _, rule := range spec.Assets {
+			tag := rule.Tag
+			if tag == "" {
+				tag = "script"
+			}
 			matched := len(rule.Names) > 0
 			for _, name := range rule.Names {
 				found := false
-				for asset := range assets {
+				for asset := range assets[tag] {
 					if !strings.Contains(name, "/") {
 						found = found || path.Base(asset) == name
 					} else {
@@ -168,6 +223,11 @@ func matchFingerprints(resp *http.Response, body string, catalogue []technologyS
 				add("assets", "component", rule.Confidence, rule.Source)
 			}
 		}
+		for _, rule := range spec.Markup {
+			if matchesMarkup(rule, tags, body) {
+				add("markup", "component", rule.Confidence, rule.Source)
+			}
+		}
 		if errorPage {
 			for _, name := range spec.Diagnostics {
 				if containsClass(diagnostic, name) {
@@ -178,6 +238,55 @@ func matchFingerprints(resp *http.Response, body string, catalogue []technologyS
 		}
 	}
 	return mergeFingerprints(nil, matches)
+}
+
+func compileElement(element *elementFingerprint) {
+	element.compiled = map[string]*regexp.Regexp{}
+	for name, pattern := range element.Attributes {
+		element.compiled[name] = regexp.MustCompile(pattern)
+	}
+}
+
+func matchesElement(element elementFingerprint, tag htmlTag) bool {
+	if tag.name != element.Tag {
+		return false
+	}
+	for name, pattern := range element.compiled {
+		value, present := tag.attrs[name]
+		if !present || !pattern.MatchString(value) {
+			return false
+		}
+	}
+	return true
+}
+
+func matchesMarkup(rule markupFingerprint, tags []htmlTag, body string) bool {
+	groups := [][]htmlTag{tags}
+	if rule.Container != nil {
+		groups = nil
+		for _, tag := range tags {
+			if !matchesElement(*rule.Container, tag) {
+				continue
+			}
+			if end := rule.closing.FindStringIndex(body[tag.end:]); end != nil {
+				groups = append(groups, pageTags(body[tag.start:tag.end+end[1]]))
+			}
+		}
+	}
+	for _, group := range groups {
+		matched := len(rule.Elements) > 0
+		for _, element := range rule.Elements {
+			found := false
+			for _, tag := range group {
+				found = found || matchesElement(element, tag)
+			}
+			matched = matched && found
+		}
+		if matched {
+			return true
+		}
+	}
+	return false
 }
 
 func containsClass(body, name string) bool {

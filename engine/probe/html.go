@@ -9,8 +9,9 @@ import (
 var htmlAttributes = regexp.MustCompile(`([^\s=/'"<>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?`)
 
 type htmlTag struct {
-	name  string
-	attrs map[string]string
+	start, end int
+	name       string
+	attrs      map[string]string
 }
 
 // pageTags conservatively reads attributes while skipping comments and raw text.
@@ -69,7 +70,7 @@ func pageTags(body string) []htmlTag {
 		}
 		name := lower[start:nameEnd]
 
-		tag := htmlTag{name: name, attrs: map[string]string{}}
+		tag := htmlTag{name: name, attrs: map[string]string{}, start: start - 1, end: end + 1}
 		for _, attr := range htmlAttributes.FindAllStringSubmatch(body[nameEnd:end], -1) {
 			key := strings.ToLower(attr[1])
 			if _, exists := tag.attrs[key]; exists {

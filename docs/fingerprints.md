@@ -40,6 +40,9 @@ identifies a component family, not the entire application.
 | Flight | `flight\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/flightphp/core/master/flight/core/Dispatcher.php) |
 | Neos Flow | `Neos\Flow\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/neos/flow-development-collection/9.0/Neos.Flow/Classes/Exception.php) |
 
+The separate application catalogue adds [fifty further PHP applications](applications.md),
+with a sourced coverage table and explicit limits.
+
 ## Roundcube application detection
 
 Roundcube is recorded separately in

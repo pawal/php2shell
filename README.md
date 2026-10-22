@@ -29,6 +29,8 @@ challenge page or an access denial is reported as blocked inspection.
 [docs/detection.md](docs/detection.md) records the research and its limits,
 and [docs/fingerprints.md](docs/fingerprints.md) lists the twenty framework
 families in the sourced fingerprint catalogue.
+[docs/applications.md](docs/applications.md) lists fifty further PHP
+applications and their supported signals.
 
 Only public domain names and public IP addresses are checked, on ports 80,
 443, 8080 and 8443. Non-public addresses are refused before any request is

@@ -49,6 +49,8 @@ A sourced framework catalogue supplements these generic signals.
 per-signal sources and confidence, and the distinction between declared
 identity, default-cookie hints and component evidence. Roundcube application
 rules are maintained separately from the twenty framework families.
+[applications.md](applications.md) lists fifty further researched applications
+and distinguishes production artifacts from conditional diagnostic coverage.
 
 Unknown challenge products, hidden warnings, static exports and stripped
 headers still limit what the check can see. [method.md](method.md) defines
