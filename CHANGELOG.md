@@ -3,7 +3,12 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.4 (2026-10-22)
+
+Results draw on phpinfo() pages and Apache server signatures, name
+disagreeing PHP versions and follow the unfixed one, and explain a FreeBSD
+session extension older than PHP itself. Attested checks without a version
+also ask for `/phpinfo.php` and `/info.php`.
 
 - Document the isolated OOM-control experiment and detection limits.
 - Narrow screens hide the logo.
