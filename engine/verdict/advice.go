@@ -9,6 +9,9 @@ const Restart = "Restart every PHP worker after upgrading: PHP-FPM pools, Apache
 // Verify points at the local check, the only conclusive one.
 const Verify = "Verify on the server: the version the web server runs, the package changelog, and session.upload_progress.enabled."
 
+// RemovePHPInfo follows any verdict drawn with a public phpinfo() page.
+const RemovePHPInfo = "Remove the public phpinfo() page; it discloses the PHP version and configuration."
+
 // Mitigate lists the official stopgaps.
 const Mitigate = "Until upgraded, set session.upload_progress.enabled=0 and memory_limit=-1 in php.ini and restart the workers. These narrow the exposure but do not fix it."
 

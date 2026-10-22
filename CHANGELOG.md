@@ -10,6 +10,7 @@ number is written.
 - The vulnerable summary names an outdated session extension as a cause.
 - The server check reports the session extension's version.
 - FreeBSD sites get `pkg` and `service` commands for the server check.
+- A phpinfo() page supplies the PHP version when no header carries one.
 
 ## v1.0.3 (2026-10-22)
 

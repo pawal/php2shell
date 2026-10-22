@@ -88,6 +88,9 @@
     if (page.x_powered_by && page.x_powered_by !== start.x_powered_by) {
       return group('span', [el('code', page.x_powered_by), hints ? ' ' + hints : '']);
     }
+    if (page.phpinfo_version && page.phpinfo_version !== start.phpinfo_version) {
+      return group('span', [el('code', 'PHP ' + page.phpinfo_version), hints ? ' ' + hints : '']);
+    }
     if (hints) {
       return hints;
     }
@@ -159,6 +162,7 @@
         ['Not followed', codes(start.redirect_not_followed ? [start.redirect_not_followed] : [])],
         ['Server', codes(start.server ? [start.server] : [])],
         ['X-Powered-By', codes(start.x_powered_by ? [start.x_powered_by] : [])],
+        ['phpinfo()', codes(start.phpinfo_version ? ['PHP ' + start.phpinfo_version] : [])],
         ['Cookies', codes(start.cookies)],
         ['PHP signs', (start.php_hints || []).join(', ')],
         ['PHP links', codes((start.discovered_paths || []).map(short))],

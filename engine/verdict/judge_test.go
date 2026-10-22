@@ -1,6 +1,7 @@
 package verdict
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -52,5 +53,20 @@ func TestUnpatchedUnderFixedHeader(t *testing.T) {
 	got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OracleUnpatched})
 	if !strings.Contains(got.Summary, "session extension is older") {
 		t.Errorf("summary: %s", got.Summary)
+	}
+}
+
+// A phpinfo() version stands in for a missing header and adds removal advice.
+func TestPHPInfoVersion(t *testing.T) {
+	got := Judge(Input{Reachable: true, Server: "nginx", PHPInfo: "8.4.27", Oracle: OracleNotRun})
+	if got.Verdict != LikelyPatched || !strings.Contains(got.Summary, "phpinfo() page shows 8.4.27") || !slices.Contains(got.Recommendations, RemovePHPInfo) {
+		t.Errorf("phpinfo: %+v", got)
+	}
+	header := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.26", PHPInfo: "8.4.27"})
+	if header.Verdict != LikelyVulnerable || !strings.Contains(header.Summary, "header shows") {
+		t.Errorf("header first: %+v", header)
+	}
+	if slices.Contains(recommendations[LikelyPatched], RemovePHPInfo) {
+		t.Error("advice leaked into the shared recommendations")
 	}
 }

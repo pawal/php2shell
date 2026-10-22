@@ -36,7 +36,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		return in, evidence, nil
 	}
 	in.Reachable = true
-	in.PoweredBy, in.Server, in.Hints = passive.PoweredBy, passive.Server, passive.Hints
+	in.PoweredBy, in.Server, in.Hints, in.PHPInfo = passive.PoweredBy, passive.Server, passive.Hints, passive.PHPInfo
 	in.InspectionBlocked = passive.Blocked
 	if passive.Blocked != "" {
 		return in, evidence, nil
@@ -57,6 +57,9 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 			if _, found := verdict.ParseVersion(page.PoweredBy, page.Server); found {
 				in.PoweredBy, in.Server = page.PoweredBy, page.Server
 			}
+		}
+		if in.PHPInfo == "" {
+			in.PHPInfo = page.PHPInfo
 		}
 		if page.Status >= 200 && page.Status < 300 && page.Stopped == "" {
 			oraclePage.Paths = append(oraclePage.Paths, page.FinalURL)

@@ -15,6 +15,11 @@ The check fetches the start page once and reads the PHP version from
 `X-Powered-By`, or from `Server` when the first carries none. The version is
 compared with the fixed release of its branch.
 
+When no header carries a version and the start page or a discovered page
+is phpinfo() output, the version that page shows is used instead, and the
+result advises removing the page. The check never requests a phpinfo() page
+it was not given or linked to.
+
 The header is often absent: `expose_php=Off` removes it, and proxies and CDNs
 strip it. Its number is not always upstream's either. Ubuntu and Red Hat fix
 PHP without changing the version they advertise, and Debian does so on

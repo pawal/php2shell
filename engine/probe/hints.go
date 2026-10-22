@@ -115,6 +115,9 @@ func applicationHints(resp *http.Response, body string) []string {
 	if phpDiagnostic.MatchString(body) {
 		hints = append(hints, "PHP diagnostic")
 	}
+	if phpinfoVersion(body) != "" {
+		hints = append(hints, "phpinfo() page")
+	}
 	if resp.Header.Get("Php-Warning") != "" {
 		hints = append(hints, "PHP warning header")
 	}

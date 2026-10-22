@@ -16,6 +16,7 @@ type Passive struct {
 	Status       int           `json:"status"`
 	Server       string        `json:"server,omitempty"`
 	PoweredBy    string        `json:"x_powered_by,omitempty"`
+	PHPInfo      string        `json:"phpinfo_version,omitempty"`
 	Cookies      []string      `json:"cookies,omitempty"`
 	Redirects    []string      `json:"redirects,omitempty"`
 	// Stopped is a redirect left unfollowed, off the site or past the limit.
@@ -82,6 +83,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 		out.addExternal(s.prober.Fingerprints.Match(resp, text))
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			out.Paths = discoveredPaths(out.FinalURL, text)
+			out.PHPInfo = phpinfoVersion(text)
 		}
 	}
 	return out, nil
