@@ -3,7 +3,12 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.5 (2026-10-22)
+
+More sites that hide their PHP version are recognised as PHP, from
+WordPress, Drupal, phpBB and Shopware headers and cookies, further session
+cookies and a Matomo header, and six new catalogue applications. Every
+signal was checked against the application's own source.
 
 - WordPress redirects, Drupal cache headers, and phpBB and Shopware cookies count as PHP hints.
 - Session cookies identify Flarum, GLPI, Chamilo and LimeSurvey, and a request header Matomo.
