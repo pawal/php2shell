@@ -1,0 +1,16 @@
+# Working documents, not part of this repository
+CLAUDE.md
+plans/
+
+# Build output
+/bin/
+/php2shell
+/dist/
+
+# Test and coverage artifacts
+*.test
+*.out
+cover.html
+
+# Editor and OS
+.DS_Store

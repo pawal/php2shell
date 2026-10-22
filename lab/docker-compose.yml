@@ -1,0 +1,10 @@
+services:
+  vuln:
+    build: { context: ., args: { BASE: "php:8.5.11-apache", HARDEN: "no" } }
+    ports: ["18081:80"]
+  patched:
+    build: { context: ., args: { BASE: "php:8.5.12-apache", HARDEN: "no" } }
+    ports: ["18082:80"]
+  vuln-hardened:
+    build: { context: ., args: { BASE: "php:8.5.11-apache", HARDEN: "yes" } }
+    ports: ["18083:80"]
