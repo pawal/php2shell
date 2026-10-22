@@ -30,6 +30,11 @@ show whether the interim measure is in place, and name the processes to
 restart. Such a page is read up to 256 KiB, since phpinfo() prints the
 session section late.
 
+Every version the check sees is kept, from the headers and phpinfo() output
+of each page it reads. When they disagree, the verdict follows the one least
+likely to carry the fix, and the summary names the others: more than one
+PHP serves the site, or some workers were not restarted.
+
 The header is often absent: `expose_php=Off` removes it, and proxies and CDNs
 strip it. Its number is not always upstream's either. Ubuntu and Red Hat fix
 PHP without changing the version they advertise, and Debian does so on

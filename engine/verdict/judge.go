@@ -38,6 +38,7 @@ type Input struct {
 	Server            string
 	PHPInfo           string // the version a phpinfo() page shows
 	PHPInfoSettings   map[string]string
+	Sightings         []Sighting // versions other pages showed
 	Hints             []string
 	Oracle            Oracle
 }
@@ -57,6 +58,9 @@ func Judge(in Input) Result {
 		return result(Unreachable, "low", "The site did not answer, so nothing was checked.", nil)
 	}
 	out := judge(in)
+	if out.Version != nil {
+		out.Summary += disagreement(*out.Version, sightings(in))
+	}
 	if in.PHPInfo != "" {
 		advice := slices.Clone(out.Recommendations)
 		if i := slices.Index(advice, Restart); i >= 0 {
@@ -69,13 +73,14 @@ func Judge(in Input) Result {
 	return out
 }
 
-// judge draws the verdict from the header version, else the phpinfo() one.
+// judge draws the verdict from the version least likely to carry the fix.
 func judge(in Input) Result {
-	v, versioned := ParseVersion(in.PoweredBy, in.Server)
-	source := "header"
-	if !versioned && in.PHPInfo != "" {
-		v, versioned = ParseVersion("PHP/"+in.PHPInfo, in.Server)
-		source = "phpinfo() page"
+	all := sightings(in)
+	var v Version
+	source, versioned := "", len(all) > 0
+	if versioned {
+		chosen := worst(all)
+		v, source = chosen.Version, chosen.Source
 	}
 	var vp *Version
 	if versioned {

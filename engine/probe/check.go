@@ -3,6 +3,7 @@ package probe
 import (
 	"context"
 	"errors"
+	"net/url"
 
 	"github.com/pawal/php2shell/engine/verdict"
 )
@@ -63,13 +64,15 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		if in.PHPInfo == "" {
 			in.PHPInfo, in.PHPInfoSettings = page.PHPInfo, page.Settings
 		}
+		in.Sightings = append(in.Sightings, pageSightings(page)...)
 		if page.Status >= 200 && page.Status < 300 && page.Stopped == "" {
 			oraclePage.Paths = append(oraclePage.Paths, page.FinalURL)
 		}
 	}
-	if _, versioned := verdict.ParseVersion(in.PoweredBy, in.Server); oracle && !versioned && in.PHPInfo == "" {
+	if _, versioned := verdict.ParseVersion(in.PoweredBy, in.Server); oracle && !versioned && in.PHPInfo == "" && len(in.Sightings) == 0 {
 		evidence.PHPInfo = s.findPHPInfo(ctx, passive)
 		for _, page := range evidence.PHPInfo {
+			in.Sightings = append(in.Sightings, pageSightings(page)...)
 			if page.PHPInfo != "" {
 				in.PHPInfo, in.PHPInfoSettings = page.PHPInfo, page.Settings
 				in.Hints = dedupe(append(in.Hints, "phpinfo() page"))
@@ -91,4 +94,23 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		}
 	}
 	return in, evidence, err
+}
+
+// pageSightings names each version a page showed with the page's path.
+func pageSightings(page Passive) []verdict.Sighting {
+	if page.Error != "" || page.Blocked != "" {
+		return nil
+	}
+	at := page.FinalURL
+	if u, err := url.Parse(page.FinalURL); err == nil && u.Path != "" {
+		at = u.Path
+	}
+	var out []verdict.Sighting
+	if v, ok := verdict.ParseVersion(page.PoweredBy, page.Server); ok {
+		out = append(out, verdict.Sighting{Source: "header on " + at, Version: v})
+	}
+	if v, ok := verdict.ParseVersion("PHP/"+page.PHPInfo, page.Server); ok && page.PHPInfo != "" {
+		out = append(out, verdict.Sighting{Source: "phpinfo() page at " + at, Version: v})
+	}
+	return out
 }

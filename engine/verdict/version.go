@@ -2,6 +2,7 @@
 package verdict
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -125,4 +126,63 @@ func (v Version) Backports() bool {
 		return v.Standing() == BranchEOL
 	}
 	return false
+}
+
+// Sighting is a PHP version one source showed, named with where it was seen.
+type Sighting struct {
+	Source  string
+	Version Version
+}
+
+// sightings lists every version a check saw, the header and phpinfo() page first.
+func sightings(in Input) []Sighting {
+	var all []Sighting
+	if v, ok := ParseVersion(in.PoweredBy, in.Server); ok {
+		all = append(all, Sighting{"header", v})
+	}
+	if in.PHPInfo != "" {
+		if v, ok := ParseVersion("PHP/"+in.PHPInfo, in.Server); ok {
+			all = append(all, Sighting{"phpinfo() page", v})
+		}
+	}
+	return append(all, in.Sightings...)
+}
+
+// worst picks the sighting least likely to carry the fix; earlier ones win ties.
+func worst(all []Sighting) Sighting {
+	chosen := all[0]
+	for _, s := range all[1:] {
+		if s.Version.rank() < chosen.Version.rank() {
+			chosen = s
+		}
+	}
+	return chosen
+}
+
+func (v Version) rank() int {
+	switch v.Standing() {
+	case BranchEOL:
+		return 0
+	case BranchAffected:
+		return 1
+	case BranchUnknown:
+		return 2
+	}
+	return 3
+}
+
+// disagreement names the sources that show a release other than v.
+func disagreement(v Version, all []Sighting) string {
+	var others []string
+	seen := map[string]bool{v.String(): true}
+	for _, s := range all {
+		if !seen[s.Version.String()] {
+			seen[s.Version.String()] = true
+			others = append(others, fmt.Sprintf("the %s shows %s", s.Source, s.Version))
+		}
+	}
+	if len(others) == 0 {
+		return ""
+	}
+	return " Sources disagree: " + strings.Join(others, " and ") + ". More than one PHP serves the site, or some workers were not restarted."
 }

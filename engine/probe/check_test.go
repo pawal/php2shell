@@ -322,3 +322,24 @@ func TestVBulletinWithoutVersion(t *testing.T) {
 		t.Fatalf("application version must not be treated as PHP version: %+v", result)
 	}
 }
+
+// A linked page on an older PHP outweighs a fixed start page.
+func TestCheckDisagreeingPages(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/old.php" {
+			w.Header().Set("X-Powered-By", "PHP/8.5.11")
+			return
+		}
+		w.Header().Set("X-Powered-By", "PHP/8.5.12")
+		fmt.Fprint(w, `<a href="/old.php">old</a>`)
+	}))
+	defer srv.Close()
+	in, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := verdict.Judge(in)
+	if got.Verdict != verdict.LikelyVulnerable || !strings.Contains(got.Summary, "The header on /old.php shows 8.5.11") || !strings.Contains(got.Summary, "the header shows 8.5.12") {
+		t.Errorf("%+v", got)
+	}
+}

@@ -99,3 +99,32 @@ func TestPHPInfoSettings(t *testing.T) {
 		t.Errorf("without phpinfo(): %+v", plain)
 	}
 }
+
+// Disagreeing sources are named, and the version least likely fixed decides.
+func TestDisagreeingVersions(t *testing.T) {
+	old := mustVersion(t, "PHP/8.5.11")
+	got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Sightings: []Sighting{{"header on /old.php", old}}})
+	if got.Verdict != LikelyVulnerable || got.Version.String() != "8.5.11" {
+		t.Fatalf("worst version: %+v", got)
+	}
+	if !strings.HasPrefix(got.Summary, "The header on /old.php shows 8.5.11; the fix is in 8.5.12.") || !strings.Contains(got.Summary, "Sources disagree: the header shows 8.5.12.") {
+		t.Errorf("summary: %s", got.Summary)
+	}
+	same := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.11", Sightings: []Sighting{{"header on /old.php", old}}})
+	if strings.Contains(same.Summary, "disagree") || !strings.HasPrefix(same.Summary, "The header shows") {
+		t.Errorf("agreeing sources: %s", same.Summary)
+	}
+	tie := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.11", PHPInfo: "8.5.10"})
+	if !strings.HasPrefix(tie.Summary, "The header shows 8.5.11") || !strings.Contains(tie.Summary, "the phpinfo() page shows 8.5.10") {
+		t.Errorf("tie: %s", tie.Summary)
+	}
+}
+
+func mustVersion(t *testing.T, header string) Version {
+	t.Helper()
+	v, ok := ParseVersion(header, "")
+	if !ok {
+		t.Fatalf("no version in %q", header)
+	}
+	return v
+}
