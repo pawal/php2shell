@@ -1,0 +1,97 @@
+GO ?= go
+GOVULNCHECK ?= govulncheck
+BIN := bin
+PKGS := ./...
+PUBLIC := server/public
+LAB := lab
+
+.PHONY: all test test-go fmt fmt-check vet csp-check build test-lab vulncheck \
+	package-binaries packages clean
+
+all: test
+
+# The canonical "did I break something" target.
+test: fmt-check vet test-go csp-check
+
+test-go:
+	$(GO) test -race $(PKGS)
+
+fmt:
+	gofmt -w .
+
+fmt-check:
+	@files=$$(gofmt -l .); \
+	if [ -n "$$files" ]; then \
+		echo "gofmt required for:"; echo "$$files"; exit 1; \
+	fi
+
+vet:
+	$(GO) vet $(PKGS)
+
+# The content policy admits no inline style and no inline script, and no text
+# carries a typographic dash or quotation mark. The bytes are spelled in octal
+# so this file passes its own check.
+TYPOGRAPHIC := $(shell printf '\342\200[\223\224\230\231\234\235]')
+csp-check:
+	@fail=0; \
+	if grep -rnE '(style="|<style)' $(PUBLIC); then \
+		echo "inline styles are not allowed"; fail=1; \
+	fi; \
+	if grep -rn '<script' $(PUBLIC) | grep -v 'src='; then \
+		echo "inline scripts are not allowed"; fail=1; \
+	fi; \
+	if LC_ALL=C grep -rnI --exclude-dir=.git --exclude-dir=$(BIN) --exclude-dir=dist \
+		--exclude-dir=plans -e '$(TYPOGRAPHIC)' .; then \
+		echo "typographic dashes and quotation marks are not allowed"; fail=1; \
+	fi; \
+	exit $$fail
+
+build:
+	$(GO) build -o $(BIN)/php2shell ./cmd/php2shell
+
+# The live acceptance tests against the Docker lab. Requires Docker, so it is
+# never part of `test`.
+test-lab:
+	docker compose -f $(LAB)/docker-compose.yml up -d --build
+	PHP2SHELL_LAB=1 $(GO) test -count=1 -run Lab ./engine/probe/; \
+	status=$$?; \
+	docker compose -f $(LAB)/docker-compose.yml down --rmi local; \
+	exit $$status
+
+# Network-dependent and never part of `test`.
+vulncheck:
+	$(GOVULNCHECK) ./...
+
+# Packaging: one .deb and one .rpm per architecture, built with nfpm. The tag
+# is the only place a version number is written.
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null | sed 's/^v//')
+PACKAGE_ARCHES ?= amd64 arm64
+DIST := dist
+PKG_DIR := $(DIST)/packages
+NFPM_CONF := $(DIST)/nfpm
+NFPM := $(GO) run github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+
+package-binaries:
+	@for arch in $(PACKAGE_ARCHES); do \
+		echo "building linux/$$arch"; \
+		mkdir -p $(DIST)/linux_$$arch; \
+		GOOS=linux GOARCH=$$arch CGO_ENABLED=0 $(GO) build -trimpath -ldflags='-s -w' \
+			-o $(DIST)/linux_$$arch/php2shell ./cmd/php2shell || exit 1; \
+	done
+
+packages: package-binaries
+	@test -n "$(VERSION)" || { echo "no version; pass VERSION=x.y.z"; exit 1; }
+	@mkdir -p $(PKG_DIR) $(NFPM_CONF)
+	@for arch in $(PACKAGE_ARCHES); do \
+		sed -e "s|\$${ARCH}|$$arch|g" -e "s|\$${VERSION}|$(VERSION)|g" \
+			packaging/nfpm/php2shell.yaml > $(NFPM_CONF)/php2shell-$$arch.yaml || exit 1; \
+		for packager in deb rpm; do \
+			echo "packaging $$arch $$packager"; \
+			$(NFPM) pkg --config $(NFPM_CONF)/php2shell-$$arch.yaml \
+				--packager $$packager --target $(PKG_DIR)/ || exit 1; \
+		done; \
+	done
+	@ls -1 $(PKG_DIR)
+
+clean:
+	rm -rf $(BIN) $(DIST)
