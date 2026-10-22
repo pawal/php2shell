@@ -15,7 +15,10 @@ import (
 //go:embed frameworks.json
 var frameworkCatalogueJSON []byte
 
-// Fingerprint is a sourced indication of a framework or one of its components.
+//go:embed applications.json
+var applicationCatalogueJSON []byte
+
+// Fingerprint is a sourced indication of an application, framework or component.
 type Fingerprint struct {
 	Technology string `json:"technology"`
 	Signal     string `json:"signal"`
@@ -25,7 +28,7 @@ type Fingerprint struct {
 	URL        string `json:"url"`
 }
 
-type frameworkSpec struct {
+type technologySpec struct {
 	Technology  string              `json:"technology"`
 	Aliases     []string            `json:"aliases"`
 	Diagnostics []string            `json:"diagnostics"`
@@ -58,12 +61,14 @@ type assetFingerprint struct {
 	Source     string   `json:"source"`
 }
 
-var frameworkCatalogue = loadFrameworkCatalogue()
+var frameworkCatalogue = loadCatalogue(frameworkCatalogueJSON)
+var applicationCatalogue = loadCatalogue(applicationCatalogueJSON)
+var fingerprintCatalogue = append(append([]technologySpec(nil), frameworkCatalogue...), applicationCatalogue...)
 
-func loadFrameworkCatalogue() []frameworkSpec {
-	var specs []frameworkSpec
-	if err := json.Unmarshal(frameworkCatalogueJSON, &specs); err != nil {
-		panic(fmt.Sprintf("invalid framework catalogue: %v", err))
+func loadCatalogue(data []byte) []technologySpec {
+	var specs []technologySpec
+	if err := json.Unmarshal(data, &specs); err != nil {
+		panic(fmt.Sprintf("invalid fingerprint catalogue: %v", err))
 	}
 	for i := range specs {
 		for j := range specs[i].Headers {
@@ -80,6 +85,14 @@ func declaredTechnology(value, alias string) bool {
 
 // frameworkFingerprints inspect existing responses without requesting diagnostic URLs.
 func frameworkFingerprints(resp *http.Response, body string) []Fingerprint {
+	return matchFingerprints(resp, body, frameworkCatalogue)
+}
+
+func applicationFingerprints(resp *http.Response, body string) []Fingerprint {
+	return matchFingerprints(resp, body, fingerprintCatalogue)
+}
+
+func matchFingerprints(resp *http.Response, body string, catalogue []technologySpec) []Fingerprint {
 	if inspectionBlock(resp, body) != "" {
 		return nil
 	}
@@ -94,7 +107,7 @@ func frameworkFingerprints(resp *http.Response, body string) []Fingerprint {
 	for _, tag := range pageTags(body) {
 		if tag.name == "script" {
 			if address, err := url.Parse(tag.attrs["src"]); err == nil && (address.Scheme == "" || address.Scheme == "http" || address.Scheme == "https") {
-				assets[path.Base(address.Path)] = true
+				assets[address.Path] = true
 			}
 		}
 		if tag.name == "meta" && strings.EqualFold(tag.attrs["name"], "generator") {
@@ -104,7 +117,7 @@ func frameworkFingerprints(resp *http.Response, body string) []Fingerprint {
 	diagnostic := strings.ReplaceAll(html.UnescapeString(body), `\\`, `\`)
 	lower := strings.ToLower(diagnostic)
 	errorPage := resp.StatusCode >= 500 && resp.StatusCode <= 599 && (strings.Contains(lower, "exception") || strings.Contains(lower, "stack trace") || strings.Contains(lower, "fatal error"))
-	for _, spec := range frameworkCatalogue {
+	for _, spec := range catalogue {
 		add := func(signal, scope, confidence, source string) {
 			matches = append(matches, Fingerprint{Technology: spec.Technology, Signal: signal, Scope: scope, Confidence: confidence, Source: source, URL: address})
 		}
@@ -141,7 +154,15 @@ func frameworkFingerprints(resp *http.Response, body string) []Fingerprint {
 		for _, rule := range spec.Assets {
 			matched := len(rule.Names) > 0
 			for _, name := range rule.Names {
-				matched = matched && assets[name]
+				found := false
+				for asset := range assets {
+					if !strings.Contains(name, "/") {
+						found = found || path.Base(asset) == name
+					} else {
+						found = found || asset == name || strings.HasSuffix(asset, "/"+name)
+					}
+				}
+				matched = matched && found
 			}
 			if matched {
 				add("assets", "component", rule.Confidence, rule.Source)

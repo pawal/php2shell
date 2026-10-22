@@ -5,6 +5,8 @@ number is written.
 
 ## Unreleased
 
+- Recognise Roundcube cookies, generator declarations and paired application script paths.
+
 - The page shows what the check saw as lists and tables, with the raw JSON one click away.
 
 - A sourced catalogue of twenty PHP framework families adds scoped evidence and per-signal confidence.

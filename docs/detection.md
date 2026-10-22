@@ -47,7 +47,8 @@ malformed HTML, or a body cut off at the size cap, can reduce coverage.
 A sourced framework catalogue supplements these generic signals.
 [fingerprints.md](fingerprints.md) lists all twenty framework families, the
 per-signal sources and confidence, and the distinction between declared
-identity, default-cookie hints and component evidence.
+identity, default-cookie hints and component evidence. Roundcube application
+rules are maintained separately from the twenty framework families.
 
 Unknown challenge products, hidden warnings, static exports and stripped
 headers still limit what the check can see. [method.md](method.md) defines

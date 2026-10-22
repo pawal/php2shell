@@ -1,0 +1,42 @@
+[
+  {
+    "technology": "Roundcube",
+    "aliases": [
+      "Roundcube",
+      "Roundcube Webmail"
+    ],
+    "diagnostics": [],
+    "confidence": "medium",
+    "source": "https://raw.githubusercontent.com/roundcube/roundcubemail/master/program/include/rcmail_output_html.php",
+    "cookies": [
+      {
+        "name": "roundcube_sessid",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/roundcube/roundcubemail/master/program/include/rcmail.php"
+      },
+      {
+        "name": "roundcube_sessauth",
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/roundcube/roundcubemail/master/program/include/rcmail.php"
+      }
+    ],
+    "assets": [
+      {
+        "names": [
+          "program/js/app.js",
+          "program/js/common.js"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/roundcube/roundcubemail/master/program/include/rcmail_output_html.php"
+      },
+      {
+        "names": [
+          "program/js/app.min.js",
+          "program/js/common.min.js"
+        ],
+        "confidence": "low",
+        "source": "https://raw.githubusercontent.com/roundcube/roundcubemail/master/program/include/rcmail_output_html.php"
+      }
+    ]
+  }
+]

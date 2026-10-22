@@ -119,7 +119,7 @@ func applicationHints(resp *http.Response, body string) []string {
 		hints = append(hints, "PHP warning header")
 	}
 
-	for _, fingerprint := range frameworkFingerprints(resp, body) {
+	for _, fingerprint := range applicationFingerprints(resp, body) {
 		hints = append(hints, fingerprint.hint())
 	}
 	return dedupe(hints)

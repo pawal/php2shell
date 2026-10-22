@@ -35,7 +35,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		if req.Response != nil {
 			out.Hints = append(out.Hints, applicationHints(req.Response, "")...)
-			out.Fingerprints = mergeFingerprints(out.Fingerprints, frameworkFingerprints(req.Response, ""))
+			out.Fingerprints = mergeFingerprints(out.Fingerprints, applicationFingerprints(req.Response, ""))
 			for _, cookie := range req.Response.Cookies() {
 				out.Cookies = append(out.Cookies, cookie.Name)
 			}
@@ -77,7 +77,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 	out.Blocked = inspectionBlock(resp, text)
 	if out.Blocked == "" {
 		out.Hints = dedupe(append(out.Hints, applicationHints(resp, text)...))
-		out.Fingerprints = mergeFingerprints(out.Fingerprints, frameworkFingerprints(resp, text))
+		out.Fingerprints = mergeFingerprints(out.Fingerprints, applicationFingerprints(resp, text))
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			out.Paths = discoveredPaths(out.FinalURL, text)
 		}

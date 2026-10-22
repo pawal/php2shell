@@ -40,6 +40,29 @@ identifies a component family, not the entire application.
 | Flight | `flight\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/flightphp/core/master/flight/core/Dispatcher.php) |
 | Neos Flow | `Neos\Flow\` | Explicit identity or diagnostic only | [Official source](https://raw.githubusercontent.com/neos/flow-development-collection/9.0/Neos.Flow/Classes/Exception.php) |
 
+## Roundcube application detection
+
+Roundcube is recorded separately in
+[applications.json](../engine/probe/applications.json), not counted among
+the twenty framework families. The catalogue accepts explicit Roundcube
+generator or identity declarations. It also recognises the exact
+`roundcube_sessid` and `roundcube_sessauth` cookie names documented in the
+[application source](https://raw.githubusercontent.com/roundcube/roundcubemail/master/program/include/rcmail.php).
+
+Paired `program/js/app.js` and `program/js/common.js` script paths, including
+paired minified variants, are a separate low-confidence indicator. Their
+[renderer source](https://raw.githubusercontent.com/roundcube/roundcubemail/master/program/include/rcmail_output_html.php)
+also defines the default generator. Deployments in a subdirectory are
+supported. Generic `app.js`/`common.js` files elsewhere, a title alone or a
+Roundcube mention in prose MUST NOT identify the application.
+
+Roundcube versions, including the JavaScript `rcversion` value, MUST NOT be
+interpreted as PHP versions. Fixtures cover cookie, generator and asset
+signals, lookalikes, subdirectories, privacy and verdict integration.
+GET-only verification of `webmail.evilbit.de` on 2026-10-22 identifies the
+Roundcube cookie and paired minified assets. The PHP version remains
+unknown, so the result is `inconclusive`.
+
 ## Signal sources and limits
 
 The cookie, header and asset rules cite these sources, which the catalogue
