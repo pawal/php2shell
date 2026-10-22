@@ -62,7 +62,7 @@ func Judge(in Input) Result {
 	case OracleUnpatched:
 		summary := "PHP answered the session upload progress request the way only unpatched releases do."
 		if versioned && v.Standing() == BranchFixed {
-			summary += fmt.Sprintf(" The header claims %s; the workers serving the site have not been restarted, or another PHP answers.", v)
+			summary += fmt.Sprintf(" The header claims %s; the workers serving the site have not been restarted, the session extension is older than PHP itself, or another PHP answers.", v)
 		}
 		return result(Vulnerable, "high", summary, vp)
 	case OraclePatched:

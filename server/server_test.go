@@ -342,3 +342,19 @@ func TestInspectionBlockedReport(t *testing.T) {
 		t.Fatalf("%d %+v", rec.Code, report)
 	}
 }
+
+func TestLocalCheckFollowsServerHeader(t *testing.T) {
+	freebsd := strings.Join(LocalCheck(verdict.Input{Server: "Apache/2.4.69 (FreeBSD) OpenSSL/3.5.6 PHP/8.5.12"}), "\n")
+	if !strings.Contains(freebsd, "pkg info") || strings.Contains(freebsd, "dpkg") {
+		t.Errorf("freebsd: %s", freebsd)
+	}
+	other := strings.Join(LocalCheck(verdict.Input{Server: "Apache/2.4.66 (Debian)"}), "\n")
+	if !strings.Contains(other, "dpkg") || strings.Contains(other, "pkg info") {
+		t.Errorf("debian: %s", other)
+	}
+	for name, text := range map[string]string{"freebsd": freebsd, "debian": other} {
+		if !strings.Contains(text, `phpversion("session")`) {
+			t.Errorf("%s lacks the session extension version: %s", name, text)
+		}
+	}
+}

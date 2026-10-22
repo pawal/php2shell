@@ -7,6 +7,9 @@ number is written.
 
 - Document the isolated OOM-control experiment and detection limits.
 - Narrow screens hide the logo.
+- The vulnerable summary names an outdated session extension as a cause.
+- The server check reports the session extension's version.
+- FreeBSD sites get `pkg` and `service` commands for the server check.
 
 ## v1.0.3 (2026-10-22)
 

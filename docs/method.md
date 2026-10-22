@@ -88,7 +88,12 @@ file handler, or when the path is not served by PHP.
 
 The session request outranks the header: a patched answer under an old
 version number is a backport, and an unpatched answer under a fixed number
-means the workers were not restarted or another PHP serves the page.
+means the workers were not restarted, the session extension is older than
+PHP itself, or another PHP serves the page. FreeBSD packages the session
+extension separately, as `php85-session`, so upgrading `mod_php85` alone
+leaves the flaw in place while the header shows the fixed version.
 
 Every result carries the evidence it was drawn from and the commands that
-settle the question on the server.
+settle the question on the server. They include the session extension's own
+version, and when the `Server` header names FreeBSD they use `pkg` and
+`service` in place of the Debian and Red Hat tools.

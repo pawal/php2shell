@@ -1,6 +1,9 @@
 package verdict
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestJudge(t *testing.T) {
 	cases := []struct {
@@ -41,5 +44,13 @@ func TestRecommendationsCoverEveryVerdict(t *testing.T) {
 		if len(recommendations[code]) == 0 {
 			t.Errorf("%s has no recommendations", code)
 		}
+	}
+}
+
+// An unpatched answer under a fixed header names the stale session extension.
+func TestUnpatchedUnderFixedHeader(t *testing.T) {
+	got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OracleUnpatched})
+	if !strings.Contains(got.Summary, "session extension is older") {
+		t.Errorf("summary: %s", got.Summary)
 	}
 }

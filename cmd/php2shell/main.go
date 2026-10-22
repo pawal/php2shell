@@ -141,7 +141,7 @@ func check(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	if *asJSON {
 		report := server.Report{
 			Target: target.URL(), Result: result, OracleRun: input.Oracle != verdict.OracleNotRun,
-			Evidence: evidence, LocalCheck: server.LocalCheck, CheckedAt: time.Now().UTC(),
+			Evidence: evidence, LocalCheck: server.LocalCheck(input), CheckedAt: time.Now().UTC(),
 		}
 		encoder := json.NewEncoder(stdout)
 		encoder.SetIndent("", "  ")

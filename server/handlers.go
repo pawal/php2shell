@@ -85,7 +85,7 @@ func (s *Server) run(ctx context.Context, target probe.Target, oracle bool) (Rep
 		Result:     result,
 		OracleRun:  oracle && input.Oracle != verdict.OracleNotRun,
 		Evidence:   evidence,
-		LocalCheck: LocalCheck,
+		LocalCheck: LocalCheck(input),
 		CheckedAt:  s.now().UTC(),
 	}, nil
 }
