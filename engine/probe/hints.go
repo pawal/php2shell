@@ -1,6 +1,7 @@
 package probe
 
 import (
+	"html"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -118,6 +119,9 @@ func applicationHints(resp *http.Response, body string) []string {
 	if phpinfoVersion(body) != "" {
 		hints = append(hints, "phpinfo() page")
 	}
+	if signature(body) != "" {
+		hints = append(hints, "PHP server signature")
+	}
 	if resp.Header.Get("Php-Warning") != "" {
 		hints = append(hints, "PHP warning header")
 	}
@@ -138,6 +142,16 @@ func dedupe(items []string) []string {
 		}
 	}
 	return out
+}
+
+var serverSignature = regexp.MustCompile(`(?i)<address>\s*([^<]*\bPHP/\d+\.\d+\.\d+[^<]*?)\s*</address>`)
+
+// signature reads a server signature footer that names PHP, as Apache error pages print it.
+func signature(body string) string {
+	if m := serverSignature.FindStringSubmatch(body); m != nil {
+		return strings.Join(strings.Fields(html.UnescapeString(m[1])), " ")
+	}
+	return ""
 }
 
 var phpDiagnostic = regexp.MustCompile(`(?is)(?:PHP (?:Warning|Fatal error|Parse error|Notice):|<(?:b|strong)>(?:Warning|Fatal error|Parse error|Notice)</(?:b|strong)>:)[^\r\n]{0,1000}\.php(?:</b>)? (?:on line|:)[^\r\n]{0,32}[0-9]`)

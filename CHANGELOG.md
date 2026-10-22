@@ -15,6 +15,7 @@ number is written.
 - A phpinfo() page's server API and session settings shape the summary and advice.
 - Session request evidence keeps the warning lines it counted.
 - Disagreeing PHP versions are named in the summary, and the unfixed one decides.
+- An Apache server signature footer that names PHP supplies a version.
 
 ## v1.0.3 (2026-10-22)
 

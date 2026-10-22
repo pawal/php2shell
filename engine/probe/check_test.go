@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -341,5 +342,46 @@ func TestCheckDisagreeingPages(t *testing.T) {
 	got := verdict.Judge(in)
 	if got.Verdict != verdict.LikelyVulnerable || !strings.Contains(got.Summary, "The header on /old.php shows 8.5.11") || !strings.Contains(got.Summary, "the header shows 8.5.12") {
 		t.Errorf("%+v", got)
+	}
+}
+
+const apache404 = `<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>404 Not Found</title></head><body>
+<h1>Not Found</h1><p>The requested URL was not found on this server.</p>
+<hr>
+<address>Apache/2.4.62 (Debian) PHP/8.4.26 Server at example.com Port 443</address>
+</body></html>`
+
+func TestSignature(t *testing.T) {
+	if got := signature(apache404); got != "Apache/2.4.62 (Debian) PHP/8.4.26 Server at example.com Port 443" {
+		t.Errorf("got %q", got)
+	}
+	if got := signature(`<p>Apache/2.4.62 PHP/8.4.26 Server at example.com</p>`); got != "" {
+		t.Errorf("outside an address element: %q", got)
+	}
+}
+
+// A CDN rewrites Server, but the origin's 404 footer still names PHP.
+func TestCheckSignatureBehindACDN(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Server", "cloudflare")
+		if r.Method == http.MethodGet && r.URL.Path != "/" {
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, apache404)
+		}
+	}))
+	defer srv.Close()
+	in, evidence, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := verdict.Judge(in)
+	if got.Verdict != verdict.LikelyVulnerable || !strings.HasPrefix(got.Summary, "The server signature on /phpinfo.php shows 8.4.26; the fix is in 8.4.27.") || strings.Contains(got.Summary, "disagree") {
+		t.Errorf("%+v", got)
+	}
+	if evidence.PHPInfo[0].Signature == "" || !slices.Contains(in.Hints, "PHP server signature") {
+		t.Errorf("evidence %+v hints %v", evidence.PHPInfo, in.Hints)
+	}
+	if passive, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, false); err != nil || verdict.Judge(passive).Verdict != verdict.NoPHPSignal {
+		t.Errorf("passive check went past the start page: %+v %v", passive, err)
 	}
 }

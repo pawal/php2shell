@@ -30,8 +30,15 @@ show whether the interim measure is in place, and name the processes to
 restart. Such a page is read up to 256 KiB, since phpinfo() prints the
 session section late.
 
-Every version the check sees is kept, from the headers and phpinfo() output
-of each page it reads. When they disagree, the verdict follows the one least
+Apache prints a server signature on error pages and directory listings,
+such as `<address>Apache/2.4.62 (Debian) PHP/8.4.27 Server at example.com
+Port 443</address>`. The check reads the PHP version from it on every page
+it inspects, including a missing `/phpinfo.php`. The signature names PHP
+only when the origin's `Server` header does, so it adds a version where a
+proxy or CDN rewrote that header but passed the body through.
+
+Every version the check sees is kept, from the headers, phpinfo() output
+and server signatures of each page it reads. When they disagree, the verdict follows the one least
 likely to carry the fix, and the summary names the others: more than one
 PHP serves the site, or some workers were not restarted.
 

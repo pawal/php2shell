@@ -38,6 +38,8 @@ func TestApplicationHints(t *testing.T) {
 		{"vbulletin cookie", "/", map[string][]string{"Set-Cookie": {"bb_sessionhash=abc; Path=/; HttpOnly"}}, "", []string{"vBulletin cookie"}},
 		{"mention is not detection", "/", nil, `<p>We used to run vBulletin.</p>`, nil},
 		{"phpinfo page", "/", nil, `<title>PHP 8.4.27 - phpinfo()</title><h1 class="p">PHP Version 8.4.27</h1>`, []string{"phpinfo() page"}},
+		{"server signature", "/", nil, `<hr><address>Apache/2.4.62 (Debian) PHP/8.4.26 Server at example.com Port 443</address>`, []string{"PHP server signature"}},
+		{"signature without php", "/", nil, `<hr><address>Apache/2.4.62 (Debian) Server at example.com Port 443</address>`, nil},
 		{"generator attributes reordered", "/", nil, `<meta data-x="a > b" CONTENT='WordPress 6.8' NAME=generator>`, []string{"generator WordPress"}},
 		{"multiple generators", "/", nil, `<meta name=generator content=Hugo><meta content="Drupal 11" name=generator>`, []string{"generator Drupal"}},
 		{"generator in script ignored", "/", nil, `<script>var s = '<meta name="generator" content="WordPress">';</script>`, nil},

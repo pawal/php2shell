@@ -40,6 +40,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 	in.Reachable = true
 	in.PoweredBy, in.Server, in.Hints = passive.PoweredBy, passive.Server, passive.Hints
 	in.PHPInfo, in.PHPInfoSettings = passive.PHPInfo, passive.Settings
+	in.Sightings = pageSightings(passive)
 	in.InspectionBlocked = passive.Blocked
 	if passive.Blocked != "" {
 		return in, evidence, nil
@@ -73,6 +74,9 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		evidence.PHPInfo = s.findPHPInfo(ctx, passive)
 		for _, page := range evidence.PHPInfo {
 			in.Sightings = append(in.Sightings, pageSightings(page)...)
+			if page.Signature != "" && page.Blocked == "" {
+				in.Hints = dedupe(append(in.Hints, "PHP server signature"))
+			}
 			if page.PHPInfo != "" {
 				in.PHPInfo, in.PHPInfoSettings = page.PHPInfo, page.Settings
 				in.Hints = dedupe(append(in.Hints, "phpinfo() page"))
@@ -111,6 +115,9 @@ func pageSightings(page Passive) []verdict.Sighting {
 	}
 	if v, ok := verdict.ParseVersion("PHP/"+page.PHPInfo, page.Server); ok && page.PHPInfo != "" {
 		out = append(out, verdict.Sighting{Source: "phpinfo() page at " + at, Version: v})
+	}
+	if v, ok := verdict.ParseVersion(page.Signature, page.Signature); ok {
+		out = append(out, verdict.Sighting{Source: "server signature on " + at, Version: v})
 	}
 	return out
 }
