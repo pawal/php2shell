@@ -204,6 +204,9 @@ one possible cause. No result advises that no action is needed merely
 because a session response changed.
 
 Every result carries the evidence it was drawn from and the commands that
-settle the question on the server. They include the session extension's own
-version, and when the `Server` header names FreeBSD they use `pkg` and
-`service` in place of the Debian and Red Hat tools.
+settle the question on the server. The commands include the session
+extension's own version, and when the `Server` header names FreeBSD they use
+`pkg` and `service` in place of the Debian and Red Hat tools. Evidence keeps
+at most 256 bytes of a header value or server signature, 1 KiB of a URL, 32
+cookie names and 16 fingerprints per page; a longer value is cut and marked
+with `...`, so a site cannot inflate a report.

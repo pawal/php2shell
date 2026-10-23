@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- Evidence keeps bounded amounts of a site's own text, so a hostile site cannot inflate a report.
+
 ## v1.0.12 (2026-10-23)
 
 A security release: the binaries are built with Go 1.27.3, which fixes 13

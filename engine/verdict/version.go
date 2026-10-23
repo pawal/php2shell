@@ -27,7 +27,7 @@ type Version struct {
 	Distro string `json:"distro,omitempty"`
 }
 
-var phpVersion = regexp.MustCompile(`(?i)\bPHP/(\d+)\.(\d+)\.(\d+)([-+~][^\s,;()]*)?`)
+var phpVersion = regexp.MustCompile(`(?i)\bPHP/(\d+)\.(\d+)\.(\d+)([-+~][^\s,;()]{0,63})?`)
 
 // Distribution names as they appear in a Server header.
 var serverDistros = []struct{ token, distro string }{

@@ -58,6 +58,9 @@ func discoveredPaths(finalURL, body string) []string {
 		}
 		candidate.Fragment, candidate.RawFragment = "", ""
 		address := candidate.String()
+		if len(address) > 2048 {
+			continue
+		}
 		if !seen[address] {
 			seen[address] = true
 			paths = append(paths, address)

@@ -19,8 +19,16 @@ type Evidence struct {
 	HTTPSError string `json:"https_error,omitempty"`
 }
 
-// Check admits the target under the address policy, then runs the checks.
+// Check admits the target under the address policy, then runs the checks; the evidence is bounded.
 func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict.Input, any, error) {
+	in, evidence, err := p.check(ctx, target, oracle)
+	for i, path := range in.OraclePaths {
+		in.OraclePaths[i] = clip(path, maxURL)
+	}
+	return in, evidence.bounded(), err
+}
+
+func (p *Prober) check(ctx context.Context, target Target, oracle bool) (verdict.Input, Evidence, error) {
 	s := p.newSession()
 	defer s.close()
 	in := verdict.Input{Oracle: verdict.OracleNotRun}
@@ -137,6 +145,7 @@ func pageSightings(page Passive) []verdict.Sighting {
 	if u, err := url.Parse(page.FinalURL); err == nil && u.Path != "" {
 		at = u.Path
 	}
+	at = clip(at, maxValue)
 	var out []verdict.Sighting
 	if v, ok := verdict.ParseVersion(page.PoweredBy, page.Server); ok {
 		out = append(out, verdict.Sighting{Source: "header on " + at, Version: v})

@@ -15,7 +15,7 @@ const maxPHPInfoBody = 256 << 10
 
 var (
 	phpinfoTitle   = regexp.MustCompile(`<title>[^<]*phpinfo\(\)\s*</title>`)
-	phpinfoHeading = regexp.MustCompile(`<h1 class="p">PHP Version (\d+\.\d+\.\d+[^\s<]*)\s*</h1>`)
+	phpinfoHeading = regexp.MustCompile(`<h1 class="p">PHP Version (\d+\.\d+\.\d+[^\s<]{0,63})\s*</h1>`)
 )
 
 // phpinfoRows match the local value of each kept setting.
