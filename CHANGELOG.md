@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- End-of-life results name the PHP security team's source backports for 7.4, 8.0 and 8.1.
+
 ## v1.0.9 (2026-10-23)
 
 Session findings are reported as likelihoods for the paths they were seen

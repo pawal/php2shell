@@ -186,3 +186,8 @@ func disagreement(v Version, all []Sighting) string {
 	}
 	return " Sources disagree: " + strings.Join(others, " and ") + ". More than one PHP serves the site, or some workers were not restarted."
 }
+
+// SourceBackport reports a branch for which the PHP security team published a minimal source backport.
+func (v Version) SourceBackport() bool {
+	return v.Major == 7 && v.Minor == 4 || v.Major == 8 && v.Minor <= 1
+}

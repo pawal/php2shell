@@ -20,7 +20,7 @@ var recommendations = map[string][]string{
 	Patched:            {Verify, "Confirm vendor fixes for both CVEs on every PHP runtime serving the site."},
 	LikelyVulnerable:   {Upgrade, Restart, Mitigate, Verify},
 	PossiblyBackported: {"Check the installed package against your distribution's advisory for CVE-2026-109618 and CVE-2026-109619.", Restart, Verify},
-	EOLBranch:          {"Upgrade to a supported branch, or confirm that your vendor ships a fixed package for this one.", Restart, Mitigate},
+	EOLBranch:          {"Upgrade to a supported branch. Until then, apply your vendor's fixed package or, for 7.4, 8.0 and 8.1, build PHP with the PHP security team's source backport.", Restart, Mitigate},
 	LikelyPatched:      {Restart, Verify},
 	Inconclusive:       {Verify, Upgrade, Restart},
 	NoPHPSignal:        {"If the site runs PHP, verify on the server.", Verify},

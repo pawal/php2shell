@@ -167,9 +167,14 @@ func judgeVersion(v Version, source string, in Input) Result {
 		}
 		return result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s; the fix is in %s.", source, v, v.FixedIn())+note+measureNote(in), &v)
 	case BranchEOL:
-		summary := fmt.Sprintf("The %s shows %s, a branch the PHP project no longer fixes.", source, v)
-		if v.Distro != "" {
+		summary := fmt.Sprintf("The %s shows %s, from a branch that no longer receives PHP releases.", source, v)
+		switch {
+		case v.SourceBackport():
+			summary += " The PHP security team published a minimal source backport for it, and vendors may ship fixed packages, so the version number cannot show whether the fix is applied."
+		case v.Distro != "":
 			summary += " Only a vendor backport from " + v.Distro + " can carry the fix."
+		default:
+			summary += " Only a vendor backport can carry the fix."
 		}
 		return result(EOLBranch, "medium", summary+note+measureNote(in), &v)
 	}

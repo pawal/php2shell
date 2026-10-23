@@ -215,3 +215,18 @@ func TestOlderSessionBehaviourKeepsVersionFraming(t *testing.T) {
 		t.Errorf("no version: %+v", none)
 	}
 }
+
+// End-of-life summaries name the source backports where the PHP security team published them.
+func TestEOLWording(t *testing.T) {
+	for _, c := range []struct{ header, want string }{
+		{"PHP/8.1.2", "published a minimal source backport"},
+		{"PHP/7.4.33-1+deb11u5", "published a minimal source backport"},
+		{"PHP/7.3.33", "Only a vendor backport can carry the fix."},
+		{"PHP/7.2.24-0ubuntu0.18.04.17", "Only a vendor backport from ubuntu can carry the fix."},
+	} {
+		got := Judge(Input{Reachable: true, PoweredBy: c.header})
+		if got.Verdict != EOLBranch || !strings.Contains(got.Summary, c.want) || strings.Contains(got.Summary, "no longer fixes") {
+			t.Errorf("%s: %s", c.header, got.Summary)
+		}
+	}
+}
