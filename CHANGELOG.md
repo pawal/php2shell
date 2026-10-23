@@ -3,7 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.8 (2026-10-23)
+
+When nothing shows PHP, results name the platform the answers point to
+instead, such as Java or Express, from each platform's documented defaults.
 
 - When nothing shows PHP, the result names another platform the answers point to, such as Java.
 
