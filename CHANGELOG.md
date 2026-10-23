@@ -3,7 +3,12 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.12 (2026-10-23)
+
+A security release: the binaries are built with Go 1.27.3, which fixes 13
+standard-library vulnerabilities. Earlier releases were built with Go
+1.27.0, and some of those flaws are in the HTTP client the checks use
+against untrusted sites, so upgrading is recommended.
 
 - Builds require Go 1.27.3, which fixes 13 standard-library vulnerabilities, some in the HTTP client the checks use.
 
