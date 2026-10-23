@@ -182,6 +182,10 @@ inconclusive. With a fixed reported version the overall result is at most
 likely patched. Older session behaviour takes priority in aggregation and
 produces a likely-vulnerable result naming the affected path, but
 still does not prove exploitability or the state of the separate OOM fix.
+On an end-of-life version the result stays `eol_branch` with its advice. On
+a distribution version that may carry a backport, the older behaviour argues
+against the backport, so the result is likely vulnerable rather than possibly
+backported.
 
 A fixed version accompanied by older session behaviour is conflicting
 evidence. The result advises verifying the running workers, vendor patches

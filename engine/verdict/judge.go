@@ -113,6 +113,13 @@ func judge(in Input) Result {
 	}
 	switch in.Oracle {
 	case OracleUnpatched:
+		// An affected version keeps its framing; older behaviour argues against a backport.
+		switch {
+		case versioned && v.Standing() == BranchEOL:
+			return judgeVersion(v, source, in)
+		case versioned && v.Standing() == BranchAffected:
+			return result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s; the fix is in %s.", source, v, v.FixedIn()), vp)
+		}
 		summary := "The session response suggests missing session-handling changes."
 		if versioned && v.Standing() == BranchFixed {
 			summary += fmt.Sprintf(" The %s shows %s; verify the running workers, the session extension and vendor patches because these observations conflict.", source, v)

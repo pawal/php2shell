@@ -199,3 +199,19 @@ func TestSessionSignalCannotEstablishBothCVEFixes(t *testing.T) {
 		}
 	}
 }
+
+// Older session behaviour keeps the framing and advice of the version it ran under.
+func TestOlderSessionBehaviourKeepsVersionFraming(t *testing.T) {
+	eol := Judge(Input{Reachable: true, PoweredBy: "PHP/8.1.2", Oracle: OracleUnpatched})
+	if eol.Verdict != EOLBranch || !strings.Contains(eol.Summary, "8.1.2") || !strings.Contains(eol.Summary, "older session behaviour") || !strings.HasPrefix(eol.Recommendations[0], "Upgrade to a supported branch") {
+		t.Errorf("eol: %+v", eol)
+	}
+	ubuntu := Judge(Input{Reachable: true, PoweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", Oracle: OracleUnpatched})
+	if ubuntu.Verdict != LikelyVulnerable || !strings.Contains(ubuntu.Summary, "the fix is in 8.3.36") {
+		t.Errorf("backport distribution: %+v", ubuntu)
+	}
+	none := Judge(Input{Reachable: true, Oracle: OracleUnpatched})
+	if none.Verdict != LikelyVulnerable || !strings.HasPrefix(none.Summary, "The session response suggests missing session-handling changes.") {
+		t.Errorf("no version: %+v", none)
+	}
+}
