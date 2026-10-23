@@ -51,7 +51,8 @@ func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	report, cached, err := s.cooldown.do(target.Host, req.Attested, func() (Report, error) {
+	// Results are shared per origin; a path does not buy another check of the site.
+	report, cached, err := s.cooldown.do(target.Origin(), req.Attested, func() (Report, error) {
 		return s.run(r.Context(), target, req.Attested)
 	})
 	if err != nil {

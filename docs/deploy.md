@@ -80,8 +80,10 @@ Notes on the keys:
   on every POST to `/api/v1/check`. A refusal is 429 with `Retry-After`. The
   counters live in the process and are forgotten when they leave the window.
 - `target_cooldown` is how long a result answers repeated checks of the same
-  host. Two checks of one host at once run once. A result made without the
-  session request does not answer a request for it. Zero disables the cache.
+  origin, the scheme, host and port; another path on it receives the same
+  result. Two checks of one origin at once run once. A result made without
+  the session request does not answer a request for it. Zero disables the
+  cache.
 - `max_concurrent_checks` bounds checks in flight; past it a check is refused
   with 503 and `Retry-After`. `check_timeout` bounds one check.
 - `log_file` receives one line per check; see below. Empty logs nothing.

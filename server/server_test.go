@@ -268,6 +268,18 @@ func TestCooldown(t *testing.T) {
 	}
 }
 
+// Scheme and port separate cached results; the path does not.
+func TestCooldownPerOrigin(t *testing.T) {
+	checker := &fakeChecker{}
+	h := newTestServer(t, nil, checker).Handler()
+	for _, url := range []string{"https://example.com/", "http://example.com/", "example.com:8443", "https://example.com/other", "http://example.com/x"} {
+		post(t, h, `{"url":"`+url+`"}`)
+	}
+	if checker.calls.Load() != 3 {
+		t.Errorf("%d checks, want one per origin", checker.calls.Load())
+	}
+}
+
 func TestBusy(t *testing.T) {
 	release := make(chan struct{})
 	started := make(chan struct{}, 1)

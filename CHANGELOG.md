@@ -6,6 +6,7 @@ number is written.
 ## Unreleased
 
 - An assumed HTTPS that does not answer is retried over plain HTTP too, while time remains.
+- Cached results are kept per scheme, host and port instead of per host.
 
 ## v1.0.10 (2026-10-23)
 
