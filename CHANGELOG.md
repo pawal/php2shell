@@ -8,6 +8,7 @@ number is written.
 - Evidence keeps bounded amounts of a site's own text, so a hostile site cannot inflate a report.
 - The result cache holds at most 64 MiB besides its 10,000 entries.
 - The systemd unit caps the service's memory at 512 MB.
+- The rate limit counts an IPv6 client by its /64 and tracks at most 100,000 clients.
 
 ## v1.0.12 (2026-10-23)
 

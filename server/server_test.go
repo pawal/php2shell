@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -483,5 +484,51 @@ func TestRefreshJoinsRunningCheck(t *testing.T) {
 	wg.Wait()
 	if checker.calls.Load() != 1 {
 		t.Errorf("%d checks, want the refresh to join the running one", checker.calls.Load())
+	}
+}
+
+// IPv6 clients are counted per /64, so rotating addresses in one block buys nothing.
+func TestRateLimitPerIPv6Block(t *testing.T) {
+	for _, c := range []struct{ client, want string }{
+		{"2001:db8:1:2:aaaa::1", "2001:db8:1:2::/64"},
+		{"2001:db8:1:2:ffff::9", "2001:db8:1:2::/64"},
+		{"203.0.113.7", "203.0.113.7"},
+	} {
+		if got := limitKey(c.client); got != c.want {
+			t.Errorf("%s: got %s, want %s", c.client, got, c.want)
+		}
+	}
+	s := newTestServer(t, func(c *Config) {
+		c.TrustedProxyCIDRs = []string{"192.0.2.0/24"}
+		c.RateLimit.Max = 2
+		c.TargetCooldown = Duration{}
+	}, nil)
+	h := s.Handler()
+	var last *httptest.ResponseRecorder
+	for i := range 3 {
+		last = post(t, h, `{"url":"example.com"}`, "X-Forwarded-For", fmt.Sprintf("2001:db8:1:2::%x", i+1))
+	}
+	if last.Code != http.StatusTooManyRequests {
+		t.Errorf("third address in one /64 got %d", last.Code)
+	}
+	if other := post(t, h, `{"url":"example.com"}`, "X-Forwarded-For", "2001:db8:1:3::1"); other.Code != http.StatusOK {
+		t.Errorf("another /64 got %d", other.Code)
+	}
+}
+
+// A full limiter refuses new clients instead of growing, and keeps serving known ones.
+func TestRateLimiterCapacity(t *testing.T) {
+	l := NewRateLimiter(RateLimitConfig{Enabled: true, Max: 5, Window: Duration{time.Hour}})
+	l.capacity = 2
+	for _, client := range []string{"a", "b"} {
+		if ok, _ := l.Allow(client); !ok {
+			t.Fatalf("%s refused", client)
+		}
+	}
+	if ok, retry := l.Allow("c"); ok || retry < time.Second {
+		t.Errorf("a new client was admitted to a full table (retry %v)", retry)
+	}
+	if ok, _ := l.Allow("a"); !ok || l.Clients() != 2 {
+		t.Errorf("a known client was refused, or the table grew to %d", l.Clients())
 	}
 }

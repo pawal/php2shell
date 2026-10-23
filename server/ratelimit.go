@@ -5,10 +5,14 @@ import (
 	"time"
 )
 
+// maxClients bounds the clients a limiter tracks; past it new clients wait for a sweep.
+const maxClients = 100000
+
 // RateLimiter counts events per client over a sliding window.
 type RateLimiter struct {
-	max    int
-	window time.Duration
+	max      int
+	window   time.Duration
+	capacity int // maxClients, smaller in tests
 	// Now is the clock; nil is time.Now in UTC.
 	Now func() time.Time
 
@@ -19,7 +23,7 @@ type RateLimiter struct {
 
 // NewRateLimiter returns a limiter; a disabled configuration allows everything.
 func NewRateLimiter(cfg RateLimitConfig) *RateLimiter {
-	limiter := &RateLimiter{events: map[string][]time.Time{}}
+	limiter := &RateLimiter{capacity: maxClients, events: map[string][]time.Time{}}
 	if cfg.Enabled {
 		limiter.max = cfg.Max
 		limiter.window = cfg.Window.Duration
@@ -54,7 +58,16 @@ func (l *RateLimiter) Allow(client string) (bool, time.Duration) {
 	defer l.mu.Unlock()
 	l.sweep(cutoff, window)
 
-	kept := prune(l.events[client], cutoff)
+	events, known := l.events[client]
+	if !known && len(l.events) >= l.capacity {
+		// A full table refuses new clients rather than grow; the next sweep frees room.
+		retry := l.lastSweep.Add(2 * window).Sub(now)
+		if retry < time.Second {
+			retry = time.Second
+		}
+		return false, retry
+	}
+	kept := prune(events, cutoff)
 	if len(kept) >= max {
 		l.events[client] = kept
 		retry := kept[0].Add(window).Sub(now)

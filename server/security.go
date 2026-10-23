@@ -87,6 +87,19 @@ func clientAddress(r *http.Request, trusted []netip.Prefix) string {
 	return peer.Unmap().String()
 }
 
+// limitKey counts an IPv6 client by its /64, the block one subscriber or host is given.
+func limitKey(client string) string {
+	addr, err := netip.ParseAddr(client)
+	if err != nil || !addr.Is6() {
+		return client
+	}
+	prefix, err := addr.Prefix(64)
+	if err != nil {
+		return client
+	}
+	return prefix.String()
+}
+
 // requestScheme honours a forwarded protocol only from a trusted proxy.
 func requestScheme(r *http.Request, trusted []netip.Prefix) string {
 	if r.TLS != nil {

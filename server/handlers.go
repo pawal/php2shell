@@ -29,7 +29,7 @@ func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if s.limiter.Enabled() {
-		if ok, retry := s.limiter.Allow(clientAddress(r, s.trusted)); !ok {
+		if ok, retry := s.limiter.Allow(limitKey(clientAddress(r, s.trusted))); !ok {
 			w.Header().Set("Retry-After", strconv.Itoa(max(1, int(retry.Round(time.Second)/time.Second))))
 			writeError(w, http.StatusTooManyRequests, codeRateLimited, "too many checks from this address")
 			return

@@ -77,8 +77,12 @@ Notes on the keys:
   Without the proxy in the list, the rate limit counts the proxy instead of
   the client and the origin check cannot see `https`.
 - `rate_limit` bounds checks per client address: `max` per `window`, counted
-  on every POST to `/api/v1/check`. A refusal is 429 with `Retry-After`. The
-  counters live in the process and are forgotten when they leave the window.
+  on every POST to `/api/v1/check`. An IPv6 client is counted by its `/64`,
+  the block one subscriber or host is given, so rotating addresses inside it
+  gains nothing. A refusal is 429 with `Retry-After`. The counters live in the
+  process and are forgotten when they leave the window. At most 100,000
+  clients are tracked; while the table is full, new clients are refused until
+  the next sweep.
 - `target_cooldown` is how long a result answers repeated checks of the same
   origin, the scheme, host and port; another path on it receives the same
   result. Two checks of one origin at once run once. A result made without
