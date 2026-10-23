@@ -10,6 +10,7 @@ number is written.
 - The systemd unit caps the service's memory at 512 MB.
 - The rate limit counts an IPv6 client by its /64 and tracks at most 100,000 clients.
 - Releases pin nfpm and the GitHub actions to exact versions.
+- A refused address is named by its kind only, so the service does not show how it resolves names.
 
 ## v1.0.12 (2026-10-23)
 

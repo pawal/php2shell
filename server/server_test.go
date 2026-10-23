@@ -212,7 +212,7 @@ func TestCheck(t *testing.T) {
 
 func TestCheckRefusals(t *testing.T) {
 	policy := &fakeChecker{fn: func(probe.Target, bool) (verdict.Input, any, error) {
-		return verdict.Input{}, nil, &probe.PolicyError{Host: "internal.example.com", Reason: "10.0.0.1 is private use"}
+		return verdict.Input{}, nil, &probe.PolicyError{Host: "internal.example.com", Reason: "private use", Addr: "10.0.0.1"}
 	}}
 	cases := []struct {
 		name    string
@@ -530,5 +530,18 @@ func TestRateLimiterCapacity(t *testing.T) {
 	}
 	if ok, _ := l.Allow("a"); !ok || l.Clients() != 2 {
 		t.Errorf("a known client was refused, or the table grew to %d", l.Clients())
+	}
+}
+
+// A refusal names the kind of address but not the address the server resolved.
+func TestRefusalHidesResolvedAddress(t *testing.T) {
+	refused := &probe.PolicyError{Host: "internal.example.com", Reason: "private use", Addr: "10.0.0.1"}
+	checker := &fakeChecker{fn: func(probe.Target, bool) (verdict.Input, any, error) { return verdict.Input{}, nil, refused }}
+	body := post(t, newTestServer(t, nil, checker).Handler(), `{"url":"internal.example.com"}`).Body.String()
+	if strings.Contains(body, "10.0.0.1") || !strings.Contains(body, "non-public address (private use)") {
+		t.Errorf("response %s", body)
+	}
+	if !strings.Contains(refused.Error(), "10.0.0.1 is private use") {
+		t.Errorf("the command line lost the address: %s", refused.Error())
 	}
 }

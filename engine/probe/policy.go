@@ -16,10 +16,22 @@ var publicPorts = map[string]bool{"80": true, "443": true, "8080": true, "8443":
 type PolicyError struct {
 	Host   string
 	Reason string
+	Addr   string // the refused address the host resolved to, if any
 }
 
 func (e *PolicyError) Error() string {
+	if e.Addr != "" {
+		return fmt.Sprintf("%s is not a public website: %s is %s", e.Host, e.Addr, e.Reason)
+	}
 	return fmt.Sprintf("%s is not a public website: %s", e.Host, e.Reason)
+}
+
+// Public is the refusal without the resolved address, which would show strangers how this server resolves names.
+func (e *PolicyError) Public() string {
+	if e.Addr != "" {
+		return fmt.Sprintf("%s is not a public website: it resolves to a non-public address (%s)", e.Host, e.Reason)
+	}
+	return e.Error()
 }
 
 // ErrUnresolvable is a host name with no address.
@@ -73,7 +85,7 @@ func (p *pins) addresses(ctx context.Context, host string) ([]netip.Addr, error)
 	if !p.allowNonGlobal {
 		for _, addr := range addrs {
 			if reason := NotGlobalReason(addr); reason != "" {
-				return nil, &PolicyError{Host: host, Reason: addr.String() + " is " + reason}
+				return nil, &PolicyError{Host: host, Reason: reason, Addr: addr.String()}
 			}
 		}
 	}

@@ -123,8 +123,15 @@ func failureLabel(err error) string {
 }
 
 func (s *Server) writeCheckError(w http.ResponseWriter, target probe.Target, err error) {
+	var policy *probe.PolicyError
 	switch code := errorCode(err); code {
-	case codeNonGlobalAddress, codeUnresolvable:
+	case codeNonGlobalAddress:
+		message := err.Error()
+		if errors.As(err, &policy) {
+			message = policy.Public()
+		}
+		writeError(w, http.StatusBadRequest, code, message)
+	case codeUnresolvable:
 		writeError(w, http.StatusBadRequest, code, err.Error())
 	case codeBusy:
 		w.Header().Set("Retry-After", "5")
