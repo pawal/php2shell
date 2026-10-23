@@ -3,7 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.6 (2026-10-23)
+
+Results name a CDN, firewall or cache that shows itself in front of the
+site, and say in plain words that it limits what a remote check can see.
 
 - Results name a CDN, firewall or cache in front of the site when it limits what the check sees.
 
