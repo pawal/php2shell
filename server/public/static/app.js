@@ -143,12 +143,14 @@
     }
     const counts = 'ID too long ' + request.invalid_id + ', read failed ' + request.failed_read + ', write failed ' + request.failed_write;
     let answer = 'no classified session signal';
-    if (request.error || request.response_complete === false) {
-      answer = 'incomplete response; not classified' + (request.error ? ': ' + request.error : '');
-    } else if (request.session_result === 'unpatched_path') {
+    if (request.session_result === 'unpatched_path') {
       answer = 'older session behaviour';
     } else if (request.session_result === 'patched_path') {
       answer = 'session behaviour associated with the fix';
+    } else if (!request.status) {
+      answer = 'no response' + (request.error ? ': ' + request.error : '');
+    } else if (request.error || request.response_complete === false) {
+      answer = 'incomplete response; not classified' + (request.error ? ': ' + request.error : '');
     }
     return group('span', [answer, ' ', el('span', counts, 'muted')]);
   }
