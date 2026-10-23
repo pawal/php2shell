@@ -69,6 +69,9 @@ func TestCheckVerdicts(t *testing.T) {
 					return
 				}
 				defer r.MultipartForm.RemoveAll()
+				if r.FormValue("PHPSESSID") != "_" {
+					t.Error("missing invalid session form field")
+				}
 				if r.FormValue("PHP_SESSION_UPLOAD_PROGRESS") != "probe" {
 					t.Error("missing progress field")
 				}

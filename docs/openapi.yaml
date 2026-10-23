@@ -22,7 +22,7 @@ paths:
                   description: A host name, an address or an http(s) URL.
                 attested:
                   type: boolean
-                  description: The visitor owns the site or may test it; adds bounded session-handling requests and, without a version, the phpinfo() requests. Session observations do not establish complete fixes for either CVE.
+                  description: The visitor owns the site or may test it; adds bounded session-handling requests and, without a version, the phpinfo() requests. Each session request carries the invalid session ID as a cookie and as a form field. Session observations do not establish complete fixes for either CVE.
                 refresh:
                   type: boolean
                   description: Run a fresh check when the cached result is at least a minute old, for example after patching.

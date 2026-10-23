@@ -128,7 +128,13 @@ and says the session request was blocked. When the check's
 time runs out, the answers already collected stand.
 
 The request uses an invalid session key and a one-byte upload with a fixed
-benign marker; it is a few hundred bytes. It is not an exploit or an
+benign marker; it is a few hundred bytes. The invalid key, `_`, is sent both
+as the `PHPSESSID` cookie and as a `PHPSESSID` multipart field placed before
+the upload-progress field and the file, so PHP's streaming parser still reads
+it when a frontend drops the cookie. This adds no request. The proxy
+comparison in [session-variants.md](session-variants.md) shows the warnings
+return through a proxy that removes the cookie when errors are visible;
+hidden errors still show nothing. The request is not an exploit or an
 out-of-memory probe. The displayed warning pattern differs between the
 unmodified lab releases, but establishes only a session-handling observation.
 It MUST NOT establish a complete fix or confirmed vulnerability for either CVE.

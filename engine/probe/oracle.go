@@ -85,6 +85,11 @@ func warningLines(text string) []string {
 func (s *session) oracle(ctx context.Context, target Target, passive Passive) (verdict.Oracle, []OracleObservation, error) {
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
+	// The same invalid ID in the body survives frontends that drop Cookie.
+	// It must precede upload progress and the file for PHP's streaming parser.
+	if err := writer.WriteField("PHPSESSID", "_"); err != nil {
+		return verdict.OracleNotRun, nil, err
+	}
 	if err := writer.WriteField("PHP_SESSION_UPLOAD_PROGRESS", "probe"); err != nil {
 		return verdict.OracleNotRun, nil, err
 	}

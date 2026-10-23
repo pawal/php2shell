@@ -71,7 +71,7 @@ test-oom-control:
 
 # Small session-ID variants in disconnected containers, never exploit payloads.
 test-session-variants:
-	PHP2SHELL_SESSION_VARIANTS=1 $(GO) test -count=1 -v -run '^TestSessionVariants$$' ./lab/
+	PHP2SHELL_SESSION_VARIANTS=1 $(GO) test -count=1 -v -run '^TestSession(Variants|Proxy)$$' ./lab/
 
 # The lab's expectations against public instances of our own, under the
 # public address policy. Name them in PHP2SHELL_LIVE_UNPATCHED,

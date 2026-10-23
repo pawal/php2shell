@@ -46,5 +46,9 @@ including invalid and NUL IDs, in disconnected PHP 8.5.11 and 8.5.12
 containers. It varies error visibility, cookie-only configuration and upload
 progress. The form variant reproduces the existing warning signal; NUL IDs
 can produce a session cookie on both releases even with errors hidden.
-See [the results and limits](../docs/session-variants.md). This experiment
-does not add requests to the public checker and is skipped by `make test`.
+It also sends cookie-only, form-only and combined IDs through two Apache
+reverse proxies on container loopback, one forwarding cookies and one
+stripping them. The form field keeps the warning signal when the cookie is
+stripped, which is why the public request now carries the ID in both places.
+See [docs/session-variants.md](../docs/session-variants.md) for the results
+and limits. `make test` skips the experiment.

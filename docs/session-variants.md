@@ -3,16 +3,17 @@
 Tested on 2026-10-23. This experiment evaluates small session-ID variants
 for PHP reachability and session-handling signals. It does not reproduce
 exploitation payloads, serialization attacks, memory exhaustion or either
-complete CVE.
+complete CVE fix.
 
 ## Reproduce
 
 Run `make test-session-variants` with Docker or Colima available and the
 official `php:8.5.11-apache` and `php:8.5.12-apache` images installed.
-The test creates ten disposable containers with networking disabled, no
+The test creates twenty disposable containers with networking disabled, no
 published ports, a read-only fixture mount, a 256 MiB memory cap, one CPU
-and a 64-process limit. It sends nine container-loopback requests per
-container and removes each container afterwards. Ordinary `make test` skips it.
+and a 64-process limit. It sends nine container-loopback requests to each
+direct-comparison container and six to each proxy-comparison container, 150
+in all, and removes each container afterwards. Ordinary `make test` skips it.
 
 The images used for this run were:
 
@@ -58,17 +59,45 @@ and cookies-only enabled. Query-string NUL IDs did the same only with
 cookies-only disabled. No other case emitted a session cookie. With upload
 progress disabled, neither NUL variant emitted a cookie.
 
-All 90 requests returned HTTP 200, reached the fixture and left the responding
-worker alive. No container was marked OOM-killed. Status alone did not
-distinguish the releases. The server did not advertise `X-Powered-By`.
+All 90 direct-comparison requests returned HTTP 200, reached the fixture and
+left the responding worker alive. No container was marked OOM-killed. Status
+alone did not distinguish the releases. The server did not advertise
+`X-Powered-By`.
+
+## Proxy comparison
+
+Two Apache reverse proxies run on container loopback: port 8081 forwards
+cookies and port 8080 removes the `Cookie` request header. Both forward to
+the same mod_php fixture on port 80. The fixture records whether a cookie
+arrived, so the test knows the header was removed. Each configuration sends
+cookie-only, form-only and combined invalid IDs through both proxies, 60
+requests across ten containers.
+
+With errors visible and upload progress enabled:
+
+| Request through proxy | PHP 8.5.11 warnings | PHP 8.5.12 warnings |
+|---|---|---|
+| Cookie-only, cookie forwarded | 2 / 2 / 2 | 2 / 2 / 0 |
+| Cookie-only, cookie removed | 0 / 0 / 0 | 0 / 0 / 0 |
+| Form-only, cookie forwarded or removed | 2 / 2 / 2 | 2 / 2 / 0 |
+| Cookie and form, cookie forwarded or removed | 2 / 2 / 2 | 2 / 2 / 0 |
+
+The combined request keeps the warning observation when the cookie is
+removed, including with `session.use_only_cookies=1`, and behaves like the
+cookie-only request when the cookie is forwarded. Hiding errors or disabling
+upload progress removes the warnings for every transport. All 60 requests
+reached the fixture, returned HTTP 200 and left their workers alive. No
+session cookie was issued and no container was OOM-killed.
 
 ## Implications for the checker
 
-The form-field invalid-ID variant is a candidate alternative transport for
-our existing warning observation. It did not expose a new vulnerability
-signal or recover warning evidence with errors hidden. Testing an actual
-frontend that handles cookies and form fields differently would be needed
-to establish a coverage improvement in that environment.
+The public check now sends the same invalid ID in the cookie and in a
+multipart field placed before the upload-progress field and the file. That
+reaches the tested cookie-stripping frontend with no extra request and no
+change to the candidate list, block handling, body limits or verdict rules.
+A Go test runs the checker through a reverse proxy and checks the field
+order, attestation and request counts. The form field lets the observation
+reach more sites; it does not make the observation stronger evidence.
 
 The form-field NUL variant may supply a PHP/session reachability hint when
 errors and version headers are hidden. It is identical across the tested
@@ -78,9 +107,10 @@ state rather than merely observing it; these results do not justify enabling
 it in the public checker automatically.
 
 The query variants add no signal over the form variants in this matrix.
-The current public requests and verdict logic are unchanged. Results apply
-to these Apache mod_php images, the default file session handler, the tested
-configuration and this fixture. They do not establish behavior for FPM,
-custom session handlers, strict mode, vendor backports or application routes.
+Verdict logic is unchanged and the public checker sends no NUL-ID probe.
+Results apply to these Apache mod_php images, the default file session
+handler, the tested configuration and this fixture. They do not establish
+behaviour for FPM, custom session handlers, strict mode, vendor backports or
+application routes.
 The warning distinction remains a session-path observation, not proof of
 exploitability or the complete fixes for either PHP2Shell CVE.
