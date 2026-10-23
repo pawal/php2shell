@@ -55,6 +55,7 @@ type Input struct {
 	Hints             []string
 	Oracle            Oracle
 	OraclePaths       []string
+	SessionBlocked    string // why a session request was refused
 }
 
 // Result is the verdict with its grounds and what to do next.
@@ -169,6 +170,9 @@ func judgeVersion(v Version, source string, in Input) Result {
 func silentNote(in Input) string {
 	if in.Oracle != OracleSilent {
 		return ""
+	}
+	if in.SessionBlocked != "" {
+		return " The session request was blocked (" + in.SessionBlocked + ")."
 	}
 	if reasons := hiding(in.PHPInfoSettings); len(reasons) > 0 {
 		return " The session request showed nothing; the phpinfo() page shows " + strings.Join(reasons, " and ") + "."

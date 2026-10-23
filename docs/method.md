@@ -112,7 +112,10 @@ checks send no session requests. The existing candidate list remains bounded
 and deduplicated. An answer with the pattern associated with the fix MUST NOT
 stop checks of other candidates, since another path may run older PHP. An
 answer with older behaviour ends the requests, since no later answer can
-change the result. A blocked answer stops further requests. When the check's
+change the result. A blocked answer stops further requests. It makes the
+result `inspection_blocked` only when nothing else showed PHP: no version, no
+PHP hint and no session answer. Otherwise the result stands on that evidence
+and says the session request was blocked. When the check's
 time runs out, the answers already collected stand.
 
 The request uses an invalid session key and a one-byte upload with a fixed

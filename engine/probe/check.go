@@ -95,15 +95,19 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 	if oracle {
 		in.Oracle, evidence.Requests, err = s.oracle(ctx, target, oraclePage)
 		for _, request := range evidence.Requests {
-			if request.InvalidID > 0 && request.FailedRead > 0 {
+			if request.Blocked == "" && request.InvalidID > 0 && request.FailedRead > 0 {
 				in.Hints = dedupe(append(in.Hints, "PHP session warnings"))
 			}
 			if request.Result == in.Oracle && request.Result != verdict.OracleSilent {
 				in.OraclePaths = append(in.OraclePaths, request.URL)
 			}
 			if request.Blocked != "" {
-				in.InspectionBlocked = request.Blocked
+				in.SessionBlocked = request.Blocked
 			}
+		}
+		// A blocked session request decides only when nothing else showed PHP.
+		if _, versioned := verdict.ParseVersion(in.PoweredBy, in.Server); in.SessionBlocked != "" && !versioned && in.PHPInfo == "" && len(in.Sightings) == 0 && len(in.Hints) == 0 && in.Oracle == verdict.OracleSilent {
+			in.InspectionBlocked = in.SessionBlocked
 		}
 	}
 	return in, evidence, err

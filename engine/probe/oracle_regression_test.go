@@ -249,3 +249,32 @@ func TestSessionRequestsStopAndKeepAnswers(t *testing.T) {
 		t.Fatalf("deadline lost the answer: %v %v", in.Oracle, err)
 	}
 }
+
+// A blocked session request decides the result only when nothing else showed PHP.
+func TestBlockedSessionRequestKeepsOtherEvidence(t *testing.T) {
+	for _, c := range []struct {
+		name, poweredBy, first, verdict, summary string
+	}{
+		{"fix pattern, then blocked", "PHP/8.5.11", readWarnings + "<br />\n" + strings.Repeat("<p>page</p>", 200), verdict.LikelyVulnerable, "8.5.11"},
+		{"blocked at once", "PHP/8.5.11", "", verdict.LikelyVulnerable, "The session request was blocked (HTTP 403 access denied)."},
+		{"nothing else", "", "", verdict.InspectionBlocked, "Inspection was blocked (HTTP 403 access denied)."},
+	} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("X-Powered-By", c.poweredBy)
+			if r.Method != http.MethodPost {
+				return
+			}
+			if r.URL.Path == "/" && c.first != "" {
+				fmt.Fprint(w, c.first)
+				return
+			}
+			w.WriteHeader(http.StatusForbidden)
+		}))
+		in, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, true)
+		srv.Close()
+		got := verdict.Judge(in)
+		if err != nil || got.Verdict != c.verdict || !strings.Contains(got.Summary, c.summary) {
+			t.Errorf("%s: %+v %v", c.name, got, err)
+		}
+	}
+}
