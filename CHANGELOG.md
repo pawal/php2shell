@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- An assumed HTTPS that does not answer is retried over plain HTTP too, while time remains.
+
 ## v1.0.10 (2026-10-23)
 
 End-of-life results now match the PHP advisory on source backports, and a

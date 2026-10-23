@@ -18,10 +18,13 @@ The check fetches the start page once and reads the PHP version from
 compared with the fixed release of its branch.
 
 A host name or address given without a scheme is checked over HTTPS. When
-that fails fast, with a refused or reset connection or a certificate or
-handshake failure, the check retries over plain HTTP, on port 80 in place of
-the default 443, and the result says so. An address given with `https://` is
-not retried, and neither is a timeout.
+that fails, whether HTTPS does not answer, refuses or resets the connection,
+or fails the certificate or handshake, the check retries over plain HTTP, on
+port 80 in place of the default 443, and the result says so. A retry starts
+only while at least two seconds of the check's time remain; when HTTP fails
+too, the result is `unreachable` and names both failures. An address given
+with `https://` is not retried, nor is a refused address or a host name that
+does not resolve.
 
 When no header carries a version and the start page or a discovered page
 is phpinfo() output, the version that page shows is used instead, and the

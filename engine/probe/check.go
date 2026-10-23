@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"time"
 
 	"github.com/pawal/php2shell/engine/verdict"
 )
@@ -31,22 +32,20 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		return in, evidence, err
 	}
 	passive, err := s.fetch(ctx, target)
-	if err != nil && target.Defaulted && ctx.Err() == nil {
-		// HTTPS was only assumed; a fast HTTPS failure is retried over HTTP.
-		switch reason := failureReason(err); reason {
-		case verdict.FailedCertificate, verdict.FailedHandshake, verdict.FailedRefused, verdict.FailedReset:
-			plain := target.PlainHTTP()
-			if s.pins.admitPort(plain.Host, plain.Port) == nil {
-				evidence.HTTPSError, in.HTTPSFailure = err.Error(), reason
-				target = plain
-				passive, err = s.fetch(ctx, target)
-			}
+	// HTTPS was only assumed, so any failure that HTTP could avoid is retried over HTTP.
+	if err != nil && target.Defaulted && retryOverHTTP(ctx, err) {
+		plain := target.PlainHTTP()
+		if s.pins.admitPort(plain.Host, plain.Port) == nil {
+			evidence.HTTPSError, in.HTTPSFailure = err.Error(), failureReason(err)
+			target = plain
+			passive, err = s.fetch(ctx, target)
 		}
 	}
 	evidence.Passive = passive
 	if err != nil {
 		var policy *PolicyError
-		if errors.As(err, &policy) || errors.Is(err, ErrUnresolvable) || ctx.Err() != nil {
+		// A retry that ran out of time still reports both failures.
+		if errors.As(err, &policy) || errors.Is(err, ErrUnresolvable) || ctx.Err() != nil && in.HTTPSFailure == "" {
 			return in, evidence, err
 		}
 		evidence.Passive.Error = err.Error()
@@ -148,4 +147,17 @@ func pageSightings(page Passive) []verdict.Sighting {
 		out = append(out, verdict.Sighting{Source: "server signature on " + at, Version: v})
 	}
 	return out
+}
+
+// minRetry is the check time an HTTP retry needs to be worth starting.
+const minRetry = 2 * time.Second
+
+// retryOverHTTP reports whether an HTTPS failure leaves a reason and the time to try HTTP.
+func retryOverHTTP(ctx context.Context, err error) bool {
+	var policy *PolicyError
+	if errors.As(err, &policy) || errors.Is(err, ErrUnresolvable) || ctx.Err() != nil {
+		return false
+	}
+	deadline, ok := ctx.Deadline()
+	return !ok || time.Until(deadline) >= minRetry
 }

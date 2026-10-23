@@ -73,8 +73,11 @@ type Result struct {
 // Judge applies the verdict matrix.
 func Judge(in Input) Result {
 	out := judgeReached(in)
-	if in.HTTPSFailure != "" {
+	switch {
+	case in.HTTPSFailure != "" && in.Reachable:
 		out.Summary += " Over HTTPS, " + in.HTTPSFailure + ", so the check used plain HTTP."
+	case in.HTTPSFailure != "":
+		out.Summary += " Plain HTTP was tried after HTTPS failed: " + in.HTTPSFailure + "."
 	}
 	return out
 }

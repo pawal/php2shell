@@ -1,6 +1,10 @@
 package probe
 
 import (
+	"bufio"
+	"context"
+	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -65,5 +69,80 @@ func TestAssumedHTTPSFallsBackToHTTP(t *testing.T) {
 	in, evidence, err = checkURL(t, &Prober{AllowNonGlobal: true}, "https://"+bare, false)
 	if err != nil || in.Reachable || evidence.HTTPSError != "" {
 		t.Errorf("explicit https was retried: %+v %v", in, err)
+	}
+}
+
+// splitPort never answers a TLS handshake but serves plain HTTP on the same port.
+func splitPort(t *testing.T) string {
+	t.Helper()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { ln.Close() })
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			go func(c net.Conn) {
+				defer c.Close()
+				r := bufio.NewReader(c)
+				first, err := r.Peek(1)
+				if err != nil {
+					return
+				}
+				if first[0] == 0x16 {
+					io.Copy(io.Discard, r)
+					return
+				}
+				for line := ""; err == nil && line != "\r\n"; line, err = r.ReadString('\n') {
+				}
+				fmt.Fprint(c, "HTTP/1.1 200 OK\r\nX-Powered-By: PHP/8.5.11\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+			}(conn)
+		}
+	}()
+	return ln.Addr().String()
+}
+
+// An assumed HTTPS that does not answer is retried over HTTP while time remains.
+func TestSilentHTTPSFallsBackToHTTP(t *testing.T) {
+	address := splitPort(t)
+	in, evidence, err := checkURL(t, &Prober{AllowNonGlobal: true, RequestTimeout: 300 * time.Millisecond}, address, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := verdict.Judge(in)
+	if !in.Reachable || in.HTTPSFailure != verdict.FailedTimeout || got.Verdict != verdict.LikelyVulnerable || !strings.HasSuffix(got.Summary, "Over HTTPS, the connection timed out, so the check used plain HTTP.") {
+		t.Fatalf("%+v %+v", got, evidence)
+	}
+	target, err := ParseTarget(address)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	in, _, err = (&Prober{AllowNonGlobal: true, RequestTimeout: 300 * time.Millisecond}).Check(ctx, target, false)
+	if err != nil || in.Reachable || in.HTTPSFailure != "" {
+		t.Errorf("retried without time left: %+v %v", in, err)
+	}
+}
+
+// When HTTP fails too, the result names both failures.
+func TestBothSchemesFail(t *testing.T) {
+	closed, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	address := closed.Addr().String()
+	closed.Close()
+	in, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, address, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := verdict.Judge(in)
+	if got.Verdict != verdict.Unreachable || !strings.HasSuffix(got.Summary, "Plain HTTP was tried after HTTPS failed: the connection was refused.") {
+		t.Errorf("%+v", got)
 	}
 }
