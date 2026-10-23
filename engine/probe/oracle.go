@@ -126,7 +126,8 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		} else if got.readErr != nil {
 			observation.Error = got.readErr.Error()
 		}
-		usable := observation.Blocked == "" && observation.Status >= 200 && observation.Status < 300
+		// A redirect still carries the warnings when output buffering held them.
+		usable := observation.Blocked == "" && observation.Status >= 200 && observation.Status < 400
 		switch {
 		case !usable || observation.InvalidID == 0 || observation.FailedRead == 0:
 		case observation.FailedWrite > 0:

@@ -127,7 +127,9 @@ vulnerability is exploitable on the target.
 
 Each session observation keeps its URL, status, warning counts, completeness,
 read error if any, and `session_result`. A response MUST be unblocked and
-HTTP 2xx before a warning pattern is classified. Older behaviour, all three
+HTTP 2xx or 3xx before a warning pattern is classified; with output buffering
+on, an application can answer the request with a redirect whose body still
+carries the warnings. Older behaviour, all three
 warnings, is classified from whatever arrived, since a cut-off body can hide
 the third warning but not invent it. The pattern associated with the fix,
 the first two warnings without the third, requires that every startup

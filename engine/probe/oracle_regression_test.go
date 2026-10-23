@@ -181,3 +181,27 @@ func TestLongPageAfterStartupWarnings(t *testing.T) {
 		})
 	}
 }
+
+// A redirect answer is classified from the warnings its body carries.
+func TestRedirectSessionAnswer(t *testing.T) {
+	for _, c := range []struct {
+		name, body string
+		want       verdict.Oracle
+	}{
+		{"older", readWarnings + " " + failedWriteWarning, verdict.OracleUnpatched},
+		{"fix pattern", readWarnings, verdict.OraclePatched},
+	} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost {
+				w.Header().Set("Location", "/login")
+				w.WriteHeader(http.StatusFound)
+				fmt.Fprint(w, c.body)
+			}
+		}))
+		in, evidence, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, true)
+		srv.Close()
+		if err != nil || in.Oracle != c.want || evidence.Requests[0].Status != http.StatusFound {
+			t.Errorf("%s: %+v %+v %v", c.name, in.Oracle, evidence.Requests, err)
+		}
+	}
+}
