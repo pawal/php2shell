@@ -3,7 +3,12 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.13 (2026-10-23)
+
+A hardening release from a security audit of the public service. A hostile
+site can no longer inflate reports or the result cache, the service's memory
+is capped, IPv6 clients are rate limited per /64, and release tooling is
+pinned. No configuration change is needed on upgrade.
 
 - Evidence keeps bounded amounts of a site's own text, so a hostile site cannot inflate a report.
 - The result cache holds at most 64 MiB besides its 10,000 entries.
