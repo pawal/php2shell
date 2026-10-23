@@ -5,6 +5,7 @@ number is written.
 
 ## Unreleased
 
+- Add an isolated lab comparison of lightweight session-ID variants and document their detection limits; public probes are unchanged.
 - The about page describes the session request, so firewall logs can be matched to it.
 - A blocked session request's summary says a firewall rule against upload-progress requests is a partial measure, not a fix.
 

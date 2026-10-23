@@ -5,7 +5,7 @@ PKGS := ./...
 PUBLIC := server/public
 LAB := lab
 
-.PHONY: all test test-go test-fingerprint-db fingerprints fmt fmt-check vet csp-check build test-lab test-oom-control test-live vulncheck \
+.PHONY: all test test-go test-fingerprint-db fingerprints fmt fmt-check vet csp-check build test-lab test-oom-control test-session-variants test-live vulncheck \
 	package-binaries packages clean
 
 all: test
@@ -68,6 +68,10 @@ test-lab:
 # Ordinary OOM responses in disconnected local PHP containers, never a CVE trigger.
 test-oom-control:
 	PHP2SHELL_OOM_CONTROL=1 $(GO) test -count=1 -v -run '^TestOOMControl$$' ./lab/
+
+# Small session-ID variants in disconnected containers, never exploit payloads.
+test-session-variants:
+	PHP2SHELL_SESSION_VARIANTS=1 $(GO) test -count=1 -v -run '^TestSessionVariants$$' ./lab/
 
 # The lab's expectations against public instances of our own, under the
 # public address policy. Name them in PHP2SHELL_LIVE_UNPATCHED,

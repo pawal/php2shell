@@ -38,3 +38,13 @@ The fatal-error text occurs on both releases. This is a negative control
 for error-message detection, not a CVE-triggering or exploit test. See
 [the results and limitations](../docs/oom-detection.md). The test is skipped
 during ordinary `make test` and runs only through `make test-oom-control`.
+
+## Lightweight session variants
+
+`make test-session-variants` compares cookie, form and query-string IDs,
+including invalid and NUL IDs, in disconnected PHP 8.5.11 and 8.5.12
+containers. It varies error visibility, cookie-only configuration and upload
+progress. The form variant reproduces the existing warning signal; NUL IDs
+can produce a session cookie on both releases even with errors hidden.
+See [the results and limits](../docs/session-variants.md). This experiment
+does not add requests to the public checker and is skipped by `make test`.
