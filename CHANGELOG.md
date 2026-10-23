@@ -3,7 +3,11 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.9 (2026-10-23)
+
+Session findings are reported as likelihoods for the paths they were seen
+on, never as a confirmed fix or vulnerability. Incomplete, redirected,
+blocked and long responses no longer hide or overstate what was seen.
 
 - Keep session observations path-scoped and reject incomplete response classifications.
 - Report likelihoods without asserting complete CVE fixes or vendor backports from session warnings.
