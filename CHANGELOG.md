@@ -3,7 +3,11 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.7 (2026-10-23)
+
+Blocked and unreachable results now say what stopped the check: the reason
+a connection failed, or a named firewall such as Sansec Shield. The about
+page lists the addresses checks come from, so owners can let them through.
 
 - An unreachable result says why the site did not answer.
 - Sansec Shield's block page is named instead of a bare HTTP 403.
