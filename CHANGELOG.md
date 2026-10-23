@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- An unreachable result says why the site did not answer.
+
 ## v1.0.6 (2026-10-23)
 
 Results name a CDN, firewall or cache that shows itself in front of the

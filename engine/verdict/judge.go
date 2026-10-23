@@ -16,6 +16,16 @@ const (
 	OracleSilent    Oracle = "silent"
 )
 
+// Reasons a site did not answer, in plain words.
+const (
+	FailedTimeout     = "the connection timed out"
+	FailedRefused     = "the connection was refused"
+	FailedReset       = "the connection was reset"
+	FailedCertificate = "the site's TLS certificate was not accepted"
+	FailedHandshake   = "the TLS handshake failed"
+	FailedConnection  = "the connection failed"
+)
+
 // Verdict codes; they are part of the API and are never renamed.
 const (
 	Vulnerable         = "vulnerable"
@@ -34,6 +44,7 @@ const (
 type Input struct {
 	InspectionBlocked string
 	Reachable         bool
+	Failure           string // why the site did not answer, one of the Failed reasons
 	PoweredBy         string
 	Server            string
 	PHPInfo           string // the version a phpinfo() page shows
@@ -56,7 +67,7 @@ type Result struct {
 // Judge applies the verdict matrix.
 func Judge(in Input) Result {
 	if !in.Reachable {
-		return result(Unreachable, "low", "The site did not answer, so nothing was checked.", nil)
+		return result(Unreachable, "low", "The site did not answer, so nothing was checked."+failureNote(in.Failure), nil)
 	}
 	out := judge(in)
 	if out.Version != nil {
@@ -157,4 +168,17 @@ func frontNote(layers []string) string {
 		verb = "answer"
 	}
 	return " " + strings.ToUpper(who[:1]) + who[1:] + " " + verb + " in front of the site and can replace headers, serve cached pages and filter requests, so this check sees less of the server behind it."
+}
+
+// failureNote names the reason, and a likely block where the network dropped the check.
+func failureNote(reason string) string {
+	if reason == "" {
+		return ""
+	}
+	note := " " + strings.ToUpper(reason[:1]) + reason[1:] + "."
+	switch reason {
+	case FailedTimeout, FailedRefused, FailedReset:
+		note += " If the site opens in a browser, its host may be blocking the checker's address."
+	}
+	return note
 }

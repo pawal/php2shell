@@ -35,6 +35,8 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		if errors.As(err, &policy) || errors.Is(err, ErrUnresolvable) || ctx.Err() != nil {
 			return in, evidence, err
 		}
+		evidence.Passive.Error = err.Error()
+		in.Failure = failureReason(err)
 		return in, evidence, nil
 	}
 	in.Reachable = true

@@ -122,6 +122,10 @@ as plain text, at most six lines of 300 bytes each.
 | `inspection_blocked` | A challenge or access control prevented inspection | low |
 | `unreachable` | The site did not answer | low |
 
+An `unreachable` result names the reason: the connection timed out, was
+refused or reset, or TLS failed. A site that opens in a browser but times
+out or refuses the checker is most likely blocking the checker's address.
+
 The session request outranks the header: a patched answer under an old
 version number is a backport, and an unpatched answer under a fixed number
 means the workers were not restarted, the session extension is older than

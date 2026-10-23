@@ -157,3 +157,17 @@ func TestFrontNote(t *testing.T) {
 		t.Errorf("plural: %q", got)
 	}
 }
+
+// An unreachable site names the reason, and a likely block only for network failures.
+func TestFailureNote(t *testing.T) {
+	timedOut := Judge(Input{Failure: FailedTimeout}).Summary
+	if timedOut != "The site did not answer, so nothing was checked. The connection timed out. If the site opens in a browser, its host may be blocking the checker's address." {
+		t.Errorf("timeout: %s", timedOut)
+	}
+	if certificate := Judge(Input{Failure: FailedCertificate}).Summary; strings.Contains(certificate, "blocking") || !strings.Contains(certificate, "The site's TLS certificate was not accepted.") {
+		t.Errorf("certificate: %s", certificate)
+	}
+	if plain := Judge(Input{}).Summary; plain != "The site did not answer, so nothing was checked." {
+		t.Errorf("no reason: %s", plain)
+	}
+}
