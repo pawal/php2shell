@@ -1,5 +1,5 @@
 GO ?= go
-GOVULNCHECK ?= govulncheck
+GOVULNCHECK ?= $(GO) run golang.org/x/vuln/cmd/govulncheck@latest
 BIN := bin
 PKGS := ./...
 PUBLIC := server/public

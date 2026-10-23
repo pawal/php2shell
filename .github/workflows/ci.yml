@@ -29,6 +29,17 @@ jobs:
       - name: the shipped configuration loads
         run: ./bin/php2shell serve -config packaging/config/config.json -dump-config > /dev/null
 
+  vulncheck:
+    name: vulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      # Known vulnerabilities in the code paths the binary reaches, standard library included.
+      - run: make vulncheck
+
   packages:
     name: packages
     runs-on: ubuntu-latest
