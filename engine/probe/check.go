@@ -41,6 +41,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 			passive, err = s.fetch(ctx, target)
 		}
 	}
+	in.Target = target.URL()
 	evidence.Passive = passive
 	if err != nil {
 		var policy *PolicyError

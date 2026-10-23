@@ -3,6 +3,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -140,7 +141,7 @@ func check(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	result := verdict.Judge(input)
 	if *asJSON {
 		report := server.Report{
-			Target: target.URL(), Result: result, OracleRun: input.Oracle != verdict.OracleNotRun,
+			Target: cmp.Or(input.Target, target.URL()), Result: result, OracleRun: input.Oracle != verdict.OracleNotRun,
 			Evidence: evidence, LocalCheck: server.LocalCheck(input), CheckedAt: time.Now().UTC(),
 		}
 		encoder := json.NewEncoder(stdout)
@@ -150,7 +151,7 @@ func check(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		}
 		return exitOK
 	}
-	fmt.Fprintf(stdout, "%s: %s (%s confidence)\n%s\n", target.URL(), result.Verdict, result.Confidence, result.Summary)
+	fmt.Fprintf(stdout, "%s: %s (%s confidence)\n%s\n", cmp.Or(input.Target, target.URL()), result.Verdict, result.Confidence, result.Summary)
 	for _, line := range result.Recommendations {
 		fmt.Fprintf(stdout, "  - %s\n", line)
 	}

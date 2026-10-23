@@ -43,6 +43,7 @@ const (
 // Input is everything a verdict is drawn from.
 type Input struct {
 	InspectionBlocked string
+	Target            string // the start URL the check used, after any retry over HTTP
 	Reachable         bool
 	Failure           string // why the site did not answer, one of the Failed reasons
 	HTTPSFailure      string // why an assumed HTTPS failed before the check used HTTP

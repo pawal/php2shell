@@ -7,6 +7,7 @@ number is written.
 
 - An assumed HTTPS that does not answer is retried over plain HTTP too, while time remains.
 - Cached results are kept per scheme, host and port instead of per host.
+- The report's target is the address actually checked, after a retry over HTTP.
 
 ## v1.0.10 (2026-10-23)
 

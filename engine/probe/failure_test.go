@@ -60,7 +60,7 @@ func TestAssumedHTTPSFallsBackToHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := verdict.Judge(in)
-	if !in.Reachable || in.HTTPSFailure != verdict.FailedHandshake || evidence.HTTPSError == "" || !strings.HasPrefix(evidence.Passive.FinalURL, "http://") {
+	if !in.Reachable || in.HTTPSFailure != verdict.FailedHandshake || evidence.HTTPSError == "" || !strings.HasPrefix(evidence.Passive.FinalURL, "http://") || in.Target != "http://"+bare+"/" {
 		t.Fatalf("no fallback: %+v %+v", in, evidence)
 	}
 	if got.Verdict != verdict.LikelyVulnerable || !strings.HasSuffix(got.Summary, "Over HTTPS, the TLS handshake failed, so the check used plain HTTP.") {

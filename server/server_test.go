@@ -386,3 +386,18 @@ func TestAboutListsSourceAddresses(t *testing.T) {
 		t.Errorf("the about page without addresses is wrong")
 	}
 }
+
+// The report names the start URL the check used, after a retry over HTTP.
+func TestReportNamesCheckedTarget(t *testing.T) {
+	checker := &fakeChecker{fn: func(target probe.Target, _ bool) (verdict.Input, any, error) {
+		return verdict.Input{Reachable: true, Target: target.PlainHTTP().URL(), HTTPSFailure: verdict.FailedTimeout}, nil, nil
+	}}
+	rec := post(t, newTestServer(t, nil, checker).Handler(), `{"url":"example.com"}`)
+	var report Report
+	if err := json.Unmarshal(rec.Body.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Target != "http://example.com/" {
+		t.Errorf("target %q", report.Target)
+	}
+}

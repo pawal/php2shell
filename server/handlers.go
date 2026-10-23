@@ -1,6 +1,7 @@
 package server
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -82,7 +83,7 @@ func (s *Server) run(ctx context.Context, target probe.Target, oracle bool) (Rep
 	result := verdict.Judge(input)
 	s.scanlog.record(s.now(), target.Host, result.Verdict, mode)
 	return Report{
-		Target:     target.URL(),
+		Target:     cmp.Or(input.Target, target.URL()),
 		Result:     result,
 		OracleRun:  oracle && input.Oracle != verdict.OracleNotRun,
 		Evidence:   evidence,
