@@ -3,7 +3,11 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.10 (2026-10-23)
+
+End-of-life results now match the PHP advisory on source backports, and a
+site whose HTTPS fails fast is checked over plain HTTP when no scheme was
+given.
 
 - End-of-life results name the PHP security team's source backports for 7.4, 8.0 and 8.1.
 - A host given without a scheme is checked over plain HTTP when HTTPS fails fast, as with a provider's default certificate.
