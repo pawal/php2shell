@@ -148,3 +148,36 @@ func TestOlderSessionBehaviourOnPartialBodies(t *testing.T) {
 		})
 	}
 }
+
+// A page longer than the cap counts once its output follows the startup warnings.
+func TestLongPageAfterStartupWarnings(t *testing.T) {
+	for _, c := range []struct {
+		name  string
+		after int
+		want  verdict.Oracle
+	}{
+		{"long page", 3 * DefaultMaxBody, verdict.OraclePatched},
+		{"cut near the warnings", 200, verdict.OracleSilent},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			body := readWarnings + "<br />\n" + strings.Repeat("<p>page</p>", c.after/11+1)
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodPost {
+					fmt.Fprint(w, body)
+				}
+			}))
+			defer srv.Close()
+			p := &Prober{AllowNonGlobal: true}
+			if c.after < startupMargin {
+				p.MaxBody = int64(len(readWarnings) + c.after)
+			}
+			in, evidence, err := checkURL(t, p, srv.URL, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if in.Oracle != c.want || evidence.Requests[0].Complete {
+				t.Fatalf("%+v %+v", in.Oracle, evidence.Requests[0])
+			}
+		})
+	}
+}

@@ -130,9 +130,13 @@ read error if any, and `session_result`. A response MUST be unblocked and
 HTTP 2xx before a warning pattern is classified. Older behaviour, all three
 warnings, is classified from whatever arrived, since a cut-off body can hide
 the third warning but not invent it. The pattern associated with the fix,
-the first two warnings without the third, requires a complete body. Body caps
-are detected with a bounded extra byte; an exact-size complete body remains
-eligible. A read error or a body beyond the cap leaves the first two warnings
+the first two warnings without the third, requires that every startup
+warning was read: a complete body, or at least 1 KiB of output after the last
+session warning. PHP prints these warnings during request startup, before any
+page output, so a page longer than the body cap still counts once its output
+follows them. Body caps are detected with a bounded extra byte; an exact-size
+complete body remains eligible. A body that breaks off or ends at the cap
+within 1 KiB of the last session warning leaves the first two warnings
 unclassified, since the absence of a third warning is then not evidence of a
 fix. Partial passive responses MAY
 still supply headers and hints, with their incompleteness recorded.

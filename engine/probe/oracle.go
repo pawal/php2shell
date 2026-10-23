@@ -35,6 +35,18 @@ const (
 	failedWriteWarning = "Failed to write session data"
 )
 
+// startupMargin is the output past the last session warning that shows the startup warnings ended.
+const startupMargin = 1 << 10
+
+// startupRead reports whether the text runs on well past the last session warning.
+func startupRead(text string) bool {
+	last := -1
+	for _, warning := range []string{invalidIDWarning, failedReadWarning, failedWriteWarning} {
+		last = max(last, strings.LastIndex(text, warning))
+	}
+	return last >= 0 && len(text)-last >= startupMargin
+}
+
 // Bounds on the warning lines kept as evidence.
 const (
 	maxWarningLines = 6
@@ -120,7 +132,8 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		case observation.FailedWrite > 0:
 			// A cut-off body can hide the write warning but not invent one.
 			observation.Result = verdict.OracleUnpatched
-		case observation.Complete:
+		case observation.Complete || startupRead(text):
+			// PHP prints these warnings at request startup, before any page output.
 			observation.Result = verdict.OraclePatched
 		}
 		observations = append(observations, observation)

@@ -8,6 +8,7 @@ number is written.
 - Keep session observations path-scoped and reject incomplete response classifications.
 - Report likelihoods without asserting complete CVE fixes or vendor backports from session warnings.
 - Older session behaviour counts even when the response body breaks off.
+- Session answers on pages longer than the 64 KiB cap count once page output follows the warnings.
 
 ## v1.0.8 (2026-10-23)
 
