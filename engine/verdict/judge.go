@@ -203,7 +203,7 @@ func silentNote(in Input) string {
 		return " The session request returned PHP session warnings, but no answer could be classified: the response broke off, ended too close to the warnings, or was an error."
 	}
 	if in.SessionBlocked != "" {
-		return " The session request was blocked (" + in.SessionBlocked + ")."
+		return " The session request was blocked (" + in.SessionBlocked + "). A firewall rule against upload-progress requests also blocks it; such a rule is a partial measure, not a fix."
 	}
 	if reasons := hiding(in.PHPInfoSettings); len(reasons) > 0 {
 		return " The session request showed nothing; the phpinfo() page shows " + strings.Join(reasons, " and ") + "."

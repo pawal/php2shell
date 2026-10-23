@@ -3,6 +3,11 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- The about page describes the session request, so firewall logs can be matched to it.
+- A blocked session request's summary says a firewall rule against upload-progress requests is a partial measure, not a fix.
+
 ## v1.0.13 (2026-10-23)
 
 A hardening release from a security audit of the public service. A hostile
