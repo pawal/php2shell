@@ -3,7 +3,13 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.14 (2026-10-23)
+
+A small release about the session request. It now carries its invalid
+session ID as a form field as well as a cookie, so a site behind a proxy
+that strips cookies still yields a session observation, and the about page
+and the results explain the request to administrators who meet it in
+firewall logs. No configuration change is needed on upgrade.
 
 - The session request also sends its invalid session ID as a form field, so a proxy that strips cookies does not hide the observation.
 - The about page describes the session request, so firewall logs can be matched to it.
