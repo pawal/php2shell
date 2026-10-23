@@ -23,6 +23,9 @@ paths:
                 attested:
                   type: boolean
                   description: The visitor owns the site or may test it; adds bounded session-handling requests and, without a version, the phpinfo() requests. Session observations do not establish complete fixes for either CVE.
+                refresh:
+                  type: boolean
+                  description: Run a fresh check when the cached result is at least a minute old, for example after patching.
       responses:
         "200":
           description: The verdict, cached when the host was checked within the cooldown.
@@ -113,6 +116,10 @@ components:
           items: { type: string }
         checked_at: { type: string, format: date-time }
         cached: { type: boolean }
+        refresh_at:
+          type: string
+          format: date-time
+          description: On a cached result, when a refresh runs a fresh check.
     PageEvidence:
       type: object
       properties:

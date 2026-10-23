@@ -51,4 +51,5 @@ type Report struct {
 	LocalCheck []string  `json:"local_check"`
 	CheckedAt  time.Time `json:"checked_at"`
 	Cached     bool      `json:"cached"`
+	RefreshAt  time.Time `json:"refresh_at,omitzero"` // when a refresh runs a fresh check
 }

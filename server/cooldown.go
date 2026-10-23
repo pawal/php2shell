@@ -8,6 +8,9 @@ import (
 // maxCached bounds the cache; past it the cache starts over.
 const maxCached = 10000
 
+// refreshFloor is how old a result must be before a refresh runs a fresh check.
+const refreshFloor = time.Minute
+
 // cooldown answers repeated checks of one host from its last result and
 // runs concurrent checks of one host once.
 type cooldown struct {
@@ -37,12 +40,13 @@ func newCooldown(window time.Duration, now func() time.Time) *cooldown {
 }
 
 // do returns a fresh result for host, waits for a check already running, or
-// runs fn. A result without the oracle does not answer a request for it.
-func (c *cooldown) do(host string, oracle bool, fn func() (Report, error)) (Report, bool, error) {
+// runs fn. A result without the oracle does not answer a request for it, and a
+// refresh passes over a result older than refreshFloor.
+func (c *cooldown) do(host string, oracle, refresh bool, fn func() (Report, error)) (Report, bool, error) {
 	c.mu.Lock()
 	now := c.now()
 	c.sweep(now)
-	if e, ok := c.entries[host]; ok && now.Sub(e.at) < c.window && (e.report.OracleRun || !oracle) {
+	if e, ok := c.entries[host]; ok && now.Sub(e.at) < c.window && (e.report.OracleRun || !oracle) && !(refresh && now.Sub(e.at) >= refreshFloor) {
 		c.mu.Unlock()
 		return e.report, true, nil
 	}

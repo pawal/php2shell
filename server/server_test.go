@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -430,5 +431,57 @@ func TestScanLogReasons(t *testing.T) {
 	}
 	if fields := strings.Fields(string(data)); len(fields) != 5 || fields[2] != verdict.Unreachable || fields[4] != "refused" {
 		t.Errorf("log line %q", data)
+	}
+}
+
+// A refresh runs a fresh check only once the cached result is a minute old.
+func TestRefreshAfterAMinute(t *testing.T) {
+	checker := &fakeChecker{}
+	s := newTestServer(t, nil, checker)
+	clock := time.Date(2026, 10, 23, 12, 0, 0, 0, time.UTC)
+	s.now = func() time.Time { return clock }
+	h := s.Handler()
+	report := func(body string) Report {
+		var out Report
+		if err := json.Unmarshal(post(t, h, body).Body.Bytes(), &out); err != nil {
+			t.Fatal(err)
+		}
+		return out
+	}
+	report(`{"url":"example.com"}`)
+	early := report(`{"url":"example.com","refresh":true}`)
+	if !early.Cached || checker.calls.Load() != 1 || !early.RefreshAt.Equal(clock.Add(time.Minute)) {
+		t.Errorf("early refresh: cached %v, %d checks, refresh at %v", early.Cached, checker.calls.Load(), early.RefreshAt)
+	}
+	clock = clock.Add(61 * time.Second)
+	fresh := report(`{"url":"example.com","refresh":true}`)
+	if fresh.Cached || checker.calls.Load() != 2 || !fresh.RefreshAt.IsZero() {
+		t.Errorf("refresh: cached %v, %d checks", fresh.Cached, checker.calls.Load())
+	}
+	if again := report(`{"url":"example.com"}`); !again.Cached || checker.calls.Load() != 2 {
+		t.Errorf("the fresh result was not cached: %d checks", checker.calls.Load())
+	}
+}
+
+// A refresh joins a check of the same site that is already running.
+func TestRefreshJoinsRunningCheck(t *testing.T) {
+	started, release := make(chan struct{}), make(chan struct{})
+	var once sync.Once
+	checker := &fakeChecker{fn: func(probe.Target, bool) (verdict.Input, any, error) {
+		once.Do(func() { close(started) })
+		<-release
+		return verdict.Input{Reachable: true}, nil, nil
+	}}
+	h := newTestServer(t, nil, checker).Handler()
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() { defer wg.Done(); post(t, h, `{"url":"example.com"}`) }()
+	<-started
+	go func() { defer wg.Done(); post(t, h, `{"url":"example.com","refresh":true}`) }()
+	time.Sleep(50 * time.Millisecond)
+	close(release)
+	wg.Wait()
+	if checker.calls.Load() != 1 {
+		t.Errorf("%d checks, want the refresh to join the running one", checker.calls.Load())
 	}
 }

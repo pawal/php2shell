@@ -11,6 +11,7 @@ number is written.
 - Unreachable and blocked lines in the check log name the reason.
 - The API specification describes every evidence field, and a test keeps it complete.
 - CI runs govulncheck, and `make vulncheck` needs no separate install.
+- Check again runs a fresh check once a cached result is a minute old, for example after patching.
 
 ## v1.0.10 (2026-10-23)
 

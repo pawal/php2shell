@@ -238,6 +238,9 @@
       meta.push('earlier result from ' + new Date(report.checked_at).toLocaleTimeString());
     }
     children.push(el('p', meta.join(' | '), 'meta'));
+    if (report.cached) {
+      children.push(againButton(report));
+    }
 
     const advice = el('ul');
     for (const line of report.recommendations || []) {
@@ -257,6 +260,23 @@
     show(label[1], children);
   }
 
+  // againButton asks for a fresh check once the cached result is old enough.
+  function againButton(report) {
+    const again = el('button', 'Check again', 'again');
+    again.type = 'button';
+    again.addEventListener('click', () => check(true));
+    const wait = Date.parse(report.refresh_at) - Date.now();
+    if (wait > 0) {
+      again.disabled = true;
+      again.textContent = 'Check again in ' + Math.ceil(wait / 1000) + ' s';
+      setTimeout(() => {
+        again.disabled = false;
+        again.textContent = 'Check again';
+      }, wait);
+    }
+    return again;
+  }
+
   function renderError(status, body, retryAfter) {
     let message = (body && body.error && body.error.message) || 'The check failed.';
     if (status === 429 && retryAfter) {
@@ -265,8 +285,7 @@
     show('warn', [el('h2', 'Not checked'), el('p', message)]);
   }
 
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
+  async function check(refresh) {
     const url = form.elements.url.value.trim();
     if (!url) {
       form.elements.url.focus();
@@ -278,7 +297,7 @@
       const response = await fetch('/api/v1/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url, attested: form.elements.attested.checked }),
+        body: JSON.stringify({ url: url, attested: form.elements.attested.checked, refresh: refresh }),
       });
       const body = await response.json().catch(() => null);
       if (response.ok && body) {
@@ -291,5 +310,10 @@
     } finally {
       button.disabled = false;
     }
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    check(false);
   });
 })();

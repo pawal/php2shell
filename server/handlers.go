@@ -20,6 +20,7 @@ var errBusy = errors.New("busy")
 type checkRequest struct {
 	URL      string `json:"url"`
 	Attested bool   `json:"attested"`
+	Refresh  bool   `json:"refresh"`
 }
 
 func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +54,7 @@ func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Results are shared per origin; a path does not buy another check of the site.
-	report, cached, err := s.cooldown.do(target.Origin(), req.Attested, func() (Report, error) {
+	report, cached, err := s.cooldown.do(target.Origin(), req.Attested, req.Refresh, func() (Report, error) {
 		return s.run(r.Context(), target, req.Attested)
 	})
 	if err != nil {
@@ -61,6 +62,9 @@ func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	report.Cached = cached
+	if cached {
+		report.RefreshAt = report.CheckedAt.Add(refreshFloor)
+	}
 	writeJSON(w, http.StatusOK, report)
 }
 

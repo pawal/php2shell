@@ -226,6 +226,17 @@ li + li { margin-top: 0.25rem; }
 .result.bad { border-left-color: var(--bad); background: var(--bad-bg); }
 .result.warn { border-left-color: var(--warn); background: var(--warn-bg); }
 .result.good { border-left-color: var(--good); background: var(--good-bg); }
+.result .again {
+  padding: 0.4rem 1rem;
+  font: inherit;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.result .again:hover { box-shadow: 0 0 1.2em var(--glow); }
+.result .again:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
 
 .result > h2 { margin-top: 0; font-size: 1.25rem; }
 .result > h2::before { content: "[*] "; content: "[*] " / ""; }
