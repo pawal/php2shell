@@ -91,7 +91,7 @@ PACKAGE_ARCHES ?= amd64 arm64
 DIST := dist
 PKG_DIR := $(DIST)/packages
 NFPM_CONF := $(DIST)/nfpm
-NFPM := $(GO) run github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+NFPM := $(GO) run github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.48.0
 
 package-binaries:
 	@for arch in $(PACKAGE_ARCHES); do \
