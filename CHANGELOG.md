@@ -9,6 +9,7 @@ number is written.
 - Cached results are kept per scheme, host and port instead of per host.
 - The report's target is the address actually checked, after a retry over HTTP.
 - Unreachable and blocked lines in the check log name the reason.
+- The API specification describes every evidence field, and a test keeps it complete.
 
 ## v1.0.10 (2026-10-23)
 

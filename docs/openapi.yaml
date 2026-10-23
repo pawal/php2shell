@@ -116,9 +116,47 @@ components:
     PageEvidence:
       type: object
       properties:
+        final_url: { type: string, format: uri }
+        status: { type: integer }
+        error:
+          type: string
+          description: The request got no response.
         body_incomplete:
           type: boolean
-          description: The body was cut short by a read error or the configured body cap; headers and partial passive evidence may still be shown.
+          description: The body was cut short by a read error or the configured body cap; headers and partial passive evidence still count.
+        read_error:
+          type: string
+          description: Why the body broke off.
+        inspection_blocked: { type: string }
+        server: { type: string }
+        x_powered_by: { type: string }
+        phpinfo_version: { type: string }
+        phpinfo_settings:
+          type: object
+          additionalProperties: { type: string }
+          description: Server API, display_errors, session.save_handler and session.upload_progress.enabled as a phpinfo() page shows them.
+        server_signature: { type: string }
+        front_layers:
+          type: array
+          items: { type: string }
+          description: CDNs, firewalls and caches that showed themselves in the response.
+        other_platforms:
+          type: array
+          items: { type: string }
+          description: Non-PHP platforms whose documented defaults the answers carried.
+        cookies:
+          type: array
+          items: { type: string }
+        redirects:
+          type: array
+          items: { type: string, format: uri }
+        redirect_not_followed: { type: string, format: uri }
+        discovered_paths:
+          type: array
+          items: { type: string, format: uri }
+        php_hints:
+          type: array
+          items: { type: string }
         fingerprints:
           type: array
           items: { $ref: "#/components/schemas/Fingerprint" }
@@ -134,7 +172,7 @@ components:
         session_result:
           type: string
           enum: [unpatched_path, patched_path, silent]
-          description: A path-specific session-handling observation, not a CVE verdict. Incomplete, blocked and unsuccessful responses are silent. A patched_path does not establish a complete fix.
+          description: A path-specific session-handling observation, not a CVE verdict. Blocked and 4xx or 5xx responses are silent. All three warnings count however the body ended; the first two alone need a complete body or 1 KiB of output after them. A patched_path does not establish a complete fix.
         invalid_id: { type: integer }
         failed_read: { type: integer }
         failed_write: { type: integer }

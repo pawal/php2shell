@@ -5,10 +5,14 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/pawal/php2shell/engine/probe"
+	"github.com/pawal/php2shell/engine/verdict"
 )
 
 // The files the documents and the packages are held to.
@@ -212,6 +216,56 @@ func TestOpenAPICoversTheAPI(t *testing.T) {
 	for path := range spec {
 		if _, ok := routes[path]; !ok {
 			t.Errorf("%s is documented but not registered", path)
+		}
+	}
+}
+
+// jsonFields names a struct's JSON fields, with embedded structs flattened.
+func jsonFields(typ reflect.Type) []string {
+	var names []string
+	for i := range typ.NumField() {
+		field := typ.Field(i)
+		if field.Anonymous {
+			names = append(names, jsonFields(field.Type)...)
+			continue
+		}
+		name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
+		if field.IsExported() && name != "" && name != "-" {
+			names = append(names, name)
+		}
+	}
+	return names
+}
+
+// specSchema is the text of one schema under components, up to the next.
+func specSchema(t *testing.T, spec, name string) string {
+	t.Helper()
+	_, rest, found := strings.Cut(spec, "\n    "+name+":\n")
+	if !found {
+		t.Fatalf("%s has no schema %s", specPath, name)
+	}
+	if next := regexp.MustCompile(`\n    [A-Za-z]+:\n`).FindStringIndex(rest); next != nil {
+		rest = rest[:next[0]]
+	}
+	return rest
+}
+
+// Every JSON field of a report and its evidence is described in the API spec.
+func TestOpenAPICoversTheReport(t *testing.T) {
+	spec := readFile(t, specPath)
+	for schema, types := range map[string][]reflect.Type{
+		"Report":             {reflect.TypeFor[Report](), reflect.TypeFor[probe.Evidence](), reflect.TypeFor[verdict.Version]()},
+		"PageEvidence":       {reflect.TypeFor[probe.Passive]()},
+		"SessionObservation": {reflect.TypeFor[probe.OracleObservation]()},
+		"Fingerprint":        {reflect.TypeFor[probe.Fingerprint]()},
+	} {
+		block := specSchema(t, spec, schema)
+		for _, typ := range types {
+			for _, name := range jsonFields(typ) {
+				if !strings.Contains(block, " "+name+":") {
+					t.Errorf("%s does not describe %s.%s in %s", specPath, typ.Name(), name, schema)
+				}
+			}
 		}
 	}
 }
