@@ -45,7 +45,8 @@ sent, including every form that carries IPv4 inside IPv6.
 
 ## Installation
 
-Go 1.27 or later is required.
+Go 1.27.3 or later is required; earlier 1.27 releases carry standard-library
+vulnerabilities that `make vulncheck` reports.
 
     make build            # bin/php2shell
 

@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- Builds require Go 1.27.3, which fixes 13 standard-library vulnerabilities, some in the HTTP client the checks use.
+
 ## v1.0.11 (2026-10-23)
 
 Owners can check again a minute after a cached result, for example after
