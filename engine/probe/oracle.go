@@ -28,6 +28,9 @@ type OracleObservation struct {
 	Lines []string `json:"lines,omitempty"`
 }
 
+// warned reports the first two session warnings, which every classified answer carries.
+func (o OracleObservation) warned() bool { return o.InvalidID > 0 && o.FailedRead > 0 }
+
 // The warnings the session request counts.
 const (
 	invalidIDWarning   = "Session ID is too long"
@@ -132,7 +135,7 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		// A redirect still carries the warnings when output buffering held them.
 		usable := observation.Blocked == "" && observation.Status >= 200 && observation.Status < 400
 		switch {
-		case !usable || observation.InvalidID == 0 || observation.FailedRead == 0:
+		case !usable || !observation.warned():
 		case observation.FailedWrite > 0:
 			// A cut-off body can hide the write warning but not invent one.
 			observation.Result = verdict.OracleUnpatched

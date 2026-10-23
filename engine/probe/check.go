@@ -95,7 +95,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 	if oracle {
 		in.Oracle, evidence.Requests, err = s.oracle(ctx, target, oraclePage)
 		for _, request := range evidence.Requests {
-			if request.Blocked == "" && request.InvalidID > 0 && request.FailedRead > 0 {
+			if request.Blocked == "" && request.warned() {
 				in.Hints = dedupe(append(in.Hints, "PHP session warnings"))
 				in.SessionUnclassified = in.SessionUnclassified || request.Result == verdict.OracleSilent
 			}
