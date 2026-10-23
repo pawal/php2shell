@@ -102,6 +102,9 @@ components:
             phpinfo_requests:
               type: array
               items: { $ref: "#/components/schemas/PageEvidence" }
+            https_error:
+              type: string
+              description: Why an assumed HTTPS failed before the check used plain HTTP.
             oracle_requests:
               type: array
               items: { $ref: "#/components/schemas/SessionObservation" }

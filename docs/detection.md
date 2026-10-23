@@ -81,6 +81,15 @@ Unknown challenge products, hidden warnings, static exports and stripped
 headers still limit what the check can see. [method.md](method.md) defines
 the resulting verdicts and the owner's local verification step.
 
+Sites hosted at all-inkl.com were unreachable from the service on
+2026-10-23: threeman.info and depeche-mode-world.de timed out at the TCP
+connection from the service's address while answering elsewhere. A second
+checking address was dropped the same way after a few minutes of checks.
+The provider's firewall, not the site, refuses the checker; the check cannot
+pass it and reports the timeout. Port 443 of depeche-mode-world.de also
+served the provider's `kasserver.com` certificate, which the HTTP retry for
+an assumed HTTPS covers.
+
 ## Layers in front of the site
 
 A layer is named only from a header its vendor documents. Load balancers
@@ -133,5 +142,6 @@ GET-only checks of the public examples on that date returned:
 | huvudstacentrum.se | `inconclusive` | WordPress assets and REST API, Elementor generator, WP Engine header; no PHP version |
 | flowr.dk (2026-10-23) | `inspection_blocked` | HTTP 403 Sansec Shield block page, passed through Sucuri |
 | cartographie.pevelecarembault.fr (2026-10-23) | `no_php_signal` | OpenID login redirects, `JSESSIONID` and renamed Play cookies; Java |
+| depeche-mode-world.de (2026-10-23) | `unreachable` | Provider certificate on 443; plain HTTP answered until the provider dropped the checking address |
 
 No session requests were sent to these public examples during verification.

@@ -14,6 +14,8 @@ type Evidence struct {
 	Pages    []Passive           `json:"discovery,omitempty"`
 	PHPInfo  []Passive           `json:"phpinfo_requests,omitempty"`
 	Requests []OracleObservation `json:"oracle_requests,omitempty"`
+	// HTTPSError is why an assumed HTTPS failed before the check used HTTP.
+	HTTPSError string `json:"https_error,omitempty"`
 }
 
 // Check admits the target under the address policy, then runs the checks.
@@ -29,6 +31,18 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		return in, evidence, err
 	}
 	passive, err := s.fetch(ctx, target)
+	if err != nil && target.Defaulted && ctx.Err() == nil {
+		// HTTPS was only assumed; a fast HTTPS failure is retried over HTTP.
+		switch reason := failureReason(err); reason {
+		case verdict.FailedCertificate, verdict.FailedHandshake, verdict.FailedRefused, verdict.FailedReset:
+			plain := target.PlainHTTP()
+			if s.pins.admitPort(plain.Host, plain.Port) == nil {
+				evidence.HTTPSError, in.HTTPSFailure = err.Error(), reason
+				target = plain
+				passive, err = s.fetch(ctx, target)
+			}
+		}
+	}
 	evidence.Passive = passive
 	if err != nil {
 		var policy *PolicyError

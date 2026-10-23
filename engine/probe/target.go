@@ -16,6 +16,8 @@ type Target struct {
 	Host   string `json:"host"`
 	Port   string `json:"port"`
 	Path   string `json:"path"`
+	// Defaulted marks a scheme the input left out, so HTTPS was only assumed.
+	Defaulted bool `json:"-"`
 }
 
 // ErrInvalidTarget wraps every refusal of the input grammar.
@@ -35,7 +37,8 @@ func ParseTarget(input string) (Target, error) {
 	if len(text) > 2048 {
 		return Target{}, invalid("longer than 2048 characters")
 	}
-	if !strings.Contains(text, "://") {
+	defaulted := !strings.Contains(text, "://")
+	if defaulted {
 		text = "https://" + text
 	}
 	u, err := url.Parse(text)
@@ -67,7 +70,17 @@ func ParseTarget(input string) (Target, error) {
 	if path == "" {
 		path = "/"
 	}
-	return Target{Scheme: scheme, Host: host, Port: port, Path: path}, nil
+	return Target{Scheme: scheme, Host: host, Port: port, Path: path, Defaulted: defaulted}, nil
+}
+
+// PlainHTTP is the same address over HTTP, on port 80 in place of the default 443.
+func (t Target) PlainHTTP() Target {
+	plain := t
+	plain.Scheme, plain.Defaulted = "http", false
+	if t.Port == "443" {
+		plain.Port = "80"
+	}
+	return plain
 }
 
 // checkHost admits an IP literal or a multi-label LDH name whose last label

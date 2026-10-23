@@ -43,3 +43,27 @@ func TestUnreachableReasons(t *testing.T) {
 		}
 	}
 }
+
+// An assumed HTTPS that fails fast is retried over HTTP; an explicit https:// is not.
+func TestAssumedHTTPSFallsBackToHTTP(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Powered-By", "PHP/8.5.11")
+	}))
+	defer srv.Close()
+	bare := strings.TrimPrefix(srv.URL, "http://")
+	in, evidence, err := checkURL(t, &Prober{AllowNonGlobal: true}, bare, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := verdict.Judge(in)
+	if !in.Reachable || in.HTTPSFailure != verdict.FailedHandshake || evidence.HTTPSError == "" || !strings.HasPrefix(evidence.Passive.FinalURL, "http://") {
+		t.Fatalf("no fallback: %+v %+v", in, evidence)
+	}
+	if got.Verdict != verdict.LikelyVulnerable || !strings.HasSuffix(got.Summary, "Over HTTPS, the TLS handshake failed, so the check used plain HTTP.") {
+		t.Errorf("summary: %s", got.Summary)
+	}
+	in, evidence, err = checkURL(t, &Prober{AllowNonGlobal: true}, "https://"+bare, false)
+	if err != nil || in.Reachable || evidence.HTTPSError != "" {
+		t.Errorf("explicit https was retried: %+v %v", in, err)
+	}
+}

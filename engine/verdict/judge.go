@@ -45,6 +45,7 @@ type Input struct {
 	InspectionBlocked string
 	Reachable         bool
 	Failure           string // why the site did not answer, one of the Failed reasons
+	HTTPSFailure      string // why an assumed HTTPS failed before the check used HTTP
 	PoweredBy         string
 	Server            string
 	PHPInfo           string // the version a phpinfo() page shows
@@ -71,6 +72,15 @@ type Result struct {
 
 // Judge applies the verdict matrix.
 func Judge(in Input) Result {
+	out := judgeReached(in)
+	if in.HTTPSFailure != "" {
+		out.Summary += " Over HTTPS, " + in.HTTPSFailure + ", so the check used plain HTTP."
+	}
+	return out
+}
+
+// judgeReached draws the verdict and its notes for the scheme that was used.
+func judgeReached(in Input) Result {
 	if !in.Reachable {
 		return result(Unreachable, "low", "The site did not answer, so nothing was checked."+failureNote(in.Failure), nil)
 	}

@@ -6,6 +6,7 @@ number is written.
 ## Unreleased
 
 - End-of-life results name the PHP security team's source backports for 7.4, 8.0 and 8.1.
+- A host given without a scheme is checked over plain HTTP when HTTPS fails fast, as with a provider's default certificate.
 
 ## v1.0.9 (2026-10-23)
 

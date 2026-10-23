@@ -170,6 +170,7 @@
       el('h4', 'Start page'),
       facts([
         ['Address', codes([start.final_url || target])],
+        ['HTTPS failed', evidence.https_error],
         ['Status', start.status ? String(start.status) : 'no answer'],
         ['Body', start.body_incomplete ? 'incomplete; partial passive evidence only' : null],
         ['Redirects', start.redirects ? codes([target, ...start.redirects].map(short), ' \u2192 ') : null],

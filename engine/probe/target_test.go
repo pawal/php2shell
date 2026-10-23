@@ -44,3 +44,18 @@ func TestParseTargetRefuses(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultedSchemeAndPlainHTTP(t *testing.T) {
+	bare, _ := ParseTarget("example.com")
+	explicit, _ := ParseTarget("https://example.com/")
+	custom, _ := ParseTarget("example.com:8443")
+	if !bare.Defaulted || explicit.Defaulted || !custom.Defaulted {
+		t.Errorf("defaulted: %v %v %v", bare.Defaulted, explicit.Defaulted, custom.Defaulted)
+	}
+	if plain := bare.PlainHTTP(); plain.URL() != "http://example.com/" || plain.Defaulted {
+		t.Errorf("plain: %+v", plain)
+	}
+	if plain := custom.PlainHTTP(); plain.URL() != "http://example.com:8443/" {
+		t.Errorf("custom port: %s", plain.URL())
+	}
+}

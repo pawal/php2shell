@@ -18,7 +18,7 @@ func failureReason(err error) string {
 	switch {
 	case errors.As(err, &certificate):
 		return verdict.FailedCertificate
-	case strings.Contains(err.Error(), "tls:"):
+	case strings.Contains(err.Error(), "tls:") || strings.Contains(err.Error(), "HTTP response to HTTPS client"):
 		return verdict.FailedHandshake
 	case errors.Is(err, syscall.ECONNREFUSED):
 		return verdict.FailedRefused
