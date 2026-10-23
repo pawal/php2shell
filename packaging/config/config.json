@@ -2,5 +2,6 @@
   "listen_addr": "127.0.0.1:8080",
   "public_url": "https://php2shell.evilbit.de",
   "trusted_proxy_cidrs": ["127.0.0.1/32", "::1/128"],
+  "source_addresses": ["5.75.244.113", "2a01:4f8:c012:1000::1"],
   "log_file": "/var/lib/php2shell/checks.log"
 }

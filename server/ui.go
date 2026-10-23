@@ -26,6 +26,7 @@ type page struct {
 	ProviderURL    string
 	SourceURL      string
 	Contact        string
+	Sources        []string
 	StructuredData template.JS
 }
 
@@ -48,6 +49,7 @@ func (s *Server) renderDocuments() (map[string][]byte, error) {
 		data := page{
 			Title: doc.title, Description: doc.description, Path: doc.path, Version: s.version,
 			Provider: s.cfg.Provider, ProviderURL: s.cfg.ProviderURL, SourceURL: s.cfg.SourceURL, Contact: s.cfg.Contact,
+			Sources: s.cfg.SourceAddresses,
 		}
 		if origin := s.cfg.Origin(); origin != "" {
 			data.Origin = origin

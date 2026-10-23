@@ -45,6 +45,7 @@ that loads back unchanged. A file naming an unknown key is refused.
   "source_url": "https://github.com/pawal/php2shell",
   "contact": "abuse@evilbit.de",
   "trusted_proxy_cidrs": ["127.0.0.1/32", "::1/128"],
+  "source_addresses": ["5.75.244.113", "2a01:4f8:c012:1000::1"],
   "rate_limit": { "enabled": true, "max": 10, "window": "1h" },
   "target_cooldown": "5m",
   "max_concurrent_checks": 10,
@@ -68,6 +69,9 @@ Notes on the keys:
   provided by". `source_url` is the source link of the footer and the about
   page. `contact`, when set, is offered on the about page for opt-out
   requests.
+- `source_addresses` lists the addresses checks leave from. The about page
+  shows them so that site owners can let the check through a firewall. Each
+  MUST be an IP address; empty shows none.
 - `trusted_proxy_cidrs` lists the peers whose forwarded client address and
   protocol are trusted. From any other peer those headers are stripped.
   Without the proxy in the list, the rate limit counts the proxy instead of

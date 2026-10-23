@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -45,5 +46,17 @@ func TestConfigRefusals(t *testing.T) {
 	bad.TrustedProxyCIDRs = []string{"nope"}
 	if bad.Validate() == nil {
 		t.Error("a faulty configuration validated")
+	}
+}
+
+func TestSourceAddressesMustBeAddresses(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.SourceAddresses = []string{"192.0.2.10", "example.com"}
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "source_addresses") {
+		t.Errorf("a host name was accepted: %v", err)
+	}
+	cfg.SourceAddresses = []string{"192.0.2.10", "2001:db8::10"}
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
 	}
 }

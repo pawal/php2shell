@@ -358,3 +358,19 @@ func TestLocalCheckFollowsServerHeader(t *testing.T) {
 		}
 	}
 }
+
+func TestAboutListsSourceAddresses(t *testing.T) {
+	about := func(addresses []string) string {
+		h := newTestServer(t, func(c *Config) { c.SourceAddresses = addresses }, nil).Handler()
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/about", nil))
+		return rec.Body.String()
+	}
+	listed := about([]string{"192.0.2.10", "2001:db8::10"})
+	if !strings.Contains(listed, "They come from <code>192.0.2.10</code> and <code>2001:db8::10</code>.") || !strings.Contains(listed, "allow these addresses") {
+		t.Errorf("addresses missing from the about page")
+	}
+	if plain := about(nil); strings.Contains(plain, "They come from") || !strings.Contains(plain, "allow this User-Agent") {
+		t.Errorf("the about page without addresses is wrong")
+	}
+}

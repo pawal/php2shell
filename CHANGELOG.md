@@ -8,6 +8,7 @@ number is written.
 - An unreachable result says why the site did not answer.
 - Sansec Shield's block page is named instead of a bare HTTP 403.
 - A block the result already names no longer also names the layer in front.
+- The about page lists the addresses checks come from, set by `source_addresses`, so owners can let the check through.
 
 ## v1.0.6 (2026-10-23)
 

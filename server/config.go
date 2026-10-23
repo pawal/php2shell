@@ -64,6 +64,7 @@ type Config struct {
 	// Contact is shown on the about page for opt-out requests.
 	Contact             string          `json:"contact,omitempty"`
 	TrustedProxyCIDRs   []string        `json:"trusted_proxy_cidrs,omitempty"`
+	SourceAddresses     []string        `json:"source_addresses,omitempty"` // shown on the about page
 	RateLimit           RateLimitConfig `json:"rate_limit"`
 	TargetCooldown      Duration        `json:"target_cooldown"`
 	MaxConcurrentChecks int             `json:"max_concurrent_checks"`
@@ -141,6 +142,7 @@ var durationKeys = []key[Duration]{
 
 var listKeys = []key[[]string]{
 	{"trusted-proxy-cidrs", "TRUSTED_PROXY_CIDRS", "sources whose forwarded client address is honoured", func(c *Config) *[]string { return &c.TrustedProxyCIDRs }},
+	{"source-addresses", "SOURCE_ADDRESSES", "addresses checks are sent from, shown on the about page", func(c *Config) *[]string { return &c.SourceAddresses }},
 }
 
 // commaList binds a comma-separated value to a slice.
@@ -383,6 +385,11 @@ func (c Config) Validate() error {
 	for _, cidr := range c.TrustedProxyCIDRs {
 		if _, err := netip.ParsePrefix(cidr); err != nil {
 			faults = append(faults, fmt.Errorf("trusted_proxy_cidrs: %q is not a prefix", cidr))
+		}
+	}
+	for _, address := range c.SourceAddresses {
+		if _, err := netip.ParseAddr(address); err != nil {
+			faults = append(faults, fmt.Errorf("source_addresses: %q is not an address", address))
 		}
 	}
 	return errors.Join(faults...)

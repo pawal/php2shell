@@ -23,8 +23,10 @@
 <p>To have a site excluded or a record removed, write to <a href="mailto:{{.Contact}}">{{.Contact}}</a>.</p>
 {{- end}}
 
-<h2>Recognising the check in your logs</h2>
-<p>Requests carry a <code>User-Agent</code> beginning with <code>php2shell-check</code> and a link to this page.</p>
+<h2>Recognising and allowing the check</h2>
+<p>Requests carry a <code>User-Agent</code> beginning with <code>php2shell-check</code> and a link to this page.
+{{- if .Sources}} They come from {{range $i, $a := .Sources}}{{if $i}} and {{end}}<code>{{$a}}</code>{{end}}.{{end}}</p>
+<p>Some firewalls and hosts refuse the check, and the result then says it was blocked or got no answer. To let it through, allow {{if .Sources}}these addresses{{else}}this User-Agent{{end}} while you check, or check on the server with the commands every result lists.</p>
 
 <h2>Source</h2>
 <p>The service is free software under the BSD 2-Clause license. The source is at <a href="{{.SourceURL}}">{{.SourceURL}}</a>.</p>
