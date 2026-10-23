@@ -103,10 +103,13 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		if path == "" || seen[path] {
 			continue
 		}
+		if ctx.Err() != nil {
+			break
+		}
 		seen[path] = true
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, bytes.NewReader(body.Bytes()))
 		if err != nil {
-			return verdict.OracleSilent, observations, err
+			return result, observations, err
 		}
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		req.Header.Set("Cookie", "PHPSESSID=_")
@@ -140,11 +143,11 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		observations = append(observations, observation)
 		if err != nil {
 			if ctx.Err() != nil {
-				return verdict.OracleSilent, observations, ctx.Err()
+				break
 			}
 			// Address policy errors remain errors even after a successful GET.
 			if _, ok := err.(*PolicyError); ok {
-				return verdict.OracleSilent, observations, err
+				return result, observations, err
 			}
 			continue
 		}
@@ -154,6 +157,14 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		if observation.Result == verdict.OracleUnpatched || result == verdict.OracleSilent {
 			result = observation.Result
 		}
+		// No later answer can change an older-behaviour result.
+		if result == verdict.OracleUnpatched {
+			break
+		}
+	}
+	// Answers collected before the deadline stand.
+	if ctx.Err() != nil && result == verdict.OracleSilent {
+		return result, observations, ctx.Err()
 	}
 	return result, observations, nil
 }

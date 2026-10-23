@@ -1,13 +1,17 @@
 package probe
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"slices"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/pawal/php2shell/engine/verdict"
 )
@@ -203,5 +207,45 @@ func TestRedirectSessionAnswer(t *testing.T) {
 		if err != nil || in.Oracle != c.want || evidence.Requests[0].Status != http.StatusFound {
 			t.Errorf("%s: %+v %+v %v", c.name, in.Oracle, evidence.Requests, err)
 		}
+	}
+}
+
+// Older behaviour ends the requests, and a deadline keeps the answers already collected.
+func TestSessionRequestsStopAndKeepAnswers(t *testing.T) {
+	var posts atomic.Int32
+	hang := make(chan struct{})
+	newServer := func(first string) *httptest.Server {
+		return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				return
+			}
+			io.Copy(io.Discard, r.Body)
+			posts.Add(1)
+			if r.URL.Path == "/" {
+				fmt.Fprint(w, first+"<br />\n"+strings.Repeat("<p>page</p>", 200))
+				return
+			}
+			select {
+			case <-hang:
+			case <-r.Context().Done():
+			}
+		}))
+	}
+	older, fixed := newServer(readWarnings+" "+failedWriteWarning), newServer(readWarnings)
+	defer older.Close()
+	defer fixed.Close()
+	defer close(hang)
+	if in, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, older.URL, true); err != nil || in.Oracle != verdict.OracleUnpatched || posts.Load() != 1 {
+		t.Fatalf("older behaviour: %v %v, %d posts", in.Oracle, err, posts.Load())
+	}
+	target, err := ParseTarget(fixed.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	in, _, err := (&Prober{AllowNonGlobal: true, RequestTimeout: 5 * time.Second}).Check(ctx, target, true)
+	if err != nil || in.Oracle != verdict.OraclePatched {
+		t.Fatalf("deadline lost the answer: %v %v", in.Oracle, err)
 	}
 }

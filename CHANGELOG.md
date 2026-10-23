@@ -9,6 +9,7 @@ number is written.
 - Report likelihoods without asserting complete CVE fixes or vendor backports from session warnings.
 - Older session behaviour counts even when the response body breaks off.
 - Session answers on pages longer than the 64 KiB cap count once page output follows the warnings.
+- Session requests stop at the first older-behaviour answer, and a check out of time keeps the answers it has.
 
 ## v1.0.8 (2026-10-23)
 

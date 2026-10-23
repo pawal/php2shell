@@ -109,8 +109,11 @@ redirect URL. When the page identifies WordPress, the
 check also tries `/wp-login.php` on the final origin, and discovered
 endpoints that were inspected successfully are further candidates. Passive
 checks send no session requests. The existing candidate list remains bounded
-and deduplicated. A positive session observation MUST NOT stop checks of
-other candidates. A blocked answer stops further requests.
+and deduplicated. An answer with the pattern associated with the fix MUST NOT
+stop checks of other candidates, since another path may run older PHP. An
+answer with older behaviour ends the requests, since no later answer can
+change the result. A blocked answer stops further requests. When the check's
+time runs out, the answers already collected stand.
 
 The request uses an invalid session key and a one-byte upload with a fixed
 benign marker; it is a few hundred bytes. It is not an exploit or an
@@ -174,7 +177,7 @@ Changed session behaviour MUST NOT override an older version on any
 inspected path or establish a complete backport. With no version it remains
 inconclusive. With a fixed reported version the overall result is at most
 likely patched. Older session behaviour takes priority in aggregation and
-produces a likely-vulnerable result with the affected observation URLs, but
+produces a likely-vulnerable result naming the affected path, but
 still does not prove exploitability or the state of the separate OOM fix.
 
 A fixed version accompanied by older session behaviour is conflicting

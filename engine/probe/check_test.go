@@ -101,6 +101,10 @@ func TestCheckVerdicts(t *testing.T) {
 			wantPosts := int32(0)
 			if c.oracle {
 				wantPosts = 2
+				// Older behaviour ends the session requests.
+				if strings.Contains(c.warnings, failedWriteWarning) && strings.Contains(c.warnings, readWarnings) {
+					wantPosts = 1
+				}
 			}
 			if posts.Load() != wantPosts {
 				t.Errorf("POST count %d, want %d", posts.Load(), wantPosts)
