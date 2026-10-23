@@ -13,6 +13,9 @@ UMask=0027
 Restart=on-failure
 RestartSec=5s
 LimitNOFILE=8192
+MemoryHigh=384M
+MemoryMax=512M
+Environment=GOMEMLIMIT=320MiB
 NoNewPrivileges=yes
 PrivateTmp=yes
 PrivateDevices=yes

@@ -133,6 +133,9 @@ UMask=0027
 Restart=on-failure
 RestartSec=5s
 LimitNOFILE=8192
+MemoryHigh=384M
+MemoryMax=512M
+Environment=GOMEMLIMIT=320MiB
 NoNewPrivileges=yes
 PrivateTmp=yes
 PrivateDevices=yes
@@ -159,7 +162,10 @@ WantedBy=multi-user.target
 ```
 
 `StateDirectory` is the one directory the service may write, so `log_file`
-MUST lie under `/var/lib/php2shell/`.
+MUST lie under `/var/lib/php2shell/`. `MemoryMax` caps the service at 512 MB,
+so an attack on its memory cannot starve Caddy or the host; past it the
+service is killed and restarted. `GOMEMLIMIT` makes the Go runtime collect
+garbage harder well before that, and `MemoryHigh` starts reclaiming at 384 MB.
 
 ## Reverse proxy
 
