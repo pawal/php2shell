@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- When nothing shows PHP, the result names another platform the answers point to, such as Java.
+
 ## v1.0.7 (2026-10-23)
 
 Blocked and unreachable results now say what stopped the check: the reason

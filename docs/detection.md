@@ -101,6 +101,22 @@ proxy.
 | Varnish | header `X-Varnish` | [Source](https://www.varnish.org/docs/reference/vsl-query/) |
 | Any proxy | header `Via` | [RFC 9110, section 7.6.3](https://www.rfc-editor.org/rfc/rfc9110#section-7.6.3) |
 
+## Other platforms
+
+When no answer shows PHP, the documented defaults of other platforms name
+what the answers point to. Each signal is the platform's own default; a
+renamed cookie or a disabled header goes unnoticed. `X-Powered-By: ASP.NET`
+is not used, because IIS adds it to every response, PHP pages included.
+
+| Platform | Signal | Source |
+|---|---|---|
+| Java servlets | cookie `JSESSIONID` | [Jakarta Servlet 6.0](https://jakarta.ee/specifications/servlet/6.0/jakarta-servlet-spec-6.0.html) |
+| Play Framework | cookies `PLAY_SESSION`, `PLAY_FLASH` | [Source](https://raw.githubusercontent.com/playframework/playframework/main/core/play/src/main/resources/reference.conf) |
+| ASP.NET | cookie `ASP.NET_SessionId` | [Source](https://learn.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/h6bb9cz9(v=vs.100)) |
+| Express | cookie `connect.sid`; `X-Powered-By: Express` | [Source](https://raw.githubusercontent.com/expressjs/session/master/README.md), [Source](https://raw.githubusercontent.com/expressjs/express/master/lib/application.js) |
+| Next.js | `X-Powered-By: Next.js` | [Source](https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader) |
+| Django | cookie `csrftoken` | [Source](https://docs.djangoproject.com/en/5.2/ref/settings/) |
+
 ## Verification
 
 `make test`, `make build` and `make test-lab` passed on 2026-10-22.
@@ -116,5 +132,6 @@ GET-only checks of the public examples on that date returned:
 | 99musik.se | `inspection_blocked` | HTTP 200 JavaScript bot challenge |
 | huvudstacentrum.se | `inconclusive` | WordPress assets and REST API, Elementor generator, WP Engine header; no PHP version |
 | flowr.dk (2026-10-23) | `inspection_blocked` | HTTP 403 Sansec Shield block page, passed through Sucuri |
+| cartographie.pevelecarembault.fr (2026-10-23) | `no_php_signal` | OpenID login redirects, `JSESSIONID` and renamed Play cookies; Java |
 
 No session requests were sent to these public examples during verification.

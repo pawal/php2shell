@@ -43,7 +43,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 	in.PoweredBy, in.Server, in.Hints = passive.PoweredBy, passive.Server, passive.Hints
 	in.PHPInfo, in.PHPInfoSettings = passive.PHPInfo, passive.Settings
 	in.Sightings = pageSightings(passive)
-	in.Front = passive.Front
+	in.Front, in.Platforms = passive.Front, passive.Platforms
 	in.InspectionBlocked = passive.Blocked
 	if passive.Blocked != "" {
 		return in, evidence, nil

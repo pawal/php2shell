@@ -51,6 +51,7 @@ type Input struct {
 	PHPInfoSettings   map[string]string
 	Sightings         []Sighting // versions other pages showed
 	Front             []string   // CDNs, firewalls and caches in front of the site
+	Platforms         []string   // other platforms whose defaults the answers carry
 	Hints             []string
 	Oracle            Oracle
 }
@@ -125,6 +126,9 @@ func judge(in Input) Result {
 	}
 	if len(in.Hints) > 0 {
 		return result(Inconclusive, "low", fmt.Sprintf("PHP indicators were found (%s), but no PHP version was advertised.", strings.Join(in.Hints, ", "))+silentNote(in), nil)
+	}
+	if len(in.Platforms) > 0 {
+		return result(NoPHPSignal, "low", "Nothing in the answers shows PHP; they point to "+strings.Join(in.Platforms, " and ")+" instead. Other paths on the host may still run PHP."+silentNote(in), nil)
 	}
 	return result(NoPHPSignal, "low", "Nothing in the answers shows PHP. A hardened PHP site looks the same."+silentNote(in), nil)
 }

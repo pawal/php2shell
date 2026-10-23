@@ -171,6 +171,7 @@
         ['X-Powered-By', codes(start.x_powered_by ? [start.x_powered_by] : [])],
         ['Server signature', codes(start.server_signature ? [start.server_signature] : [])],
         ['In front', (start.front_layers || []).join(', ')],
+        ['Other platforms', (start.other_platforms || []).join(', ')],
         ['phpinfo()', codes(start.phpinfo_version ? ['PHP ' + start.phpinfo_version] : [])],
         ['phpinfo() settings', settings(start)],
         ['Cookies', codes(start.cookies)],

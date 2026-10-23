@@ -88,6 +88,12 @@ from the session request, then adds that such a layer can replace headers,
 serve cached pages and filter requests. A layer that does not show itself goes unnoticed, so a
 missing note proves nothing.
 
+When nothing shows PHP but the answers carry another platform's documented
+default, such as the Java servlet cookie `JSESSIONID`, the result names that
+platform instead of suggesting hardened PHP. It covers only the paths the
+check read; other paths on the host may still run PHP. With any PHP sign the
+result stays `inconclusive`, since one host can run both.
+
 [detection.md](detection.md) records the research behind these choices.
 
 ## The session request

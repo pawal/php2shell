@@ -172,3 +172,16 @@ func TestFailureNote(t *testing.T) {
 		t.Errorf("no reason: %s", plain)
 	}
 }
+
+// Another platform is named only when nothing shows PHP.
+func TestOtherPlatformsNote(t *testing.T) {
+	java := []string{"Java (JSESSIONID cookie)"}
+	alone := Judge(Input{Reachable: true, Platforms: java, Oracle: OracleSilent}).Summary
+	if !strings.HasPrefix(alone, "Nothing in the answers shows PHP; they point to Java (JSESSIONID cookie) instead. Other paths on the host may still run PHP.") || !strings.Contains(alone, "session request showed nothing") {
+		t.Errorf("alone: %s", alone)
+	}
+	mixed := Judge(Input{Reachable: true, Platforms: java, Hints: []string{"PHPSESSID cookie"}})
+	if mixed.Verdict != Inconclusive || strings.Contains(mixed.Summary, "point to") {
+		t.Errorf("mixed: %+v", mixed)
+	}
+}

@@ -20,6 +20,7 @@ type Passive struct {
 	Settings     map[string]string `json:"phpinfo_settings,omitempty"`
 	Signature    string            `json:"server_signature,omitempty"`
 	Front        []string          `json:"front_layers,omitempty"`
+	Platforms    []string          `json:"other_platforms,omitempty"`
 	Cookies      []string          `json:"cookies,omitempty"`
 	Redirects    []string          `json:"redirects,omitempty"`
 	// Stopped is a redirect left unfollowed, off the site or past the limit.
@@ -35,6 +36,7 @@ func (s *session) fetch(ctx context.Context, target Target) (Passive, error) {
 // fetchPage can stop redirects to keep discovery to one request per endpoint.
 func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Passive, error) {
 	out := Passive{FinalURL: target.URL()}
+	var poweredBy []string
 	client := &http.Client{Transport: s.transport}
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		if req.Response != nil {
@@ -44,6 +46,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 			for _, cookie := range req.Response.Cookies() {
 				out.Cookies = append(out.Cookies, cookie.Name)
 			}
+			poweredBy = append(poweredBy, req.Response.Header.Values("X-Powered-By")...)
 		}
 		stop := func() error { out.Stopped = req.URL.String(); return http.ErrUseLastResponse }
 		if len(via) > s.prober.maxRedirects() || !sameSite(target.Host, strings.ToLower(strings.TrimSuffix(req.URL.Hostname(), "."))) {
@@ -80,6 +83,7 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 		out.Cookies = append(out.Cookies, cookie.Name)
 	}
 	out.Cookies = dedupe(out.Cookies)
+	out.Platforms = otherPlatforms(out.Cookies, append(poweredBy, resp.Header.Values("X-Powered-By")...))
 	out.Blocked = inspectionBlock(resp, text)
 	if out.Blocked == "" {
 		out.Hints = dedupe(append(out.Hints, applicationHints(resp, text)...))
