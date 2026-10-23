@@ -77,11 +77,11 @@ func (s *Server) run(ctx context.Context, target probe.Target, oracle bool) (Rep
 	input, evidence, err := s.checker.Check(ctx, target, oracle)
 	mode := map[bool]string{true: "oracle", false: "passive"}[oracle]
 	if err != nil {
-		s.scanlog.record(s.now(), target.Host, failureLabel(err), mode)
+		s.scanlog.record(s.now(), target.Host, failureLabel(err), mode, "")
 		return Report{}, err
 	}
 	result := verdict.Judge(input)
-	s.scanlog.record(s.now(), target.Host, result.Verdict, mode)
+	s.scanlog.record(s.now(), target.Host, result.Verdict, mode, logReason(input, result.Verdict))
 	return Report{
 		Target:     cmp.Or(input.Target, target.URL()),
 		Result:     result,

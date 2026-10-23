@@ -208,11 +208,14 @@ The binary sets these on every response:
 One line per check, appended to `log_file`:
 
     2026-10-22T12:00:00Z example.com likely_patched passive
+    2026-10-23T08:43:11Z threeman.info unreachable oracle timeout
 
 The fields are the time in UTC, the host that was checked, the verdict,
 `refused:<code>` for a target the policy declined, or `error:<code>` for a
 check that failed, and whether the session request was sent (`oracle`) or not
-(`passive`). The address of the client is never written, and the request log
+(`passive`). An `unreachable` line adds why: `timeout`, `refused`, `reset`,
+`certificate`, `handshake` or `connection`. An `inspection_blocked` line adds
+what blocked it, such as `http-403-access-denied` or `sansec-shield-firewall`. The address of the client is never written, and the request log
 on standard error omits it too. The packaged logrotate rule keeps 30 days.
 
 ## Health

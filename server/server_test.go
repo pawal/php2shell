@@ -401,3 +401,34 @@ func TestReportNamesCheckedTarget(t *testing.T) {
 		t.Errorf("target %q", report.Target)
 	}
 }
+
+// Unreachable and blocked lines carry a one-word reason; others keep four fields.
+func TestScanLogReasons(t *testing.T) {
+	cases := []struct {
+		in      verdict.Input
+		outcome string
+		want    string
+	}{
+		{verdict.Input{Failure: verdict.FailedTimeout}, verdict.Unreachable, "timeout"},
+		{verdict.Input{InspectionBlocked: "HTTP 403 access denied"}, verdict.InspectionBlocked, "http-403-access-denied"},
+		{verdict.Input{InspectionBlocked: "Sansec Shield firewall"}, verdict.InspectionBlocked, "sansec-shield-firewall"},
+		{verdict.Input{Reachable: true}, verdict.LikelyPatched, ""},
+	}
+	for _, c := range cases {
+		if got := logReason(c.in, c.outcome); got != c.want {
+			t.Errorf("%s: got %q, want %q", c.outcome, got, c.want)
+		}
+	}
+	unreachable := &fakeChecker{fn: func(probe.Target, bool) (verdict.Input, any, error) {
+		return verdict.Input{Failure: verdict.FailedRefused}, nil, nil
+	}}
+	s := newTestServer(t, nil, unreachable)
+	post(t, s.Handler(), `{"url":"example.com"}`)
+	data, err := os.ReadFile(s.cfg.LogFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fields := strings.Fields(string(data)); len(fields) != 5 || fields[2] != verdict.Unreachable || fields[4] != "refused" {
+		t.Errorf("log line %q", data)
+	}
+}
