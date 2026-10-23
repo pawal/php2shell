@@ -141,6 +141,7 @@ func TestFrontNote(t *testing.T) {
 		{"inconclusive", Input{Reachable: true, Hints: []string{"PHPSESSID cookie"}, Front: front}, true},
 		{"silent session request", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleSilent, Front: front}, true},
 		{"blocked", Input{Reachable: true, InspectionBlocked: "HTTP 403 access denied", Front: front}, true},
+		{"named block", Input{Reachable: true, InspectionBlocked: "Sansec Shield firewall", Front: []string{"Sucuri"}}, false},
 		{"header version", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleNotRun, Front: front}, false},
 		{"session answer", Input{Reachable: true, Oracle: OracleUnpatched, Front: front}, false},
 		{"nothing in front", Input{Reachable: true}, false},

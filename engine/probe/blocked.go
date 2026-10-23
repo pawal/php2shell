@@ -24,6 +24,9 @@ func inspectionBlock(resp *http.Response, body string) string {
 	if title == "one moment, please..." && strings.Contains(lower, "wsidchk") && strings.Contains(lower, "<script") {
 		return "JavaScript bot challenge"
 	}
+	if strings.Contains(lower, "blocked and logged by") && strings.Contains(lower, "sansec.io/guides/sansec-shield") {
+		return "Sansec Shield firewall"
+	}
 	switch resp.StatusCode {
 	case http.StatusUnauthorized:
 		return "HTTP 401 authentication required"

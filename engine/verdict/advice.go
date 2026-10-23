@@ -24,6 +24,6 @@ var recommendations = map[string][]string{
 	LikelyPatched:      {Restart, Verify},
 	Inconclusive:       {Verify, Upgrade, Restart},
 	NoPHPSignal:        {"If the site runs PHP, verify on the server.", Verify},
-	InspectionBlocked:  {"Check the PHP version and vendor patch status on the server. If needed, allow the checker through the site access controls and retry.", Verify},
+	InspectionBlocked:  {"Check the PHP version and vendor patch status on the server, or let the checker's addresses and User-Agent, listed on the about page, through the site's access controls and retry.", Verify},
 	Unreachable:        {"Check that the address is right and that the site answers over HTTP or HTTPS.", "If the site opens in a browser, allow the checker's addresses and User-Agent, listed on the about page."},
 }

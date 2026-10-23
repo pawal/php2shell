@@ -6,6 +6,8 @@ number is written.
 ## Unreleased
 
 - An unreachable result says why the site did not answer.
+- Sansec Shield's block page is named instead of a bare HTTP 403.
+- A block the result already names no longer also names the layer in front.
 
 ## v1.0.6 (2026-10-23)
 

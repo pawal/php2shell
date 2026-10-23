@@ -25,6 +25,14 @@ A GET of 99musik.se returned HTTP 200 with a `One moment, please...` title,
 script execution and a `wsidchk` marker. Their combination is recognised as
 a JavaScript challenge; the title alone is insufficient.
 
+A GET of flowr.dk on 2026-10-23 returned HTTP 403 with a page reading
+`Your request was blocked and logged by Sansec Shield` and linking to
+[Sansec's guide](https://sansec.io/guides/sansec-shield). The same request
+with a browser or curl User-Agent returned HTTP 200, so Shield refused the
+checker's User-Agent, which names php2shell; the guide says only that Shield
+blocks attack probes. The text and the guide link together identify the
+page. The checker keeps its User-Agent and does not try to pass the block.
+
 Four header and cookie hints come from the applications' own code.
 WordPress sends `X-Redirect-By: WordPress` on its redirects
 ([source](https://raw.githubusercontent.com/WordPress/WordPress/master/wp-includes/pluggable.php)).
@@ -107,5 +115,6 @@ GET-only checks of the public examples on that date returned:
 |---|---|---|
 | 99musik.se | `inspection_blocked` | HTTP 200 JavaScript bot challenge |
 | huvudstacentrum.se | `inconclusive` | WordPress assets and REST API, Elementor generator, WP Engine header; no PHP version |
+| flowr.dk (2026-10-23) | `inspection_blocked` | HTTP 403 Sansec Shield block page, passed through Sucuri |
 
 No session requests were sent to these public examples during verification.

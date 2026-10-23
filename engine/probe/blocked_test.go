@@ -71,3 +71,19 @@ func TestBlockedOracleStopsFurtherRequests(t *testing.T) {
 		t.Fatalf("%d %+v %+v", posts, in, evidence)
 	}
 }
+
+// Sansec Shield's block page is named, and a page that only mentions Sansec is not blocked.
+func TestSansecShieldBlock(t *testing.T) {
+	page := `<title>Access Denied</title><main class="access-denied"><h1>Access Denied</h1>
+<p>Your request was blocked and logged by
+    <a href="https://sansec.io/guides/sansec-shield" target="_blank">Sansec Shield</a>.</p></main>`
+	resp := response("/", nil)
+	resp.StatusCode = http.StatusForbidden
+	if got := inspectionBlock(resp, page); got != "Sansec Shield firewall" {
+		t.Errorf("block page: %q", got)
+	}
+	resp.StatusCode = http.StatusOK
+	if got := inspectionBlock(resp, `<p>Our store is protected by <a href="https://sansec.io/guides/sansec-shield">Sansec Shield</a>.</p>`); got != "" {
+		t.Errorf("mention: %q", got)
+	}
+}

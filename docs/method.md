@@ -78,7 +78,8 @@ produce `inspection_blocked` instead of an ordinary absence of PHP evidence.
 A blocked start page ends the check before discovery or session requests,
 and a challenge met during the session request stops further probes.
 Cloudflare's documented challenge header and known challenge-page signatures
-are recognised, including the JavaScript challenge observed at 99musik.se.
+are recognised, including the JavaScript challenge observed at 99musik.se,
+as is the block page of Sansec Shield, a firewall for Magento stores.
 The checker does not execute JavaScript or solve challenges.
 
 When a CDN, firewall or cache shows itself in the start page's headers,

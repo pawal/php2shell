@@ -73,7 +73,9 @@ func Judge(in Input) Result {
 	if out.Version != nil {
 		out.Summary += disagreement(*out.Version, sightings(in))
 	}
-	if len(in.Front) > 0 && (out.Verdict == NoPHPSignal || out.Verdict == Inconclusive || out.Verdict == InspectionBlocked || in.Oracle == OracleSilent) {
+	// A block the summary already names needs no guess about the layer in front.
+	genericBlock := out.Verdict == InspectionBlocked && strings.HasPrefix(in.InspectionBlocked, "HTTP ")
+	if len(in.Front) > 0 && (out.Verdict == NoPHPSignal || out.Verdict == Inconclusive || genericBlock || in.Oracle == OracleSilent) {
 		out.Summary += frontNote(in.Front)
 	}
 	if in.PHPInfo != "" {
