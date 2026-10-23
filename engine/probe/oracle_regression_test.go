@@ -278,3 +278,21 @@ func TestBlockedSessionRequestKeepsOtherEvidence(t *testing.T) {
 		}
 	}
 }
+
+// Session warnings that could not be classified are named, not reported as nothing.
+func TestUnclassifiedSessionWarningsAreNamed(t *testing.T) {
+	for _, poweredBy := range []string{"PHP/8.5.11", ""} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("X-Powered-By", poweredBy)
+			if r.Method == http.MethodPost {
+				breakOff(w, readWarnings)
+			}
+		}))
+		in, _, err := checkURL(t, &Prober{AllowNonGlobal: true}, srv.URL, true)
+		srv.Close()
+		got := verdict.Judge(in)
+		if err != nil || !strings.Contains(got.Summary, "returned PHP session warnings, but no answer could be classified") || strings.Contains(got.Summary, "showed nothing") {
+			t.Errorf("%q: %s %v", poweredBy, got.Summary, err)
+		}
+	}
+}

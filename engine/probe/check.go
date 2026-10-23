@@ -97,6 +97,7 @@ func (p *Prober) Check(ctx context.Context, target Target, oracle bool) (verdict
 		for _, request := range evidence.Requests {
 			if request.Blocked == "" && request.InvalidID > 0 && request.FailedRead > 0 {
 				in.Hints = dedupe(append(in.Hints, "PHP session warnings"))
+				in.SessionUnclassified = in.SessionUnclassified || request.Result == verdict.OracleSilent
 			}
 			if request.Result == in.Oracle && request.Result != verdict.OracleSilent {
 				in.OraclePaths = append(in.OraclePaths, request.URL)

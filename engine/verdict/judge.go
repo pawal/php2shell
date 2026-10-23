@@ -56,6 +56,8 @@ type Input struct {
 	Oracle            Oracle
 	OraclePaths       []string
 	SessionBlocked    string // why a session request was refused
+	// SessionUnclassified is set when session warnings arrived but no answer could be classified.
+	SessionUnclassified bool
 }
 
 // Result is the verdict with its grounds and what to do next.
@@ -170,6 +172,9 @@ func judgeVersion(v Version, source string, in Input) Result {
 func silentNote(in Input) string {
 	if in.Oracle != OracleSilent {
 		return ""
+	}
+	if in.SessionUnclassified {
+		return " The session request returned PHP session warnings, but no answer could be classified: the response broke off, ended too close to the warnings, or was an error."
 	}
 	if in.SessionBlocked != "" {
 		return " The session request was blocked (" + in.SessionBlocked + ")."
