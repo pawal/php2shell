@@ -13,10 +13,12 @@ func TestJudge(t *testing.T) {
 		want string
 	}{
 		{"unreachable", Input{}, Unreachable},
-		{"oracle unpatched", Input{Reachable: true, PoweredBy: "PHP/8.5.11", Oracle: OracleUnpatched}, Vulnerable},
-		{"oracle unpatched past a fixed header", Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OracleUnpatched}, Vulnerable},
-		{"oracle patched", Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OraclePatched}, Patched},
-		{"oracle patched on a backport", Input{Reachable: true, PoweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", Oracle: OraclePatched}, Patched},
+		{"oracle unpatched", Input{Reachable: true, PoweredBy: "PHP/8.5.11", Oracle: OracleUnpatched}, LikelyVulnerable},
+		{"oracle unpatched past a fixed header", Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OracleUnpatched}, LikelyVulnerable},
+		{"oracle patched", Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OraclePatched}, LikelyPatched},
+		{"oracle patched on a possible backport", Input{Reachable: true, PoweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", Oracle: OraclePatched}, PossiblyBackported},
+		{"oracle patched without version", Input{Reachable: true, Oracle: OraclePatched}, Inconclusive},
+		{"session change without complete backport evidence", Input{Reachable: true, PoweredBy: "PHP/8.5.11", Oracle: OraclePatched}, LikelyVulnerable},
 		{"fixed header", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleNotRun}, LikelyPatched},
 		{"affected header", Input{Reachable: true, PoweredBy: "PHP/8.4.26", Oracle: OracleSilent}, LikelyVulnerable},
 		{"ubuntu header", Input{Reachable: true, PoweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", Oracle: OracleSilent}, PossiblyBackported},
@@ -48,10 +50,10 @@ func TestRecommendationsCoverEveryVerdict(t *testing.T) {
 	}
 }
 
-// An unpatched answer under a fixed header names the stale session extension.
+// Older session behaviour under a fixed header is conflicting evidence.
 func TestUnpatchedUnderFixedHeader(t *testing.T) {
 	got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OracleUnpatched})
-	if !strings.Contains(got.Summary, "session extension is older") {
+	if !strings.Contains(got.Summary, "verify the running workers, the session extension") {
 		t.Errorf("summary: %s", got.Summary)
 	}
 }
@@ -84,7 +86,7 @@ func TestPHPInfoSettings(t *testing.T) {
 	}
 	measured := Judge(Input{Reachable: true, PHPInfo: "8.3.30", Oracle: OracleNotRun,
 		PHPInfoSettings: map[string]string{UploadProgress: "Off", ServerAPI: "Apache 2.0 Handler"}})
-	if !strings.Contains(measured.Summary, "session.upload_progress.enabled Off, the interim measure") {
+	if !strings.Contains(measured.Summary, "session.upload_progress.enabled Off, an interim measure for the session paths of CVE-2026-109619") || !strings.Contains(measured.Summary, "does not mitigate CVE-2026-109618") {
 		t.Errorf("measure: %s", measured.Summary)
 	}
 	if !slices.ContainsFunc(measured.Recommendations, func(s string) bool { return strings.HasPrefix(s, "Restart Apache") }) {
@@ -183,5 +185,17 @@ func TestOtherPlatformsNote(t *testing.T) {
 	mixed := Judge(Input{Reachable: true, Platforms: java, Hints: []string{"PHPSESSID cookie"}})
 	if mixed.Verdict != Inconclusive || strings.Contains(mixed.Summary, "point to") {
 		t.Errorf("mixed: %+v", mixed)
+	}
+}
+
+func TestSessionSignalCannotEstablishBothCVEFixes(t *testing.T) {
+	for _, header := range []string{"", "PHP/8.5.11", "PHP/8.5.12", "PHP/8.3.6-0ubuntu0.24.04.13"} {
+		got := Judge(Input{Reachable: true, PoweredBy: header, Oracle: OraclePatched, OraclePaths: []string{"https://example.com/app.php"}})
+		if got.Verdict == Patched || got.Verdict == Vulnerable || got.Confidence == "high" || !strings.Contains(got.Summary, "https://example.com/app.php") || !strings.Contains(got.Summary, "does not establish a complete fix") || !strings.Contains(got.Summary, "CVE-2026-109618 is assessed from version evidence") {
+			t.Fatalf("%s: %+v", header, got)
+		}
+		if slices.ContainsFunc(got.Recommendations, func(advice string) bool { return strings.Contains(advice, "No action is needed") }) {
+			t.Fatalf("unverified fixes dismissed: %+v", got)
+		}
 	}
 }

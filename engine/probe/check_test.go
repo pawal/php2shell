@@ -34,8 +34,8 @@ func TestCheckVerdicts(t *testing.T) {
 		name, poweredBy, server, warnings, cookie, want string
 		oracle                                          bool
 	}{
-		{name: "unpatched", warnings: readWarnings + " Failed to write session data", want: verdict.Vulnerable, oracle: true},
-		{name: "patched backport", poweredBy: "PHP/8.3.6", warnings: readWarnings, want: verdict.Patched, oracle: true},
+		{name: "unpatched session behaviour", warnings: readWarnings + " Failed to write session data", want: verdict.LikelyVulnerable, oracle: true},
+		{name: "session change does not establish backport", poweredBy: "PHP/8.3.6", warnings: readWarnings, want: verdict.LikelyVulnerable, oracle: true},
 		{name: "affected header", poweredBy: "PHP/8.5.11", want: verdict.LikelyVulnerable},
 		{name: "fixed server header", server: "Apache PHP/8.5.12", want: verdict.LikelyPatched},
 		{name: "backported", poweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", want: verdict.PossiblyBackported, oracle: true},
@@ -101,9 +101,6 @@ func TestCheckVerdicts(t *testing.T) {
 			wantPosts := int32(0)
 			if c.oracle {
 				wantPosts = 2
-				if c.warnings == readWarnings || strings.Contains(c.warnings, readWarnings+" Failed to write") {
-					wantPosts = 1
-				}
 			}
 			if posts.Load() != wantPosts {
 				t.Errorf("POST count %d, want %d", posts.Load(), wantPosts)

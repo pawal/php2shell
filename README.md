@@ -16,12 +16,14 @@ Colima. The manual Firefox pass and public deployment remain to be verified.
 ## Overview
 
 A check reads the PHP version a site advertises and compares it with the
-fixed releases. When the visitor attests that the site is theirs, it adds one
-small request whose answer differs between patched and unpatched PHP, and
-asks for `/phpinfo.php` and `/info.php` when nothing shows a version. A
-remote check can show that a site is unpatched but never that it is safe, so
-every result says what it was drawn from and how to settle the question on
-the server. [docs/method.md](docs/method.md) describes what is observed and
+fixed releases for both CVEs. When the visitor attests that the site is
+theirs, it sends bounded session-handling requests to the candidate paths
+and asks for `/phpinfo.php` and `/info.php` when nothing shows a version.
+Session warnings are path-specific indicators; they do not verify complete
+fixes, establish a backport or test the OOM corruption in CVE-2026-109618.
+Incomplete session responses are not classified. Every result says what it
+was drawn from and how to verify the running builds and patches on the
+server. [docs/method.md](docs/method.md) describes what is observed and
 what each verdict means.
 
 Without a version, the check looks for other signs of PHP in the response

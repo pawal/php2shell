@@ -142,9 +142,13 @@
       return 'blocked: ' + request.inspection_blocked;
     }
     const counts = 'ID too long ' + request.invalid_id + ', read failed ' + request.failed_read + ', write failed ' + request.failed_write;
-    let answer = 'no session warnings';
-    if (request.invalid_id > 0 && request.failed_read > 0) {
-      answer = request.failed_write > 0 ? 'like an unpatched release' : 'like a patched release';
+    let answer = 'no classified session signal';
+    if (request.error || request.response_complete === false) {
+      answer = 'incomplete response; not classified' + (request.error ? ': ' + request.error : '');
+    } else if (request.session_result === 'unpatched_path') {
+      answer = 'older session behaviour';
+    } else if (request.session_result === 'patched_path') {
+      answer = 'session behaviour associated with the fix';
     }
     return group('span', [answer, ' ', el('span', counts, 'muted')]);
   }
@@ -165,6 +169,7 @@
       facts([
         ['Address', codes([start.final_url || target])],
         ['Status', start.status ? String(start.status) : 'no answer'],
+        ['Body', start.body_incomplete ? 'incomplete; partial passive evidence only' : null],
         ['Redirects', start.redirects ? codes([target, ...start.redirects].map(short), ' \u2192 ') : null],
         ['Not followed', codes(start.redirect_not_followed ? [start.redirect_not_followed] : [])],
         ['Server', codes(start.server ? [start.server] : [])],
@@ -197,7 +202,7 @@
       children.push(el('h4', 'Frameworks'), known);
     }
     if (requests.length > 0) {
-      children.push(el('h4', 'Patch-state requests'), table(['Page', 'Status', 'PHP answered'], requests.map((request) => [
+      children.push(el('h4', 'Session-handling requests'), table(['Page', 'Status', 'PHP answered'], requests.map((request) => [
         el('code', short(request.url)), request.status ? String(request.status) : '', reading(request),
       ])));
       for (const request of requests.filter((request) => (request.lines || []).length > 0)) {
@@ -225,7 +230,7 @@
     if (report.php_version) {
       meta.push('PHP ' + report.php_version.raw.replace(/^PHP\//i, ''));
     }
-    meta.push(report.oracle_run ? 'patch-state request sent' : 'HTTP fingerprinting only');
+    meta.push(report.oracle_run ? 'session-handling requests sent' : 'HTTP fingerprinting only');
     if (report.cached) {
       meta.push('earlier result from ' + new Date(report.checked_at).toLocaleTimeString());
     }

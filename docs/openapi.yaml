@@ -22,7 +22,7 @@ paths:
                   description: A host name, an address or an http(s) URL.
                 attested:
                   type: boolean
-                  description: The visitor owns the site or may test it; adds the session request and, without a version, the phpinfo() requests.
+                  description: The visitor owns the site or may test it; adds bounded session-handling requests and, without a version, the phpinfo() requests. Session observations do not establish complete fixes for either CVE.
       responses:
         "200":
           description: The verdict, cached when the host was checked within the cooldown.
@@ -73,6 +73,7 @@ components:
         target: { type: string }
         verdict:
           type: string
+          description: Current checks emit likelihoods or inconclusive results. The legacy vulnerable and patched codes remain reserved for compatibility.
           enum: [vulnerable, patched, likely_vulnerable, possibly_backported, eol_branch, likely_patched, inconclusive, no_php_signal, unreachable, inspection_blocked]
         confidence:
           type: string
@@ -101,6 +102,9 @@ components:
             phpinfo_requests:
               type: array
               items: { $ref: "#/components/schemas/PageEvidence" }
+            oracle_requests:
+              type: array
+              items: { $ref: "#/components/schemas/SessionObservation" }
         local_check:
           type: array
           items: { type: string }
@@ -109,9 +113,31 @@ components:
     PageEvidence:
       type: object
       properties:
+        body_incomplete:
+          type: boolean
+          description: The body was cut short by a read error or the configured body cap; headers and partial passive evidence may still be shown.
         fingerprints:
           type: array
           items: { $ref: "#/components/schemas/Fingerprint" }
+    SessionObservation:
+      type: object
+      required: [url, response_complete, session_result, invalid_id, failed_read, failed_write]
+      properties:
+        url: { type: string, format: uri }
+        status: { type: integer }
+        response_complete: { type: boolean }
+        error: { type: string }
+        inspection_blocked: { type: string }
+        session_result:
+          type: string
+          enum: [unpatched_path, patched_path, silent]
+          description: A path-specific session-handling observation, not a CVE verdict. Incomplete, blocked and unsuccessful responses are silent. A patched_path does not establish a complete fix.
+        invalid_id: { type: integer }
+        failed_read: { type: integer }
+        failed_write: { type: integer }
+        lines:
+          type: array
+          items: { type: string }
     Fingerprint:
       type: object
       required: [technology, signal, scope, confidence, source, url]

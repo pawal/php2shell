@@ -12,8 +12,8 @@
 ╚═╝     ╚═╝  ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
 <span class="tag">self-check for CVE-2026-109618 and CVE-2026-109619</span></pre>
 <h1>Is your website exposed to PHP2Shell?</h1>
-<p class="lead">PHP2Shell is a pair of critical PHP flaws, CVE-2026-109618 and CVE-2026-109619. Enter your site to see which PHP release it advertises and, with your permission, whether it behaves like a patched release.</p>
-<p><strong>Both CVEs are already covered:</strong> <a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">CVE-2026-109618</a> and <a href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">CVE-2026-109619</a> were first fixed in PHP <strong>8.2.35, 8.3.36, 8.4.27 and 8.5.12</strong>. Use those releases or a later release in the same branch, or your vendor's fixed package. Vendor backports may keep an older version number.</p>
+<p class="lead">PHP2Shell is a pair of critical PHP flaws, CVE-2026-109618 and CVE-2026-109619. Enter your site to compare its reported PHP versions with the fixed releases and, with your permission, inspect session-handling behaviour.</p>
+<p><a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">CVE-2026-109618</a> and <a href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">CVE-2026-109619</a> were first fixed in PHP <strong>8.2.35, 8.3.36, 8.4.27 and 8.5.12</strong>. Version evidence is compared with these releases for both CVEs. The session check does not verify either complete fix, and no memory-exhaustion or exploit test is run. Vendor backports may keep an older version number.</p>
 
 <form id="check-form" class="check" novalidate>
 <label for="url">Website address</label>
@@ -21,7 +21,7 @@
 <input id="url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="example.com" required autofocus>
 <button type="submit">Check</button>
 </div>
-<label class="attest"><input type="checkbox" name="attested"> I own this site or am authorized to test it. This adds one small request that shows the patch state and looks for a phpinfo() page.</label>
+<label class="attest"><input type="checkbox" name="attested"> I own this site or am authorized to test it. This adds small session-handling requests and, when no version shows, looks for a phpinfo() page.</label>
 <p class="hint">Only public domain names and public IP addresses are checked, on ports 80, 443, 8080 and 8443.</p>
 </form>
 <noscript><p class="notice">The check needs JavaScript. Everything below reads without it.</p></noscript>
@@ -29,7 +29,7 @@
 
 <h2>What the check does</h2>
 <p>It fetches your start page as a browser would, plus at most two PHP pages it links to, and reads the PHP version the server advertises. That version is compared with the releases that carry the fix.</p>
-<p>If you confirm that the site is yours, it adds one small, harmless request that shows whether the PHP serving the page carries the fix. It changes nothing on your server. The <a href="/about">about page</a> explains more.</p>
+<p>If you confirm that the site is yours, it sends small requests to the candidate PHP paths and records session warnings for each URL. These warnings are patch-associated indicators, not proof of the complete fixes. A changed session response on one path never overrides an older PHP version found on another. The <a href="/about">about page</a> explains more.</p>
 
 <h2>What it cannot see</h2>
 <p>A hardened server advertises no version and shows no errors. Distributions such as Ubuntu and Red Hat also fix PHP without changing the version number. A result without a finding is therefore not proof of safety. Only a check on the server itself is conclusive.</p>

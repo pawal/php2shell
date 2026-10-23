@@ -54,6 +54,7 @@ type Input struct {
 	Platforms         []string   // other platforms whose defaults the answers carry
 	Hints             []string
 	Oracle            Oracle
+	OraclePaths       []string
 }
 
 // Result is the verdict with its grounds and what to do next.
@@ -71,6 +72,9 @@ func Judge(in Input) Result {
 		return result(Unreachable, "low", "The site did not answer, so nothing was checked."+failureNote(in.Failure), nil)
 	}
 	out := judge(in)
+	if in.Oracle == OraclePatched || in.Oracle == OracleUnpatched {
+		out.Summary += sessionNote(in)
+	}
 	if out.Version != nil {
 		out.Summary += disagreement(*out.Version, sightings(in))
 	}
@@ -106,23 +110,20 @@ func judge(in Input) Result {
 	}
 	switch in.Oracle {
 	case OracleUnpatched:
-		summary := "PHP answered the session upload progress request the way only unpatched releases do."
+		summary := "The session response suggests missing session-handling changes."
 		if versioned && v.Standing() == BranchFixed {
-			summary += fmt.Sprintf(" The %s claims %s; the workers serving the site have not been restarted, the session extension is older than PHP itself, or another PHP answers.", source, v)
+			summary += fmt.Sprintf(" The %s shows %s; verify the running workers, the session extension and vendor patches because these observations conflict.", source, v)
 		}
-		return result(Vulnerable, "high", summary, vp)
-	case OraclePatched:
-		summary := "PHP answered the session upload progress request the way patched releases do."
-		if versioned && v.Standing() != BranchFixed {
-			summary += fmt.Sprintf(" The %s shows %s, so the package carries a backported fix.", source, v)
-		}
-		return result(Patched, "high", summary, vp)
+		return result(LikelyVulnerable, "medium", summary, vp)
 	}
 	if in.InspectionBlocked != "" {
 		return result(InspectionBlocked, "low", fmt.Sprintf("Inspection was blocked (%s). The response does not establish the site's PHP patch state.", in.InspectionBlocked), vp)
 	}
 	if versioned {
 		return judgeVersion(v, source, in)
+	}
+	if in.Oracle == OraclePatched {
+		return result(Inconclusive, "low", "PHP session handling responded, but no PHP version or complete vendor patch status was established.", nil)
 	}
 	if len(in.Hints) > 0 {
 		return result(Inconclusive, "low", fmt.Sprintf("PHP indicators were found (%s), but no PHP version was advertised.", strings.Join(in.Hints, ", "))+silentNote(in), nil)
@@ -131,6 +132,18 @@ func judge(in Input) Result {
 		return result(NoPHPSignal, "low", "Nothing in the answers shows PHP; they point to "+strings.Join(in.Platforms, " and ")+" instead. Other paths on the host may still run PHP."+silentNote(in), nil)
 	}
 	return result(NoPHPSignal, "low", "Nothing in the answers shows PHP. A hardened PHP site looks the same."+silentNote(in), nil)
+}
+
+func sessionNote(in Input) string {
+	where := "a tested path"
+	if len(in.OraclePaths) > 0 {
+		where = strings.Join(in.OraclePaths, ", ")
+	}
+	behaviour := "matched the session behaviour associated with the fix"
+	if in.Oracle == OracleUnpatched {
+		behaviour = "matched the older session behaviour"
+	}
+	return " Session handling on " + where + " " + behaviour + ". This observation does not establish a complete fix or exploitability for either CVE. CVE-2026-109618 is assessed from version evidence, not an OOM test."
 }
 
 func judgeVersion(v Version, source string, in Input) Result {

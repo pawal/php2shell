@@ -8,21 +8,22 @@ import (
 
 // Passive is what one GET of the start URL shows.
 type Passive struct {
-	Fingerprints []Fingerprint     `json:"fingerprints,omitempty"`
-	Paths        []string          `json:"discovered_paths,omitempty"`
-	Blocked      string            `json:"inspection_blocked,omitempty"`
-	Error        string            `json:"error,omitempty"`
-	FinalURL     string            `json:"final_url"`
-	Status       int               `json:"status"`
-	Server       string            `json:"server,omitempty"`
-	PoweredBy    string            `json:"x_powered_by,omitempty"`
-	PHPInfo      string            `json:"phpinfo_version,omitempty"`
-	Settings     map[string]string `json:"phpinfo_settings,omitempty"`
-	Signature    string            `json:"server_signature,omitempty"`
-	Front        []string          `json:"front_layers,omitempty"`
-	Platforms    []string          `json:"other_platforms,omitempty"`
-	Cookies      []string          `json:"cookies,omitempty"`
-	Redirects    []string          `json:"redirects,omitempty"`
+	Fingerprints   []Fingerprint     `json:"fingerprints,omitempty"`
+	Paths          []string          `json:"discovered_paths,omitempty"`
+	Blocked        string            `json:"inspection_blocked,omitempty"`
+	Error          string            `json:"error,omitempty"`
+	BodyIncomplete bool              `json:"body_incomplete,omitempty"`
+	FinalURL       string            `json:"final_url"`
+	Status         int               `json:"status"`
+	Server         string            `json:"server,omitempty"`
+	PoweredBy      string            `json:"x_powered_by,omitempty"`
+	PHPInfo        string            `json:"phpinfo_version,omitempty"`
+	Settings       map[string]string `json:"phpinfo_settings,omitempty"`
+	Signature      string            `json:"server_signature,omitempty"`
+	Front          []string          `json:"front_layers,omitempty"`
+	Platforms      []string          `json:"other_platforms,omitempty"`
+	Cookies        []string          `json:"cookies,omitempty"`
+	Redirects      []string          `json:"redirects,omitempty"`
 	// Stopped is a redirect left unfollowed, off the site or past the limit.
 	Stopped string   `json:"redirect_not_followed,omitempty"`
 	Hints   []string `json:"php_hints,omitempty"`
@@ -72,9 +73,13 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 	if err != nil {
 		return out, err
 	}
-	resp, text, err := s.do(ctx, client, req)
-	if err != nil {
+	resp, text, complete, err := s.do(ctx, client, req)
+	if err != nil && (resp == nil || len(text) == 0) {
 		return out, err
+	}
+	out.BodyIncomplete = !complete
+	if err != nil {
+		out.Error = err.Error()
 	}
 	out.FinalURL, out.Status = resp.Request.URL.String(), resp.StatusCode
 	out.Server, out.PoweredBy = resp.Header.Get("Server"), resp.Header.Get("X-Powered-By")

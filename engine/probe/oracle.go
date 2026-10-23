@@ -15,12 +15,15 @@ import (
 
 // OracleObservation counts the warnings returned by one session request.
 type OracleObservation struct {
-	Blocked     string `json:"inspection_blocked,omitempty"`
-	URL         string `json:"url"`
-	Status      int    `json:"status,omitempty"`
-	InvalidID   int    `json:"invalid_id"`
-	FailedRead  int    `json:"failed_read"`
-	FailedWrite int    `json:"failed_write"`
+	Blocked     string         `json:"inspection_blocked,omitempty"`
+	URL         string         `json:"url"`
+	Status      int            `json:"status,omitempty"`
+	InvalidID   int            `json:"invalid_id"`
+	FailedRead  int            `json:"failed_read"`
+	FailedWrite int            `json:"failed_write"`
+	Complete    bool           `json:"response_complete"`
+	Error       string         `json:"error,omitempty"`
+	Result      verdict.Oracle `json:"session_result"`
 	// Lines are the distinct warning lines counted, as plain text.
 	Lines []string `json:"lines,omitempty"`
 }
@@ -83,6 +86,7 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 	client := &http.Client{Transport: s.transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	seen := map[string]bool{}
 	var observations []OracleObservation
+	result := verdict.OracleSilent
 	for _, path := range oraclePaths(target, passive) {
 		if path == "" || seen[path] {
 			continue
@@ -94,8 +98,8 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		}
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		req.Header.Set("Cookie", "PHPSESSID=_")
-		resp, text, err := s.do(ctx, client, req)
-		observation := OracleObservation{URL: path}
+		resp, text, complete, err := s.do(ctx, client, req)
+		observation := OracleObservation{URL: path, Complete: complete, Result: verdict.OracleSilent}
 		if resp != nil {
 			observation.Status = resp.StatusCode
 			observation.Blocked = inspectionBlock(resp, text)
@@ -104,6 +108,15 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		observation.FailedRead = strings.Count(text, failedReadWarning)
 		observation.FailedWrite = strings.Count(text, failedWriteWarning)
 		observation.Lines = warningLines(text)
+		if err != nil {
+			observation.Error = err.Error()
+		}
+		if err == nil && complete && observation.Blocked == "" && observation.Status >= 200 && observation.Status < 300 && observation.InvalidID > 0 && observation.FailedRead > 0 {
+			observation.Result = verdict.OraclePatched
+			if observation.FailedWrite > 0 {
+				observation.Result = verdict.OracleUnpatched
+			}
+		}
 		observations = append(observations, observation)
 		if err != nil {
 			if ctx.Err() != nil {
@@ -116,16 +129,13 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 			continue
 		}
 		if observation.Blocked != "" {
-			return verdict.OracleSilent, observations, nil
+			return result, observations, nil
 		}
-		if observation.InvalidID > 0 && observation.FailedRead > 0 {
-			if observation.FailedWrite > 0 {
-				return verdict.OracleUnpatched, observations, nil
-			}
-			return verdict.OraclePatched, observations, nil
+		if observation.Result == verdict.OracleUnpatched || result == verdict.OracleSilent {
+			result = observation.Result
 		}
 	}
-	return verdict.OracleSilent, observations, nil
+	return result, observations, nil
 }
 
 // oraclePaths adds a WordPress login fallback only when the page identifies it.

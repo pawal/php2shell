@@ -46,9 +46,9 @@ func measureNote(in Input) string {
 		return ""
 	}
 	if in.Oracle == OracleSilent {
-		return " Upload progress off is the interim measure; it narrows the exposure but does not fix it."
+		return " Upload progress off narrows the session paths of CVE-2026-109619; it does not mitigate CVE-2026-109618 or establish a complete fix."
 	}
-	return fmt.Sprintf(" The phpinfo() page shows %s %s, the interim measure; it narrows the exposure but does not fix it.", UploadProgress, v)
+	return fmt.Sprintf(" The phpinfo() page shows %s %s, an interim measure for the session paths of CVE-2026-109619; it does not mitigate CVE-2026-109618 or establish a complete fix.", UploadProgress, v)
 }
 
 // restartFor names what to restart for the server API a phpinfo() page shows.

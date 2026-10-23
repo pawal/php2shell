@@ -22,6 +22,9 @@ Expected: vuln shows "Failed to write session data" in the oracle response,
 patched shows only the two "read" warnings, vuln-hardened shows nothing.
 The fix returns early when session initialization fails; before it, PHP
 forced the session active and tried to write it anyway.
+`make test-lab` now expects `likely_vulnerable` for the unpatched container
+and `likely_patched` for the patched container. The session warning pattern
+is an observation on that URL, not proof of both complete CVE fixes.
 
 ## Ordinary OOM control
 

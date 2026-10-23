@@ -2,12 +2,14 @@
 
 PHP2Shell is the name of CVE-2026-109618 and CVE-2026-109619, two critical
 flaws in PHP itself. The PHP project fixed them on 21 October 2026 in 8.5.12,
-8.4.27, 8.3.36 and 8.2.35; branches 8.1 and older receive no fix from the
-project. The [PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)
+8.4.27, 8.3.36 and 8.2.35. Older branches have no maintained upstream release;
+the project provides minimal source backports for 7.4, 8.0 and 8.1, and
+vendors may provide fixed packages. The [PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)
 is the authoritative description and lists the interim measures.
 
-A check is remote, so it can show that a site is unpatched but never that it
-is safe. Only a check on the server is conclusive.
+A check is remote, so its result is an assessment of the observed paths,
+not proof of a complete fix or exploitability. Only verification of the
+running PHP builds and vendor patches on the server is conclusive.
 
 ## The advertised version
 
@@ -98,14 +100,36 @@ result stays `inconclusive`, since one host can run both.
 
 ## The session request
 
-When the visitor attests that the site is theirs, the check adds one small
-request to the start page, then `/index.php` and the final redirect URL
-when earlier paths give no answer. When the page identifies WordPress, the
+When the visitor attests that the site is theirs, the check sends a small
+request to each candidate: the start page, `/index.php` and the final
+redirect URL. When the page identifies WordPress, the
 check also tries `/wp-login.php` on the final origin, and discovered
 endpoints that were inspected successfully are further candidates. Passive
-checks send no session requests. Patched and unpatched releases answer
-differently when the server displays PHP warnings. The request writes
-nothing on the server, triggers no fault, and is a few hundred bytes.
+checks send no session requests. The existing candidate list remains bounded
+and deduplicated. A positive session observation MUST NOT stop checks of
+other candidates. A blocked answer stops further requests.
+
+The request uses an invalid session key and a one-byte upload with a fixed
+benign marker; it is a few hundred bytes. It is not an exploit or an
+out-of-memory probe. The displayed warning pattern differs between the
+unmodified lab releases, but establishes only a session-handling observation.
+It MUST NOT establish a complete fix or confirmed vulnerability for either CVE.
+
+CVE-2026-109618 concerns OOM corruption in the engine. It is assessed from
+reported versions and vendor patch information, not independently tested by
+the session request. Session handling is associated with one lifecycle path
+of CVE-2026-109619; the complete fixes cover more state and operations than
+this observation exercises. The evidence does not establish that either
+vulnerability is exploitable on the target.
+
+Each session observation keeps its URL, status, warning counts, completeness,
+read error if any, and `session_result`. A response MUST be complete,
+unblocked and HTTP 2xx before a warning pattern is classified. Body caps
+are detected with a bounded extra byte; an exact-size complete body remains
+eligible. A read error or a body beyond the cap MUST produce an unclassified
+observation even when the first two warnings are present. Their absence of
+a third warning is not evidence of a fix. Partial passive responses MAY
+still supply headers and hints, with their incompleteness recorded.
 
 It shows nothing when warnings are hidden, which is the production default,
 when session upload progress is disabled, when the session handler is not the
@@ -118,27 +142,35 @@ as plain text, at most six lines of 300 bytes each.
 
 | Verdict | Ground | Confidence |
 |---|---|---|
-| `vulnerable` | The session request answered as only unpatched releases do | high |
-| `patched` | The session request answered as patched releases do | high |
-| `likely_vulnerable` | The advertised version is below its branch's fix | medium |
+| `likely_vulnerable` | An affected reported version, or older session behaviour on a named path | medium |
 | `possibly_backported` | As above, from a distribution that fixes without renumbering | low |
 | `eol_branch` | The advertised version is 8.1 or older | medium |
 | `likely_patched` | The advertised version carries the fix | medium |
-| `inconclusive` | PHP indicators were found without a version or patch-state answer | low |
+| `inconclusive` | PHP indicators or a changed session response without a usable version | low |
 | `no_php_signal` | Nothing showed PHP | low |
 | `inspection_blocked` | A challenge or access control prevented inspection | low |
 | `unreachable` | The site did not answer | low |
+
+The `vulnerable` and `patched` API codes remain reserved for compatibility;
+current checks MUST NOT emit these confirmed, high-confidence verdicts.
 
 An `unreachable` result names the reason: the connection timed out, was
 refused or reset, or TLS failed. A site that opens in a browser but times
 out or refuses the checker is most likely blocking the checker's address.
 
-The session request outranks the header: a patched answer under an old
-version number is a backport, and an unpatched answer under a fixed number
-means the workers were not restarted, the session extension is older than
-PHP itself, or another PHP serves the page. FreeBSD packages the session
-extension separately, as `php85-session`, so upgrading `mod_php85` alone
-leaves the flaw in place while the header shows the fixed version.
+Changed session behaviour MUST NOT override an older version on any
+inspected path or establish a complete backport. With no version it remains
+inconclusive. With a fixed reported version the overall result is at most
+likely patched. Older session behaviour takes priority in aggregation and
+produces a likely-vulnerable result with the affected observation URLs, but
+still does not prove exploitability or the state of the separate OOM fix.
+
+A fixed version accompanied by older session behaviour is conflicting
+evidence. The result advises verifying the running workers, vendor patches
+and the session extension rather than asserting an explanation. FreeBSD
+packages the session extension separately, so mixed component versions are
+one possible cause. No result advises that no action is needed merely
+because a session response changed.
 
 Every result carries the evidence it was drawn from and the commands that
 settle the question on the server. They include the session extension's own

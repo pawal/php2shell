@@ -203,7 +203,7 @@ func TestCheck(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.Verdict != verdict.Vulnerable || !report.OracleRun || report.Cached || report.Target != "https://example.com/" {
+	if report.Verdict != verdict.LikelyVulnerable || !report.OracleRun || report.Cached || report.Target != "https://example.com/" {
 		t.Errorf("report: %+v", report)
 	}
 }
@@ -299,7 +299,7 @@ func TestScanLog(t *testing.T) {
 	}
 	line := strings.TrimSpace(string(data))
 	fields := strings.Fields(line)
-	if len(fields) != 4 || fields[1] != "example.com" || fields[2] != verdict.Vulnerable || fields[3] != "oracle" {
+	if len(fields) != 4 || fields[1] != "example.com" || fields[2] != verdict.LikelyVulnerable || fields[3] != "oracle" {
 		t.Errorf("log line %q", line)
 	}
 	if _, err := time.Parse(time.RFC3339, fields[0]); err != nil {

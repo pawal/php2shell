@@ -20,9 +20,9 @@ func TestLab(t *testing.T) {
 		oracle bool
 		want   string
 	}{
-		{"18081", true, verdict.Vulnerable},
+		{"18081", true, verdict.LikelyVulnerable},
 		{"18081", false, verdict.LikelyVulnerable},
-		{"18082", true, verdict.Patched},
+		{"18082", true, verdict.LikelyPatched},
 		{"18082", false, verdict.LikelyPatched},
 		{"18083", true, verdict.NoPHPSignal},
 		{"18084", true, verdict.NoPHPSignal},
@@ -54,8 +54,8 @@ func TestLive(t *testing.T) {
 		want   string
 		oracle bool
 	}{
-		{"PHP2SHELL_LIVE_UNPATCHED", verdict.Vulnerable, true},
-		{"PHP2SHELL_LIVE_PATCHED", verdict.Patched, true},
+		{"PHP2SHELL_LIVE_UNPATCHED", verdict.LikelyVulnerable, true},
+		{"PHP2SHELL_LIVE_PATCHED", verdict.LikelyPatched, true},
 		{"PHP2SHELL_LIVE_STATIC", verdict.NoPHPSignal, true},
 	}
 	ran := false

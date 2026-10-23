@@ -67,6 +67,8 @@ probe requires its exact request and decision logic, followed by comparison
 on controlled patched and unpatched targets with matched configuration.
 
 The checker MUST NOT add memory-exhaustion probes to its public workflow
-on the strength of the published error-message criterion. Its existing
-session-path observations are a separate patch-associated signal, with
-the limits described in [method.md](method.md).
+on the strength of the published error-message criterion. Its session-path
+observations are a separate patch-associated signal. As of 2026-10-23 they
+are explicitly path-scoped and cannot produce confirmed patched/vulnerable
+verdicts, override older reported versions or prove complete backports.
+Incomplete responses are not classified. See [method.md](method.md).

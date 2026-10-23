@@ -13,11 +13,11 @@ const Verify = "Verify on the server: the version the web server runs, the packa
 const RemovePHPInfo = "Remove the public phpinfo() page; it discloses the PHP version and configuration."
 
 // Mitigate lists the official stopgaps.
-const Mitigate = "Until upgraded, set session.upload_progress.enabled=0 and memory_limit=-1 in php.ini and restart the workers. These narrow the exposure but do not fix it."
+const Mitigate = "Until upgraded, enforce memory_limit=-1 administratively for the OOM paths of CVE-2026-109618. Disable session.upload_progress.enabled for the session paths of CVE-2026-109619, and fatal_error_backtraces on PHP 8.5 for its backtrace path. Restart every worker. These are partial measures, not complete fixes."
 
 var recommendations = map[string][]string{
 	Vulnerable:         {Upgrade, Restart, Mitigate},
-	Patched:            {"No action is needed for this path. Keep session.upload_progress.enabled=0 if the feature is unused."},
+	Patched:            {Verify, "Confirm vendor fixes for both CVEs on every PHP runtime serving the site."},
 	LikelyVulnerable:   {Upgrade, Restart, Mitigate, Verify},
 	PossiblyBackported: {"Check the installed package against your distribution's advisory for CVE-2026-109618 and CVE-2026-109619.", Restart, Verify},
 	EOLBranch:          {"Upgrade to a supported branch, or confirm that your vendor ships a fixed package for this one.", Restart, Mitigate},

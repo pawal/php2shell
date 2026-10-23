@@ -95,31 +95,36 @@ func (p *Prober) newSession() *session {
 func (s *session) close() { s.transport.CloseIdleConnections() }
 
 // do sends one request under the per-request timeout and reads a bounded body.
-func (s *session) do(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, string, error) {
+func (s *session) do(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, string, bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.prober.requestTimeout())
 	defer cancel()
 	req = req.WithContext(ctx)
 	req.Header.Set("User-Agent", s.prober.userAgent())
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, "", unwrapURLError(err)
+		return nil, "", false, unwrapURLError(err)
 	}
 	defer resp.Body.Close()
 	limit := s.prober.maxBody()
-	body, err := io.ReadAll(io.LimitReader(resp.Body, limit))
+	body, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
 	// phpinfo() output may pass the cap before its session section.
-	if err == nil && int64(len(body)) == limit && limit < maxPHPInfoBody && phpinfoVersion(string(body)) != "" {
-		rest, _ := io.ReadAll(io.LimitReader(resp.Body, maxPHPInfoBody-limit))
+	if err == nil && int64(len(body)) > limit && limit < maxPHPInfoBody && req.Method == http.MethodGet && phpinfoVersion(string(body)) != "" {
+		rest, readErr := io.ReadAll(io.LimitReader(resp.Body, maxPHPInfoBody+1-int64(len(body))))
 		body = append(body, rest...)
+		limit, err = maxPHPInfoBody, readErr
 	}
-	if err != nil && len(body) == 0 {
-		return resp, "", unwrapURLError(err)
+	complete := err == nil && int64(len(body)) <= limit
+	if int64(len(body)) > limit {
+		body = body[:limit]
 	}
-	return resp, string(body), nil
+	return resp, string(body), complete, unwrapURLError(err)
 }
 
 // unwrapURLError surfaces a policy refusal from inside the transport.
 func unwrapURLError(err error) error {
+	if err == nil {
+		return nil
+	}
 	var policy *PolicyError
 	if errors.As(err, &policy) {
 		return policy

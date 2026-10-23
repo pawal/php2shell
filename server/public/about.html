@@ -5,11 +5,11 @@
 {{template "header" .}}
 <main>
 <h1>About the PHP2Shell check</h1>
-<p class="lead">A free service that tells site owners whether their PHP is still exposed to CVE-2026-109618 and CVE-2026-109619, and what to do about it.</p>
+<p class="lead">A free service that helps site owners assess their PHP versions against CVE-2026-109618 and CVE-2026-109619, with the evidence and steps to verify the fixes on the server.</p>
 
 <h2>How it works</h2>
-<p>The check reads the PHP version your server advertises and compares it with the fixed releases. When you confirm that you own the site, it adds one small request whose answer differs between patched and unpatched PHP, and asks for /phpinfo.php and /info.php if no version shows. Nothing is written to your server and nothing is attempted beyond those requests.</p>
-<p>The check reports patch state, not exploitability. How hard the flaws are to exploit varies by server setup; the PHP project rates Apache with mod_php as the highest risk, and an unpatched release is worth fixing whatever the setup.</p>
+<p>The check compares PHP versions reported by your site with the releases that fix both CVEs. When you confirm that you own the site, it sends small session-handling requests to the candidate paths, and asks for /phpinfo.php and /info.php if no version shows. It records complete responses and their URLs; incomplete session responses are not classified.</p>
+<p>Session warnings indicate older or changed session behaviour on that path. They do not establish exploitability, a complete backport, or the separate out-of-memory fix for CVE-2026-109618. No memory-exhaustion or exploit test is run. A patched session response cannot override an older version seen elsewhere on the site. The PHP project rates Apache with mod_php as the highest risk; vendor fixes and the running PHP workers must be verified on the server.</p>
 
 <h2>What it cannot see</h2>
 <p>A server that hides its version and its errors gives no signal, patched or not. Distribution packages may carry the fix under an older version number. The check never reports a site as safe, only what it saw.</p>
