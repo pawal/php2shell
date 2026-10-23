@@ -3,7 +3,12 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.11 (2026-10-23)
+
+Owners can check again a minute after a cached result, for example after
+patching. A site whose HTTPS does not answer is checked over plain HTTP,
+results are cached per scheme, host and port, and the check log names why
+a site was unreachable or blocked.
 
 - An assumed HTTPS that does not answer is retried over plain HTTP too, while time remains.
 - Cached results are kept per scheme, host and port instead of per host.
