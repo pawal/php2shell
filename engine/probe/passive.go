@@ -13,6 +13,7 @@ type Passive struct {
 	Blocked        string            `json:"inspection_blocked,omitempty"`
 	Error          string            `json:"error,omitempty"`
 	BodyIncomplete bool              `json:"body_incomplete,omitempty"`
+	ReadError      string            `json:"read_error,omitempty"`
 	FinalURL       string            `json:"final_url"`
 	Status         int               `json:"status"`
 	Server         string            `json:"server,omitempty"`
@@ -73,13 +74,14 @@ func (s *session) fetchPage(ctx context.Context, target Target, follow bool) (Pa
 	if err != nil {
 		return out, err
 	}
-	resp, text, complete, err := s.do(ctx, client, req)
-	if err != nil && (resp == nil || len(text) == 0) {
+	got, err := s.do(ctx, client, req)
+	if err != nil {
 		return out, err
 	}
-	out.BodyIncomplete = !complete
-	if err != nil {
-		out.Error = err.Error()
+	resp, text := got.resp, got.text
+	out.BodyIncomplete = !got.complete
+	if got.readErr != nil {
+		out.ReadError = got.readErr.Error()
 	}
 	out.FinalURL, out.Status = resp.Request.URL.String(), resp.StatusCode
 	out.Server, out.PoweredBy = resp.Header.Get("Server"), resp.Header.Get("X-Powered-By")

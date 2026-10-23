@@ -98,11 +98,12 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		}
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		req.Header.Set("Cookie", "PHPSESSID=_")
-		resp, text, complete, err := s.do(ctx, client, req)
-		observation := OracleObservation{URL: path, Complete: complete, Result: verdict.OracleSilent}
-		if resp != nil {
-			observation.Status = resp.StatusCode
-			observation.Blocked = inspectionBlock(resp, text)
+		got, err := s.do(ctx, client, req)
+		text := got.text
+		observation := OracleObservation{URL: path, Complete: got.complete, Result: verdict.OracleSilent}
+		if got.resp != nil {
+			observation.Status = got.resp.StatusCode
+			observation.Blocked = inspectionBlock(got.resp, text)
 		}
 		observation.InvalidID = strings.Count(text, invalidIDWarning)
 		observation.FailedRead = strings.Count(text, failedReadWarning)
@@ -110,8 +111,10 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		observation.Lines = warningLines(text)
 		if err != nil {
 			observation.Error = err.Error()
+		} else if got.readErr != nil {
+			observation.Error = got.readErr.Error()
 		}
-		if err == nil && complete && observation.Blocked == "" && observation.Status >= 200 && observation.Status < 300 && observation.InvalidID > 0 && observation.FailedRead > 0 {
+		if observation.Complete && observation.Blocked == "" && observation.Status >= 200 && observation.Status < 300 && observation.InvalidID > 0 && observation.FailedRead > 0 {
 			observation.Result = verdict.OraclePatched
 			if observation.FailedWrite > 0 {
 				observation.Result = verdict.OracleUnpatched

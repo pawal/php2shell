@@ -94,15 +94,23 @@ func (p *Prober) newSession() *session {
 
 func (s *session) close() { s.transport.CloseIdleConnections() }
 
-// do sends one request under the per-request timeout and reads a bounded body.
-func (s *session) do(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, string, bool, error) {
+// answer is one response as the checker read it.
+type answer struct {
+	resp     *http.Response
+	text     string
+	complete bool  // the whole body fit under the cap
+	readErr  error // the body broke off; the headers and text before it stand
+}
+
+// do sends one request under the per-request timeout and reads a bounded body; its error means no response.
+func (s *session) do(ctx context.Context, client *http.Client, req *http.Request) (answer, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.prober.requestTimeout())
 	defer cancel()
 	req = req.WithContext(ctx)
 	req.Header.Set("User-Agent", s.prober.userAgent())
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, "", false, unwrapURLError(err)
+		return answer{}, unwrapURLError(err)
 	}
 	defer resp.Body.Close()
 	limit := s.prober.maxBody()
@@ -117,7 +125,7 @@ func (s *session) do(ctx context.Context, client *http.Client, req *http.Request
 	if int64(len(body)) > limit {
 		body = body[:limit]
 	}
-	return resp, string(body), complete, unwrapURLError(err)
+	return answer{resp: resp, text: string(body), complete: complete, readErr: unwrapURLError(err)}, nil
 }
 
 // unwrapURLError surfaces a policy refusal from inside the transport.

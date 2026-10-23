@@ -68,6 +68,9 @@ their redirects nor recurses. Paths naming actions such as logout, delete,
 reset or installation are excluded. The address policy, pinned connections,
 body cap and User-Agent apply to every request. A failed discovery request
 is recorded in the evidence and does not discard the start page.
+A body that breaks off is recorded as incomplete with its read error, and
+the headers and text that arrived still count; only a request that got no
+response at all is recorded as failed.
 
 The evidence names each inspected URL and what it showed. A framework
 fingerprint carries its source, its confidence and whether it is a
