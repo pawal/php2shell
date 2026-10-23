@@ -171,6 +171,39 @@ so an attack on its memory cannot starve Caddy or the host; past it the
 service is killed and restarted. `GOMEMLIMIT` makes the Go runtime collect
 garbage harder well before that, and `MemoryHigh` starts reclaiming at 384 MB.
 
+## Address filter in the kernel
+
+The address policy in the binary is the only barrier between a check and
+non-public addresses. A systemd drop-in adds a second barrier that the kernel
+enforces, so a fault in the binary cannot reach the provider's metadata
+service, private networks or multicast:
+
+```ini
+[Service]
+IPAddressAllow=localhost
+IPAddressDeny=link-local multicast 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 fc00::/7
+```
+
+Install it with `systemctl edit php2shell` and restart the service. The
+loopback stays allowed, because the reverse proxy reaches the service there
+and a local resolver such as systemd-resolved listens there; services on the
+loopback remain protected by the address policy alone.
+
+The drop-in is not part of the package, because some hosts need a denied
+range. It MUST NOT be used when `/etc/resolv.conf` names a resolver in a
+denied range, such as `169.254.169.253` on AWS or a resolver on a private
+network. A resolver on the loopback is fine, since it queries its upstream
+servers outside this unit.
+
+To verify, a request to the metadata address under the same rule MUST fail,
+and a check of a public site MUST still succeed:
+
+    systemd-run -p IPAddressDeny=link-local --wait --pipe curl -sS -m 3 http://169.254.169.254/
+    curl -s -X POST http://127.0.0.1:8080/api/v1/check -H 'Content-Type: application/json' -d '{"url":"example.com"}'
+
+Without kernel support for the BPF filter, systemd logs a warning and lets
+the traffic through.
+
 ## Reverse proxy
 
 The binary has no TLS listener. Terminate TLS in Caddy and keep `listen_addr`
