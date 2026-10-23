@@ -114,11 +114,14 @@ func (s *session) oracle(ctx context.Context, target Target, passive Passive) (v
 		} else if got.readErr != nil {
 			observation.Error = got.readErr.Error()
 		}
-		if observation.Complete && observation.Blocked == "" && observation.Status >= 200 && observation.Status < 300 && observation.InvalidID > 0 && observation.FailedRead > 0 {
+		usable := observation.Blocked == "" && observation.Status >= 200 && observation.Status < 300
+		switch {
+		case !usable || observation.InvalidID == 0 || observation.FailedRead == 0:
+		case observation.FailedWrite > 0:
+			// A cut-off body can hide the write warning but not invent one.
+			observation.Result = verdict.OracleUnpatched
+		case observation.Complete:
 			observation.Result = verdict.OraclePatched
-			if observation.FailedWrite > 0 {
-				observation.Result = verdict.OracleUnpatched
-			}
 		}
 		observations = append(observations, observation)
 		if err != nil {

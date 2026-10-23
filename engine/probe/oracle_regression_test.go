@@ -117,3 +117,34 @@ func TestUnsuccessfulSessionPageIsNotClassified(t *testing.T) {
 		t.Fatalf("%+v %v", in, err)
 	}
 }
+
+// Older behaviour counts however the body ended, since the write warning was read.
+func TestOlderSessionBehaviourOnPartialBodies(t *testing.T) {
+	for _, truncated := range []bool{true, false} {
+		t.Run(fmt.Sprintf("connection_truncated=%t", truncated), func(t *testing.T) {
+			older := readWarnings + " " + failedWriteWarning
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					return
+				}
+				if truncated {
+					breakOff(w, older)
+				} else {
+					fmt.Fprint(w, older+strings.Repeat("x", 200))
+				}
+			}))
+			defer srv.Close()
+			p := &Prober{AllowNonGlobal: true}
+			if !truncated {
+				p.MaxBody = int64(len(older) + 10)
+			}
+			in, evidence, err := checkURL(t, p, srv.URL, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if in.Oracle != verdict.OracleUnpatched || evidence.Requests[0].Complete || evidence.Requests[0].Result != verdict.OracleUnpatched {
+				t.Fatalf("%+v %+v", in, evidence.Requests)
+			}
+		})
+	}
+}

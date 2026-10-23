@@ -126,12 +126,15 @@ this observation exercises. The evidence does not establish that either
 vulnerability is exploitable on the target.
 
 Each session observation keeps its URL, status, warning counts, completeness,
-read error if any, and `session_result`. A response MUST be complete,
-unblocked and HTTP 2xx before a warning pattern is classified. Body caps
+read error if any, and `session_result`. A response MUST be unblocked and
+HTTP 2xx before a warning pattern is classified. Older behaviour, all three
+warnings, is classified from whatever arrived, since a cut-off body can hide
+the third warning but not invent it. The pattern associated with the fix,
+the first two warnings without the third, requires a complete body. Body caps
 are detected with a bounded extra byte; an exact-size complete body remains
-eligible. A read error or a body beyond the cap MUST produce an unclassified
-observation even when the first two warnings are present. Their absence of
-a third warning is not evidence of a fix. Partial passive responses MAY
+eligible. A read error or a body beyond the cap leaves the first two warnings
+unclassified, since the absence of a third warning is then not evidence of a
+fix. Partial passive responses MAY
 still supply headers and hints, with their incompleteness recorded.
 
 It shows nothing when warnings are hidden, which is the production default,
