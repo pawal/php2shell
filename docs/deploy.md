@@ -84,7 +84,9 @@ Notes on the keys:
   result. Two checks of one origin at once run once. A result made without
   the session request does not answer a request for it. A request with
   `refresh` runs a fresh check once the cached result is a minute old, so an
-  owner can check again after patching. Zero disables the cache.
+  owner can check again after patching. The cache holds at most 10,000
+  results and 64 MiB of them, measured as encoded JSON; past either bound it
+  starts over. Zero disables the cache.
 - `max_concurrent_checks` bounds checks in flight; past it a check is refused
   with 503 and `Retry-After`. `check_timeout` bounds one check.
 - `log_file` receives one line per check; see below. Empty logs nothing.

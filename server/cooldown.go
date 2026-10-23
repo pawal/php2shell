@@ -1,12 +1,16 @@
 package server
 
 import (
+	"encoding/json"
 	"sync"
 	"time"
 )
 
 // maxCached bounds the cache; past it the cache starts over.
 const maxCached = 10000
+
+// maxCacheBytes bounds the encoded size of the cached reports; past it the cache starts over.
+const maxCacheBytes = 64 << 20
 
 // refreshFloor is how old a result must be before a refresh runs a fresh check.
 const refreshFloor = time.Minute
@@ -17,8 +21,11 @@ type cooldown struct {
 	window time.Duration
 	now    func() time.Time
 
+	budget int // maxCacheBytes, smaller in tests
+
 	mu        sync.Mutex
 	entries   map[string]cached
+	bytes     int
 	inflight  map[string]*flight
 	lastSweep time.Time
 }
@@ -26,6 +33,7 @@ type cooldown struct {
 type cached struct {
 	report Report
 	at     time.Time
+	size   int
 }
 
 type flight struct {
@@ -36,7 +44,7 @@ type flight struct {
 }
 
 func newCooldown(window time.Duration, now func() time.Time) *cooldown {
-	return &cooldown{window: window, now: now, entries: map[string]cached{}, inflight: map[string]*flight{}}
+	return &cooldown{window: window, now: now, budget: maxCacheBytes, entries: map[string]cached{}, inflight: map[string]*flight{}}
 }
 
 // do returns a fresh result for host, waits for a check already running, or
@@ -66,10 +74,13 @@ func (c *cooldown) do(host string, oracle, refresh bool, fn func() (Report, erro
 		delete(c.inflight, host)
 	}
 	if err == nil && c.window > 0 {
-		if len(c.entries) >= maxCached {
-			c.entries = map[string]cached{}
+		data, _ := json.Marshal(report)
+		c.bytes -= c.entries[host].size
+		if len(c.entries) >= maxCached || c.bytes+len(data) > c.budget {
+			c.entries, c.bytes = map[string]cached{}, 0
 		}
-		c.entries[host] = cached{report: report, at: c.now()}
+		c.entries[host] = cached{report: report, at: c.now(), size: len(data)}
+		c.bytes += len(data)
 	}
 	c.mu.Unlock()
 	f.report, f.err = report, err
@@ -86,6 +97,7 @@ func (c *cooldown) sweep(now time.Time) {
 	for host, e := range c.entries {
 		if now.Sub(e.at) >= c.window {
 			delete(c.entries, host)
+			c.bytes -= e.size
 		}
 	}
 }

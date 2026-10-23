@@ -6,6 +6,7 @@ number is written.
 ## Unreleased
 
 - Evidence keeps bounded amounts of a site's own text, so a hostile site cannot inflate a report.
+- The result cache holds at most 64 MiB besides its 10,000 entries.
 
 ## v1.0.12 (2026-10-23)
 
