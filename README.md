@@ -11,7 +11,8 @@ embedded.
 The address policy, passive fetch, session request, verdict engine, service
 and page are implemented. Unit tests cover the network checks against local
 HTTP and HTTPS servers, and the Docker lab acceptance tests pass using
-Colima. The manual Firefox pass and public deployment remain to be verified.
+Colima. The service runs publicly at https://php2shell.evilbit.de. A manual
+browser pass of the evidence view remains to be done.
 
 ## Overview
 
