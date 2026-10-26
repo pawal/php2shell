@@ -50,6 +50,26 @@ func TestRecommendationsCoverEveryVerdict(t *testing.T) {
 	}
 }
 
+// Every verdict drawn from PHP evidence asks for a compromise check; only affected ones advise going offline.
+func TestCompromiseAdvice(t *testing.T) {
+	for _, code := range []string{Vulnerable, Patched, LikelyVulnerable, PossiblyBackported, EOLBranch, LikelyPatched, Inconclusive} {
+		if !slices.Contains(recommendations[code], Assess) {
+			t.Errorf("%s lacks the compromise check", code)
+		}
+	}
+	for _, code := range []string{NoPHPSignal, Unreachable, InspectionBlocked} {
+		if slices.Contains(recommendations[code], Assess) {
+			t.Errorf("%s asks for a compromise check without PHP evidence", code)
+		}
+	}
+	for code, advice := range recommendations {
+		want := code == Vulnerable || code == LikelyVulnerable || code == EOLBranch
+		if slices.Contains(advice, Offline) != want {
+			t.Errorf("%s: offline advice %v, want %v", code, !want, want)
+		}
+	}
+}
+
 // Older session behaviour under a fixed header is conflicting evidence.
 func TestUnpatchedUnderFixedHeader(t *testing.T) {
 	got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OracleUnpatched})

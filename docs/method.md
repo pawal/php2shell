@@ -7,6 +7,13 @@ the project provides minimal source backports for 7.4, 8.0 and 8.1, and
 vendors may provide fixed packages. The [PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)
 is the authoritative description and lists the interim measures.
 
+Exploitation attempts were seen from 17 October 2026, four days before the
+fix was released, as [Amazon reports](https://aws.amazon.com/blogs/security/amazon-threat-intelligence-identifies-php2shell-exploitation-prior-to-public-disclosure-in-madpot/).
+[CISA](https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching),
+the [NCSC](https://www.ncsc.gov.uk/news/critical-security-issue-affecting-php)
+and [CERT-EU](https://cert.europa.eu/publications/security-advisories/2026-018/)
+advise taking a system offline when it cannot be patched at once.
+
 A check is remote, so its result is an assessment of the observed paths,
 not proof of a complete fix or exploitability. Only verification of the
 running PHP builds and vendor patches on the server is conclusive.
@@ -212,7 +219,15 @@ because a session response changed.
 Every result carries the evidence it was drawn from and the commands that
 settle the question on the server. The commands include the session
 extension's own version, and when the `Server` header names FreeBSD they use
-`pkg` and `service` in place of the Debian and Red Hat tools. Evidence keeps
+`pkg` and `service` in place of the Debian and Red Hat tools.
+
+Upgrading does not remove a backdoor installed before it. Every result
+drawn from PHP evidence, that is every verdict except `no_php_signal`,
+`inspection_blocked` and `unreachable`, therefore asks for a check for signs
+of compromise since 17 October 2026, and the commands list the process tree
+and the files changed since that date. The `likely_vulnerable` and
+`eol_branch` results also relay the advice to take the site offline when it
+cannot be upgraded at once. Evidence keeps
 at most 256 bytes of a header value or server signature, 1 KiB of a URL, 32
 cookie names and 16 fingerprints per page; a longer value is cut and marked
 with `...`, so a site cannot inflate a report.

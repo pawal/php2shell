@@ -3,6 +3,14 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- The page and results say exploitation attempts began on 17 October 2026.
+- Results drawn from PHP evidence ask for a check for signs of compromise.
+- The server commands list the process tree and files changed since 17 October 2026.
+- Affected and end-of-life results advise taking the site offline when an upgrade must wait.
+- The about page links to the government advisories, the Amazon and Cloudflare reports and the Delft attack dashboard.
+
 ## v1.0.14 (2026-10-23)
 
 A small release about the session request. It now carries its invalid

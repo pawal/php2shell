@@ -14,6 +14,7 @@
 <h1>Is your website exposed to PHP2Shell?</h1>
 <p class="lead">PHP2Shell is a pair of critical PHP flaws, CVE-2026-109618 and CVE-2026-109619. Enter your site to compare its reported PHP versions with the fixed releases and, with your permission, inspect session-handling behaviour.</p>
 <p><a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">CVE-2026-109618</a> and <a href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">CVE-2026-109619</a> were first fixed in PHP <strong>8.2.35, 8.3.36, 8.4.27 and 8.5.12</strong>. Version evidence is compared with these releases for both CVEs. The session check does not verify either complete fix, and no memory-exhaustion or exploit test is run. Vendor backports may keep an older version number.</p>
+<p class="notice">Exploitation attempts began on 17 October 2026, four days before the fix was released, as <a href="https://aws.amazon.com/blogs/security/amazon-threat-intelligence-identifies-php2shell-exploitation-prior-to-public-disclosure-in-madpot/">Amazon reports</a>. The <a href="https://php2shell.delftintellab.com/">Delft Threat Intelligence Lab</a> tracks the attacks it sees.</p>
 
 <form id="check-form" class="check" novalidate>
 <label for="url">Website address</label>
@@ -34,11 +35,12 @@
 <h2>What it cannot see</h2>
 <p>A hardened server advertises no version and shows no errors. Distributions such as Ubuntu and Red Hat also fix PHP without changing the version number. A result without a finding is therefore not proof of safety. Only a check on the server itself is conclusive.</p>
 
-<h2>If your site is flagged</h2>
+<h2>If your site runs PHP</h2>
 <ul>
 <li>Upgrade PHP to 8.5.12, 8.4.27, 8.3.36 or 8.2.35, or install your vendor's fixed package.</li>
 <li>Restart every PHP worker afterwards, so the old code is no longer running.</li>
-<li>Follow the <a href="https://www.php.net/archive/2026.php#2026-10-21-5">PHP security advisory</a> for interim measures.</li>
+<li>If you cannot upgrade at once, take the site offline until it is fixed, as <a href="https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching">CISA</a>, the <a href="https://www.ncsc.gov.uk/news/critical-security-issue-affecting-php">NCSC</a> and <a href="https://cert.europa.eu/publications/security-advisories/2026-018/">CERT-EU</a> advise. The <a href="https://www.php.net/archive/2026.php#2026-10-21-5">PHP security advisory</a> lists interim measures, which are partial.</li>
+<li>Look for signs of compromise since 17 October 2026, since upgrading does not remove a backdoor: PHP workers that started shells or downloaded tools, unexpected processes, and changed files. The <a href="https://php2shell.delftintellab.com/">Delft dashboard</a> lists the download addresses and malware hashes seen in attacks.</li>
 </ul>
 </main>
 {{template "footer" .}}

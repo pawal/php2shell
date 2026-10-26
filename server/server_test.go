@@ -370,6 +370,9 @@ func TestLocalCheckFollowsServerHeader(t *testing.T) {
 		if !strings.Contains(text, `phpversion("session")`) {
 			t.Errorf("%s lacks the session extension version: %s", name, text)
 		}
+		if !strings.Contains(text, "-newermt 2026-10-17") {
+			t.Errorf("%s lacks the changed-file search: %s", name, text)
+		}
 	}
 }
 

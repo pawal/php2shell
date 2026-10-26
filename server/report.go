@@ -22,6 +22,8 @@ var localCheck = []string{
 	"dpkg -l 'php*' | grep -E 'fpm|apache'",
 	"rpm -q php php-fpm",
 	"php -i | grep -iE 'session.upload_progress.enabled|display_errors'",
+	"ps -ef --forest",
+	"find /var/www /tmp /var/tmp /dev/shm -type f -newermt 2026-10-17",
 	"systemctl restart php-fpm apache2",
 }
 
@@ -31,6 +33,8 @@ var freebsdCheck = []string{
 	`php -r 'echo phpversion("session"), PHP_EOL;'`,
 	"pkg info -x php",
 	"php -i | grep -iE 'session.upload_progress.enabled|display_errors'",
+	"ps -auxd",
+	"find /usr/local/www /tmp /var/tmp -type f -newermt 2026-10-17",
 	"service apache24 restart; service php_fpm restart",
 }
 

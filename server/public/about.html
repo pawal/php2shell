@@ -27,7 +27,17 @@
 <p>Requests carry a <code>User-Agent</code> beginning with <code>php2shell-check</code> and a link to this page.
 {{- if .Sources}} They come from {{range $i, $a := .Sources}}{{if $i}} and {{end}}<code>{{$a}}</code>{{end}}.{{end}}</p>
 <p>When you confirm that you own the site, the check also sends a small multipart <code>POST</code> to a few paths, such as the start page and <code>/index.php</code>. It carries a form field <code>PHP_SESSION_UPLOAD_PROGRESS</code> with the value <code>probe</code>, a one-byte upload named <code>probe.txt</code>, and the cookie <code>PHPSESSID=_</code>. The same invalid ID is also sent as a <code>PHPSESSID</code> form field, so the check still works behind a proxy that drops cookies. PHP's default session handler rejects the ID. A firewall rule against upload-progress requests stops this request too, and the result then says the session request was blocked.</p>
+<p>Amazon advises searching logs for upload-progress requests when looking for attacks. Those carrying this User-Agent and the value <code>probe</code> came from this check, though anyone can copy a User-Agent.</p>
 <p>Some firewalls and hosts refuse the check, and the result then says it was blocked or got no answer. To let it through, allow {{if .Sources}}these addresses{{else}}this User-Agent{{end}} while you check, or check on the server with the commands every result lists.</p>
+
+<h2>Further reading</h2>
+<ul>
+<li>The <a href="https://www.php.net/archive/2026.php#2026-10-21-5">PHP security advisory</a>, with the fixed releases and interim measures, and the advisories for <a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">CVE-2026-109618</a> and <a href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">CVE-2026-109619</a>.</li>
+<li>Government advice from <a href="https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching">CISA</a>, the UK <a href="https://www.ncsc.gov.uk/news/critical-security-issue-affecting-php">NCSC</a> and <a href="https://cert.europa.eu/publications/security-advisories/2026-018/">CERT-EU</a>.</li>
+<li><a href="https://aws.amazon.com/blogs/security/amazon-threat-intelligence-identifies-php2shell-exploitation-prior-to-public-disclosure-in-madpot/">Amazon</a> on exploitation attempts before disclosure and what to look for on a server.</li>
+<li><a href="https://blog.cloudflare.com/php-vulnerabilities-waf-protection">Cloudflare</a> on its firewall rules, which attackers tried to evade and which do not replace the fix.</li>
+<li>The <a href="https://php2shell.delftintellab.com/">Delft Threat Intelligence Lab</a> on the attacks it has seen since 20 October 2026, with download addresses and malware hashes to block.</li>
+</ul>
 
 <h2>Source</h2>
 <p>The service is free software under the BSD 2-Clause license. The source is at <a href="{{.SourceURL}}">{{.SourceURL}}</a>.</p>

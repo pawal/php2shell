@@ -24,7 +24,7 @@ Session warnings are path-specific indicators; they do not verify complete
 fixes, establish a backport or test the OOM corruption in CVE-2026-109618.
 Incomplete session responses are not classified. Every result says what it
 was drawn from and how to verify the running builds and patches on the
-server. [docs/method.md](docs/method.md) describes what is observed and
+server, and asks for a check for signs of compromise where PHP was seen. [docs/method.md](docs/method.md) describes what is observed and
 what each verdict means.
 
 Without a version, the check looks for other signs of PHP in the response
