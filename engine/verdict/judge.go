@@ -95,6 +95,9 @@ func judgeReached(in Input) Result {
 	if out.Version != nil {
 		out.Summary += disagreement(*out.Version, sightings(in))
 	}
+	if exposed(out.Verdict) {
+		out.Summary += demonstratedNote(in.Hints) + firewallNote(in)
+	}
 	// A block the summary already names needs no guess about the layer in front.
 	genericBlock := out.Verdict == InspectionBlocked && strings.HasPrefix(in.InspectionBlocked, "HTTP ")
 	if len(in.Front) > 0 && (out.Verdict == NoPHPSignal || out.Verdict == Inconclusive || genericBlock || in.Oracle == OracleSilent) {
@@ -213,6 +216,40 @@ func silentNote(in Input) string {
 
 func result(verdict, confidence, summary string, v *Version) Result {
 	return Result{Verdict: verdict, Confidence: confidence, Summary: summary, Version: v, Recommendations: recommendations[verdict]}
+}
+
+// exposed reports whether a verdict leaves the site possibly unfixed.
+func exposed(verdict string) bool {
+	switch verdict {
+	case Vulnerable, LikelyVulnerable, PossiblyBackported, EOLBranch, Inconclusive, InspectionBlocked:
+		return true
+	}
+	return false
+}
+
+// Applications Wiz demonstrated remote code execution against.
+var demonstrated = []string{"WordPress", "Drupal", "Joomla"}
+
+// demonstratedNote names a demonstrated target among the site's hints.
+func demonstratedNote(hints []string) string {
+	var apps []string
+	for _, app := range demonstrated {
+		if slices.ContainsFunc(hints, func(hint string) bool { return strings.Contains(strings.ToLower(hint), strings.ToLower(app)) }) {
+			apps = append(apps, app)
+		}
+	}
+	if len(apps) == 0 {
+		return ""
+	}
+	return " Wiz demonstrated unauthenticated remote code execution through these flaws against " + strings.Join(apps, " and ") + ", which the site appears to run."
+}
+
+// firewallNote says Cloudflare's rules are no fix when Cloudflare answers in front.
+func firewallNote(in Input) string {
+	if !slices.Contains(in.Front, "Cloudflare") && !strings.HasPrefix(in.InspectionBlocked, "Cloudflare") && !strings.HasPrefix(in.SessionBlocked, "Cloudflare") {
+		return ""
+	}
+	return " Cloudflare's firewall rules for these flaws do not replace the fix: Cloudflare saw attackers change payloads to evade them and advises patching."
 }
 
 // frontNote says what a layer in front of the site can hide from a remote check.

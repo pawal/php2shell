@@ -67,6 +67,48 @@ func TestCompromiseAdvice(t *testing.T) {
 		if slices.Contains(advice, Offline) != want {
 			t.Errorf("%s: offline advice %v, want %v", code, !want, want)
 		}
+		if slices.Contains(advice, Assess) && !slices.Contains(advice, MitigateSession) && !slices.Contains(advice, ProgressOff) {
+			t.Errorf("%s lacks the advice for CVE-2026-115560", code)
+		}
+	}
+}
+
+// A demonstrated target is named only while the site may be unfixed.
+func TestDemonstratedNote(t *testing.T) {
+	hints := []string{"generator WordPress", "Joomla assets"}
+	affected := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.20", Hints: hints})
+	if !strings.Contains(affected.Summary, "against WordPress and Joomla, which the site appears to run") {
+		t.Errorf("affected: %s", affected.Summary)
+	}
+	fixed := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.27", Hints: hints})
+	if strings.Contains(fixed.Summary, "Wiz") {
+		t.Errorf("fixed: %s", fixed.Summary)
+	}
+	other := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.20", Hints: []string{"TYPO3 assets"}})
+	if strings.Contains(other.Summary, "Wiz") {
+		t.Errorf("other: %s", other.Summary)
+	}
+}
+
+// Cloudflare in front, or its challenge, earns the note that its rules are no fix.
+func TestFirewallNote(t *testing.T) {
+	const note = "Cloudflare's firewall rules for these flaws do not replace the fix"
+	for name, in := range map[string]Input{
+		"front":     {Reachable: true, PoweredBy: "PHP/8.4.20", Front: []string{"Cloudflare"}},
+		"challenge": {Reachable: true, InspectionBlocked: "Cloudflare challenge"},
+		"session":   {Reachable: true, PoweredBy: "PHP/8.4.20", Oracle: OracleSilent, SessionBlocked: "Cloudflare challenge"},
+	} {
+		if got := Judge(in); !strings.Contains(got.Summary, note) {
+			t.Errorf("%s: %s", name, got.Summary)
+		}
+	}
+	for name, in := range map[string]Input{
+		"fixed":   {Reachable: true, PoweredBy: "PHP/8.4.27", Front: []string{"Cloudflare"}},
+		"varnish": {Reachable: true, PoweredBy: "PHP/8.4.20", Front: []string{"Varnish"}},
+	} {
+		if got := Judge(in); strings.Contains(got.Summary, note) {
+			t.Errorf("%s: %s", name, got.Summary)
+		}
 	}
 }
 

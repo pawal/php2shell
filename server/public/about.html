@@ -12,7 +12,7 @@
 <p>Session warnings indicate older or changed session behaviour on that path. They do not establish exploitability, a complete backport, or the separate out-of-memory fix for CVE-2026-109618. No memory-exhaustion or exploit test is run. A patched session response cannot override an older version seen elsewhere on the site. The PHP project rates Apache with mod_php as the highest risk; vendor fixes and the running PHP workers must be verified on the server.</p>
 
 <h2>What it cannot see</h2>
-<p>A server that hides its version and its errors gives no signal, patched or not. Distribution packages may carry the fix under an older version number. The check never reports a site as safe, only what it saw.</p>
+<p>A server that hides its version and its errors gives no signal, patched or not. Distribution packages may carry the fix under an older version number. It does not assess CVE-2026-115560, which depends on how an application switches its session serializer. The check never reports a site as safe, only what it saw.</p>
 
 <h2>Which targets are checked</h2>
 <p>Public domain names and public IP addresses only, on ports 80, 443, 8080 and 8443. Private, loopback, link-local and other non-public addresses are refused, including IPv4 addresses carried inside IPv6. Each site, by scheme, host and port, is checked at most once every few minutes; a repeated request receives the earlier result. A minute after a check, Check again runs a fresh one, for example after patching.</p>
@@ -32,8 +32,9 @@
 
 <h2>Further reading</h2>
 <ul>
-<li>The <a href="https://www.php.net/archive/2026.php#2026-10-21-5">PHP security advisory</a>, with the fixed releases and interim measures, and the advisories for <a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">CVE-2026-109618</a> and <a href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">CVE-2026-109619</a>.</li>
+<li>The <a href="https://www.php.net/archive/2026.php#2026-10-21-5">PHP security advisory</a>, with the fixed releases and interim measures, and the advisories for <a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">CVE-2026-109618</a> and <a href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">CVE-2026-109619</a>, and the <a href="https://www.php.net/archive/2026.php#2026-10-23-1">informational advisory</a> on CVE-2026-115560.</li>
 <li>Government advice from <a href="https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching">CISA</a>, the UK <a href="https://www.ncsc.gov.uk/news/critical-security-issue-affecting-php">NCSC</a> and <a href="https://cert.europa.eu/publications/security-advisories/2026-018/">CERT-EU</a>.</li>
+<li><a href="https://www.wiz.io/blog/php2shell-php-rce">Wiz</a> on the discovery and its demonstrations against WordPress, Drupal and Joomla.</li>
 <li><a href="https://aws.amazon.com/blogs/security/amazon-threat-intelligence-identifies-php2shell-exploitation-prior-to-public-disclosure-in-madpot/">Amazon</a> on exploitation attempts before disclosure and what to look for on a server.</li>
 <li><a href="https://blog.cloudflare.com/php-vulnerabilities-waf-protection">Cloudflare</a> on its firewall rules, which attackers tried to evade and which do not replace the fix.</li>
 <li>The <a href="https://php2shell.delftintellab.com/">Delft Threat Intelligence Lab</a> on the attacks it has seen since 20 October 2026, with download addresses and malware hashes to block.</li>

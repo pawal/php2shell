@@ -14,6 +14,12 @@ the [NCSC](https://www.ncsc.gov.uk/news/critical-security-issue-affecting-php)
 and [CERT-EU](https://cert.europa.eu/publications/security-advisories/2026-018/)
 advise taking a system offline when it cannot be patched at once.
 
+On 23 October 2026 the PHP project announced CVE-2026-115560, an unlikely
+variant in session upload progress that its next bugfix release fixes
+([informational advisory](https://www.php.net/archive/2026.php#2026-10-23-1)). It needs an application that switches
+`session.serialize_handler` to `php` at runtime, which a remote check cannot
+observe, so no check assesses it.
+
 A check is remote, so its result is an assessment of the observed paths,
 not proof of a complete fix or exploitability. Only verification of the
 running PHP builds and vendor patches on the server is conclusive.
@@ -227,7 +233,21 @@ drawn from PHP evidence, that is every verdict except `no_php_signal`,
 of compromise since 17 October 2026, and the commands list the process tree
 and the files changed since that date. The `likely_vulnerable` and
 `eol_branch` results also relay the advice to take the site offline when it
-cannot be upgraded at once. Evidence keeps
+cannot be upgraded at once, and the PHP advisory's interim measures for each
+CVE, among them keeping `session.upload_progress.enabled=0` after the upgrade
+until the release that fixes CVE-2026-115560. The other results drawn from
+PHP evidence relay that suggestion on its own.
+
+While the verdict leaves the site possibly unfixed, that is
+`likely_vulnerable`, `possibly_backported`, `eol_branch`, `inconclusive` or
+`inspection_blocked`, the summary adds two notes. When a PHP hint names
+WordPress, Drupal or Joomla, it says that [Wiz](https://www.wiz.io/blog/php2shell-php-rce) demonstrated
+unauthenticated remote code execution against that application; the flaws
+are in PHP itself, so the absence of this note does not lower the risk. When
+Cloudflare answers in front of the site, or its challenge blocked the start
+page or the session request, it says that Cloudflare's firewall rules do not
+replace the fix, since [Cloudflare](https://blog.cloudflare.com/php-vulnerabilities-waf-protection) saw attackers change
+payloads to evade them. Evidence keeps
 at most 256 bytes of a header value or server signature, 1 KiB of a URL, 32
 cookie names and 16 fingerprints per page; a longer value is cut and marked
 with `...`, so a site cannot inflate a report.

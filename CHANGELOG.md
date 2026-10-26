@@ -10,6 +10,10 @@ number is written.
 - The server commands list the process tree and files changed since 17 October 2026.
 - Affected and end-of-life results advise taking the site offline when an upgrade must wait.
 - The about page links to the government advisories, the Amazon and Cloudflare reports and the Delft attack dashboard.
+- Results relay PHP's advice on CVE-2026-115560 until its next bugfix release.
+- Affected results list every interim measure from the PHP advisory.
+- Possibly unfixed results name WordPress, Drupal or Joomla as demonstrated targets.
+- Possibly unfixed results behind Cloudflare say its firewall rules do not replace the fix.
 
 ## v1.0.14 (2026-10-23)
 
