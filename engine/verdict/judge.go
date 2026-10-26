@@ -110,6 +110,10 @@ func judgeReached(in Input) Result {
 				advice[i] = restart
 			}
 		}
+		// Upload progress already off needs no advice to turn it off.
+		if v, ok := in.PHPInfoSettings[UploadProgress]; ok && !on(v) {
+			advice = slices.DeleteFunc(advice, func(line string) bool { return line == ProgressOff })
+		}
 		out.Recommendations = append(advice, RemovePHPInfo)
 	}
 	return out

@@ -236,7 +236,8 @@ and the files changed since that date. The `likely_vulnerable` and
 cannot be upgraded at once, and the PHP advisory's interim measures for each
 CVE, among them keeping `session.upload_progress.enabled=0` after the upgrade
 until the release that fixes CVE-2026-115560. The other results drawn from
-PHP evidence relay that suggestion on its own.
+PHP evidence relay that suggestion on its own, unless a phpinfo() page
+shows upload progress already off.
 
 While the verdict leaves the site possibly unfixed, that is
 `likely_vulnerable`, `possibly_backported`, `eol_branch`, `inconclusive` or

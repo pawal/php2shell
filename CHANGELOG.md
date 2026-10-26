@@ -11,6 +11,7 @@ number is written.
 - Affected and end-of-life results advise taking the site offline when an upgrade must wait.
 - The about page links to the government advisories, the Amazon and Cloudflare reports and the Delft attack dashboard.
 - Results relay PHP's advice on CVE-2026-115560 until its next bugfix release.
+- That advice is left out when phpinfo() shows upload progress already off.
 - Affected results list every interim measure from the PHP advisory.
 - Possibly unfixed results name WordPress, Drupal or Joomla as demonstrated targets.
 - Possibly unfixed results behind Cloudflare say its firewall rules do not replace the fix.

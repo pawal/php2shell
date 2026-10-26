@@ -73,6 +73,20 @@ func TestCompromiseAdvice(t *testing.T) {
 	}
 }
 
+// The CVE-2026-115560 advice is left out when phpinfo() shows upload progress off.
+func TestProgressOffSkippedWhenOff(t *testing.T) {
+	for value, want := range map[string]bool{"Off": false, "0": false, "On": true, "": true} {
+		in := Input{Reachable: true, PHPInfo: "8.4.27"}
+		if value != "" {
+			in.PHPInfoSettings = map[string]string{UploadProgress: value}
+		}
+		got := Judge(in)
+		if got.Verdict != LikelyPatched || slices.Contains(got.Recommendations, ProgressOff) != want {
+			t.Errorf("%q: %s %v", value, got.Verdict, got.Recommendations)
+		}
+	}
+}
+
 // A demonstrated target is named only while the site may be unfixed.
 func TestDemonstratedNote(t *testing.T) {
 	hints := []string{"generator WordPress", "Joomla assets"}
