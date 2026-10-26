@@ -3,7 +3,16 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.0.15 (2026-10-26)
+
+A release about what a result advises. Results say that exploitation
+attempts began on 17 October 2026, before the fix, and ask for a check for
+signs of compromise, with commands for it. Affected results relay the
+advice of CISA, the NCSC and CERT-EU to take a site offline that cannot be
+upgraded at once, and list every interim measure from the PHP advisory.
+Results also relay PHP's advice on CVE-2026-115560, and name demonstrated
+targets and the limits of Cloudflare's firewall rules where they apply. No
+configuration change is needed on upgrade.
 
 - The page and results say exploitation attempts began on 17 October 2026.
 - Results drawn from PHP evidence ask for a check for signs of compromise.
