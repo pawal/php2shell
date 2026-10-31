@@ -92,7 +92,8 @@ Notes on the keys:
   results and 64 MiB of them, measured as encoded JSON; past either bound it
   starts over. Zero disables the cache.
 - `max_concurrent_checks` bounds checks in flight; past it a check is refused
-  with 503 and `Retry-After`. `check_timeout` bounds one check.
+  with 503 and `Retry-After`. `check_timeout` bounds one check, and each
+  request in it may take half that time, at least 8 s.
 - `log_file` receives one line per check; see below. Empty logs nothing.
 - `fingerprint_file` MAY name a separately downloaded PHP fingerprint database.
   Empty loads `/etc/php2shell/fingerprints/php.json` when that file exists.

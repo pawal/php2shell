@@ -46,6 +46,11 @@ func (p *Prober) requestTimeout() time.Duration {
 	return DefaultRequestTimeout
 }
 
+// RequestTimeoutFor gives one request half the check budget, at least the default.
+func RequestTimeoutFor(budget time.Duration) time.Duration {
+	return max(DefaultRequestTimeout, budget/2)
+}
+
 func (p *Prober) maxBody() int64 {
 	if p.MaxBody > 0 {
 		return p.MaxBody

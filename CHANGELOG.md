@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- One request may take half the check timeout, at least 8 s, so a longer timeout reaches slow sites.
+
 ## v1.0.15 (2026-10-26)
 
 A release about what a result advises. Results say that exploitation

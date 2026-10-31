@@ -48,7 +48,8 @@ const checkFlags = `Check flags:
   -json              print the report as JSON
   -passive           read the advertised version only; send no session or phpinfo() request
   -allow-non-global  check non-global addresses and any port, for a lab
-  -timeout <dur>     wall clock the whole check may take (default 15s)
+  -timeout <dur>     wall clock the whole check may take (default 15s);
+                     one request may take half of it, at least 8s
   -fingerprints <file>
                      PHP fingerprint database, default
                      ` + fingerprintdb.DefaultDir + `/php.json when present
@@ -128,7 +129,7 @@ func check(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	}
 	ctx, cancel := context.WithTimeout(ctx, *timeout)
 	defer cancel()
-	prober := &probe.Prober{AllowNonGlobal: *allowNonGlobal, UserAgent: userAgent("")}
+	prober := &probe.Prober{AllowNonGlobal: *allowNonGlobal, UserAgent: userAgent(""), RequestTimeout: probe.RequestTimeoutFor(*timeout)}
 	if prober.Fingerprints, _, err = loadFingerprints(*fingerprints); err != nil {
 		fmt.Fprintf(stderr, "php2shell check: %v\n", err)
 		return exitUsage
@@ -179,7 +180,7 @@ func serve(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return exitOK
 	}
 	logger := slog.New(slog.NewTextHandler(stderr, nil))
-	prober := &probe.Prober{AllowNonGlobal: cfg.AllowNonGlobalAddresses, UserAgent: userAgent(cfg.Origin())}
+	prober := &probe.Prober{AllowNonGlobal: cfg.AllowNonGlobalAddresses, UserAgent: userAgent(cfg.Origin()), RequestTimeout: probe.RequestTimeoutFor(cfg.CheckTimeout.Duration)}
 	var file string
 	if prober.Fingerprints, file, err = loadFingerprints(cfg.FingerprintFile); err != nil {
 		fmt.Fprintf(stderr, "php2shell serve: %v\n", err)

@@ -216,6 +216,19 @@ func TestCheckBodyBoundAndTimeout(t *testing.T) {
 	}
 }
 
+func TestRequestTimeoutFor(t *testing.T) {
+	for budget, want := range map[time.Duration]time.Duration{
+		time.Second:      DefaultRequestTimeout,
+		15 * time.Second: DefaultRequestTimeout,
+		30 * time.Second: 15 * time.Second,
+		5 * time.Minute:  150 * time.Second,
+	} {
+		if got := RequestTimeoutFor(budget); got != want {
+			t.Errorf("RequestTimeoutFor(%v) = %v, want %v", budget, got, want)
+		}
+	}
+}
+
 func TestRedirectRevalidatesAddressAndPort(t *testing.T) {
 	for _, destination := range []string{"http://child.site.example/", "http://site.example:22/"} {
 		t.Run(destination, func(t *testing.T) {
