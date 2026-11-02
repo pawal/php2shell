@@ -66,6 +66,11 @@ unit; [docs/deploy.md](docs/deploy.md) says what they place where.
 given, since the person at the command line is taken to own the target.
 `-allow-non-global` lifts the address and port policy for the lab.
 
+[tools/batch.sh](tools/batch.sh) checks a list of domain names, IP
+addresses and URLs, one per line, several at a time. It is passive unless
+`-a` is given, prints one line per target, `target: verdict (confidence)`,
+and writes one JSON report per target and a `summary.tsv`.
+
 ## Service
 
 `php2shell serve` answers the page at `/` and `/about`, and the API under

@@ -6,6 +6,7 @@ number is written.
 ## Unreleased
 
 - One request may take half the check timeout, at least 8 s, so a longer timeout reaches slow sites.
+- tools/batch.sh checks a list of domains and addresses, passive by default.
 
 ## v1.0.15 (2026-10-26)
 
