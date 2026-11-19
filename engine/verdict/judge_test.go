@@ -334,7 +334,7 @@ func TestEOLWording(t *testing.T) {
 		{"PHP/8.1.2", "published a minimal source backport"},
 		{"PHP/7.4.33-1+deb11u5", "published a minimal source backport"},
 		{"PHP/7.3.33", "Only a vendor backport can carry the fix."},
-		{"PHP/7.2.24-0ubuntu0.18.04.17", "Only a vendor backport from ubuntu can carry the fix."},
+		{"PHP/7.0.33-0ubuntu0.16.04.16", "Only a vendor backport from ubuntu can carry the fix."},
 	} {
 		got := Judge(Input{Reachable: true, PoweredBy: c.header})
 		if got.Verdict != EOLBranch || !strings.Contains(got.Summary, c.want) || strings.Contains(got.Summary, "no longer fixes") {

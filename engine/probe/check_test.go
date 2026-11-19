@@ -35,7 +35,7 @@ func TestCheckVerdicts(t *testing.T) {
 		oracle                                          bool
 	}{
 		{name: "unpatched session behaviour", warnings: readWarnings + " Failed to write session data", want: verdict.LikelyVulnerable, oracle: true},
-		{name: "session change does not establish backport", poweredBy: "PHP/8.3.6", warnings: readWarnings, want: verdict.LikelyVulnerable, oracle: true},
+		{name: "session change does not establish backport", poweredBy: "PHP/8.3.20", warnings: readWarnings, want: verdict.LikelyVulnerable, oracle: true},
 		{name: "affected header", poweredBy: "PHP/8.5.11", want: verdict.LikelyVulnerable},
 		{name: "fixed server header", server: "Apache PHP/8.5.13", want: verdict.LikelyPatched},
 		{name: "backported", poweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", want: verdict.PossiblyBackported, oracle: true},

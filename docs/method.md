@@ -90,6 +90,32 @@ branches the PHP project no longer maintains, so such a version is reported
 as possibly backported rather than vulnerable. The header also cannot show
 whether the workers were restarted after an upgrade.
 
+Most distribution builds advertise only the upstream version: Ubuntu from
+24.04, every Debian release and the Red Hat family. Ubuntu 22.04, 20.04 and
+18.04 append their package revision, such as `PHP/8.1.2-1ubuntu2.28`. A
+release that a distribution keeps and patches without renumbering is
+recognised by its version alone, unless the header or `Server` names another
+packager. The result names the distribution and the package that carries the
+October fixes and, where the header shows the revision, whether this build
+has it. Debian follows upstream point releases on its supported branches, so
+its version is compared like upstream's.
+
+| Advertised | Distribution | Package with the October fixes | Source |
+|---|---|---|---|
+| `8.5.9` | Ubuntu 26.10 | 8.5.9-0ubuntu2.1 | [USN-8948-1](https://ubuntu.com/security/notices/USN-8948-1) |
+| `8.5.4` | Ubuntu 26.04 | 8.5.4-0ubuntu1.5 | [USN-8948-1](https://ubuntu.com/security/notices/USN-8948-1) |
+| `8.3.6` | Ubuntu 24.04 | 8.3.6-0ubuntu0.24.04.13 | [USN-8948-1](https://ubuntu.com/security/notices/USN-8948-1) |
+| `8.1.2-<revision>` | Ubuntu 22.04 | 8.1.2-1ubuntu2.28 | [USN-8948-1](https://ubuntu.com/security/notices/USN-8948-1) |
+| `7.4.3-<revision>` | Ubuntu 20.04 | 7.4.3-4ubuntu2.29+esm5 | [USN-8948-2](https://ubuntu.com/security/notices/USN-8948-2) |
+| `7.2.24-<revision>` | Ubuntu 18.04 | 7.2.24-0ubuntu0.18.04.17+esm14 | [USN-8948-2](https://ubuntu.com/security/notices/USN-8948-2) |
+| `8.3.19` | RHEL 10.0 | php-8.3.19-1.el10_0.2 | [RHSA-2026:88561](https://access.redhat.com/errata/RHSA-2026:88561) |
+| `8.0.30` | RHEL 9 | php-8.0.30-8.el9_8.1 | [RHSA-2026:87151](https://access.redhat.com/errata/RHSA-2026:87151) |
+
+On 2026-11-19 the Ubuntu 24.04 and 22.04 containers advertised `8.3.6` and
+`8.1.2-1ubuntu2.28` for those packages. No distribution in the table had
+published fixes for the flaws of 19 November 2026; Debian 13 had, in 8.4.28.
+The table needs updating as distributions publish them.
+
 ## Recognising PHP without a version
 
 Without a version, the check looks for other signs of PHP: headers,
@@ -218,9 +244,9 @@ when session upload progress is disabled, which is the default from the
 November releases, when the session handler is not the file handler, or when
 the path is not served by PHP.
 
-In the lab, 8.5.12 and 8.5.13 with upload progress turned on give the same
-answer, the first two warnings, so the answer cannot tell the October release
-from the November one. A November version with that answer means a php.ini or
+In the lab, the October and November releases of 8.2, 8.3, 8.4 and 8.5 with
+upload progress turned on give the same answer, the first two warnings, so the
+answer cannot tell the October release from the November one. A November version with that answer means a php.ini or
 pool setting turns upload progress on, and the result says so.
 
 The evidence keeps each distinct warning line the answer was counted from,

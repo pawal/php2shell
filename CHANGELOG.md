@@ -3,6 +3,11 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- A release Ubuntu or Red Hat keeps and patches is recognised by its version, with the package carrying the October fixes.
+- An Ubuntu header with a package revision shows whether the build has those fixes.
+
 ## v1.1.1 (2026-11-19)
 
 A release that reads more from what a site already shows: release

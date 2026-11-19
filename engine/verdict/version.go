@@ -139,6 +139,9 @@ func (v Version) String() string {
 // Backports reports a packager known to fix a release without changing the
 // upstream version it advertises.
 func (v Version) Backports() bool {
+	if _, ok := v.shipped(); ok {
+		return true
+	}
 	switch v.Distro {
 	case "ubuntu", "redhat":
 		return true

@@ -196,7 +196,11 @@ func judgeVersion(v Version, source string, in Input) Result {
 		return result(LikelyPatched, "medium", fmt.Sprintf("The %s shows %s, which carries the fix.", source, v)+note, &v)
 	case BranchOctober, BranchAffected:
 		if v.Backports() {
-			return result(PossiblyBackported, "low", fmt.Sprintf("The %s shows %s from %s, which fixes releases without changing the version.", source, v, v.Distro)+note+measureNote(in), &v)
+			from := " from " + v.Distro
+			if s, ok := v.shipped(); ok && v.Distro == "" {
+				from = ", likely from " + s.vendor
+			}
+			return result(PossiblyBackported, "low", fmt.Sprintf("The %s shows %s%s, which fixes releases without changing the version.", source, v, from)+shippedNote(v)+note+measureNote(in), &v)
 		}
 		exposure := exposureNote(v, in.PHPInfoSettings)
 		if v.Standing() == BranchOctober {
@@ -208,6 +212,7 @@ func judgeVersion(v Version, source string, in Input) Result {
 	case BranchEOL:
 		summary := fmt.Sprintf("The %s shows %s, from a branch that no longer receives PHP releases.", source, v)
 		switch {
+		case v.revealsPackage():
 		case v.SourceBackport():
 			summary += " The PHP security team published a minimal source backport for it, and vendors may ship fixed packages, so the version number cannot show whether the fix is applied."
 		case v.Distro != "":
@@ -215,7 +220,7 @@ func judgeVersion(v Version, source string, in Input) Result {
 		default:
 			summary += " Only a vendor backport can carry the fix."
 		}
-		return result(EOLBranch, "medium", summary+note+measureNote(in), &v)
+		return result(EOLBranch, "medium", summary+shippedNote(v)+note+measureNote(in), &v)
 	}
 	return result(Inconclusive, "low", fmt.Sprintf("The %s shows %s, a branch outside the advisory.", source, v)+note, &v)
 }
