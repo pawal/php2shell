@@ -56,3 +56,11 @@ stripping them. The form field keeps the warning signal when the cookie is
 stripped, which is why the public request now carries the ID in both places.
 See [docs/session-variants.md](../docs/session-variants.md) for the results
 and limits. `make test` skips the experiment.
+
+## Startup diagnostics
+
+`lab/startup-diagnostic.sh [rounds]` sends the session request to fresh
+Apache workers of 8.5.12 and 8.5.13 that log to a file after a diagnostic at
+startup, the setup CVE-2026-129496 needs, and counts crashed workers. It
+checks that the public request is not itself a trigger; it sends no crash
+payload. See [docs/method.md](../docs/method.md) for the results.

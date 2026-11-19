@@ -342,3 +342,47 @@ func TestEOLWording(t *testing.T) {
 		}
 	}
 }
+
+// phpinfo() settings name the November flaws a release without the fix is exposed to.
+func TestExposureNote(t *testing.T) {
+	exposed := Judge(Input{Reachable: true, PHPInfo: "8.5.12", PHPInfoSettings: map[string]string{
+		ServerAPI: "FPM/FastCGI", FatalBacktraces: "On", IgnoreArgs: "Off", ErrorLog: "/var/log/php.log"}})
+	for _, want := range []string{"fatal_error_backtraces On and zend.exception_ignore_args Off, which CVE-2026-129474 needs", "FPM/FastCGI server API, which CVE-2026-129289 needs", "; and errors logged to a file, which CVE-2026-129496 needs."} {
+		if !strings.Contains(exposed.Summary, want) {
+			t.Errorf("exposed lacks %q: %s", want, exposed.Summary)
+		}
+	}
+	guarded := Judge(Input{Reachable: true, PHPInfo: "8.5.11", PHPInfoSettings: map[string]string{
+		ServerAPI: "CGI/FastCGI", FatalBacktraces: "Off", IgnoreArgs: "Off", FixPathinfo: "Off", ErrorLog: ""}})
+	for _, want := range []string{"the stopgap for CVE-2026-129474 in place", "php-cgi with the stopgap for CVE-2026-129538 in place", "no error_log file, so the demonstrated trigger of CVE-2026-129496 is absent"} {
+		if !strings.Contains(guarded.Summary, want) {
+			t.Errorf("guarded lacks %q: %s", want, guarded.Summary)
+		}
+	}
+	older := Judge(Input{Reachable: true, PHPInfo: "8.4.27", PHPInfoSettings: map[string]string{ServerAPI: "Apache 2.0 Handler", FatalBacktraces: "On", IgnoreArgs: "Off"}})
+	if strings.Contains(older.Summary, "CVE-2026-129474") || strings.Contains(older.Summary, "server API, which") {
+		t.Errorf("8.4 under Apache: %s", older.Summary)
+	}
+	if fixed := Judge(Input{Reachable: true, PHPInfo: "8.5.13", PHPInfoSettings: map[string]string{ErrorLog: "/var/log/php.log"}}); strings.Contains(fixed.Summary, "CVE-2026-129496") {
+		t.Errorf("fixed: %s", fixed.Summary)
+	}
+}
+
+// The error only the November releases raise counts as fixed-release evidence on its path.
+func TestSessionLocked(t *testing.T) {
+	alone := Judge(Input{Reachable: true, Hints: []string{SessionLocked}, Oracle: OracleSilent})
+	if alone.Verdict != LikelyPatched || alone.Version != nil || !strings.Contains(alone.Summary, "only the releases of 19 November 2026 and later raise") || !strings.Contains(alone.Summary, "A page fails because") {
+		t.Errorf("alone: %+v", alone)
+	}
+	fixed := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.13", Hints: []string{SessionLocked}})
+	if fixed.Verdict != LikelyPatched || strings.Contains(fixed.Summary, "more than one PHP") || !strings.Contains(fixed.Summary, "A page fails because") {
+		t.Errorf("fixed: %+v", fixed)
+	}
+	older := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Hints: []string{SessionLocked}})
+	if older.Verdict != LikelyVulnerable || !strings.Contains(older.Summary, "more than one PHP serves the site") {
+		t.Errorf("older: %+v", older)
+	}
+	if unpatched := Judge(Input{Reachable: true, Hints: []string{SessionLocked}, Oracle: OracleUnpatched}); unpatched.Verdict != LikelyVulnerable {
+		t.Errorf("older session behaviour: %+v", unpatched)
+	}
+}

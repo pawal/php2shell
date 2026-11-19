@@ -37,7 +37,9 @@ The check fetches the start page once and reads the PHP version from
 `X-Powered-By`, or from `Server` when the first carries none. The version is
 compared with two releases of its branch: the October release, which fixes
 CVE-2026-109618 and CVE-2026-109619, and the November release, which completes
-them. Every 8.6 release carries both.
+them. Every 8.6 release carries both. A release candidate, alpha, beta or dev
+build, such as `8.5.13RC1`, is judged as the release before it, since the
+security fixes reach a branch only at its release.
 
 A host name or address given without a scheme is checked over HTTPS. When
 that fails, whether HTTPS does not answer, refuses or resets the connection,
@@ -56,12 +58,18 @@ theirs and nothing has shown a version, the check also asks for
 redirects, and stops at the first phpinfo() page or blocked answer. Passive
 checks ask for no page they were not given or linked to.
 
-From a phpinfo() page the check keeps four settings and nothing else:
-`Server API`, `display_errors`, `session.save_handler` and
-`session.upload_progress.enabled`. They explain a silent session request,
-show whether the interim measure is in place, and name the processes to
-restart. Such a page is read up to 256 KiB, since phpinfo() prints the
-session section late.
+From a phpinfo() page the check keeps eight settings and nothing else:
+`Server API`, `display_errors`, `session.save_handler`,
+`session.upload_progress.enabled`, `fatal_error_backtraces`,
+`zend.exception_ignore_args`, `cgi.fix_pathinfo` and `error_log`. They
+explain a silent session request, show whether the interim measure is in
+place, and name the processes to restart. On a release without the November
+fixes they also name the flaws whose preconditions the page shows:
+CVE-2026-129474 on 8.5 with backtraces on and arguments kept, CVE-2026-129289
+under PHP-FPM, CVE-2026-129538 under php-cgi with `cgi.fix_pathinfo` on, and
+CVE-2026-129496 with errors logged to a file; or the stopgap in place for
+each. Such a page is read up to 256 KiB, since phpinfo() prints the session
+section late.
 
 Apache prints a server signature on error pages and directory listings,
 such as `<address>Apache/2.4.62 (Debian) PHP/8.4.27 Server at example.com
@@ -92,6 +100,15 @@ order; comments and script text are not read as navigation or generator
 tags. A CMS version is never taken for a PHP version. A hint shows PHP
 somewhere on the site and is no proof of the runtime behind every path, and
 exported static pages and proxies can preserve old application markers.
+
+One diagnostic identifies a release. From 19 November 2026, while upload
+progress is on, PHP refuses runtime changes to session settings with the
+error `Session ini settings cannot be changed at runtime when
+session.upload_progress.enabled is On`, which older releases never raise. A
+page showing it runs a release with the November fixes, so without a version
+the result is `likely_patched`. Beside an older version it shows that more
+than one PHP serves the site. The result also explains why that page fails.
+The error shows only where errors are displayed.
 
 The check reads at most two discovered, query-free PHP endpoints on the
 final origin, within a shared three-second budget, and neither follows
@@ -161,6 +178,16 @@ out-of-memory probe. The displayed warning pattern differs between the
 unmodified lab releases, but establishes only a session-handling observation.
 It MUST NOT establish a complete fix or confirmed vulnerability for either CVE.
 
+The request causes PHP diagnostics at request startup, the kind that
+CVE-2026-129496 needs in a fresh worker when PHP logs to a file after a
+diagnostic at startup. On 2026-11-19, `lab/startup-diagnostic.sh` sent it 150
+times to fresh Apache workers of PHP 8.5.12 logging to a file, after an
+invalid `date.timezone` or deprecated session settings at startup; no worker
+crashed, nor did 8.5.13 under the same settings. The advisory's crashes needed
+heap pressure, such as an oversized header or a POST above the memory limit,
+which the request of a few hundred bytes does not exert. This is an
+observation, not proof that no setup crashes.
+
 CVE-2026-109618 concerns OOM corruption in the engine. It is assessed from
 reported versions and vendor patch information, not independently tested by
 the session request. Session handling is associated with one lifecycle path
@@ -206,7 +233,7 @@ as plain text, at most six lines of 300 bytes each.
 | `likely_vulnerable` | A reported version before the November release of its branch, or older session behaviour on a named path | medium |
 | `possibly_backported` | As above, from a distribution that fixes without renumbering | low |
 | `eol_branch` | The advertised version is 8.1 or older | medium |
-| `likely_patched` | The advertised version is the November release of its branch or later | medium |
+| `likely_patched` | The advertised version is the November release of its branch or later, or a page shows the error only those releases raise | medium |
 | `inconclusive` | PHP indicators or a changed session response without a usable version | low |
 | `no_php_signal` | Nothing showed PHP | low |
 | `inspection_blocked` | A challenge or access control prevented inspection | low |

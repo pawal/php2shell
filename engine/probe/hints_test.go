@@ -58,6 +58,7 @@ func TestApplicationHints(t *testing.T) {
 		{"cookie exact name", "/", map[string][]string{"Set-Cookie": {"PHPSESSID_fake=x"}}, "", nil},
 		{"phtml", "/home.phtml", nil, "", []string{"PHP extension in final URL"}},
 		{"diagnostic", "/", nil, `PHP Warning: example in /var/www/index.php on line 42`, []string{"PHP diagnostic"}},
+		{"session settings locked", "/", nil, "<br />\n<b>Fatal error</b>:  Uncaught Error: Session ini settings cannot be changed at runtime when session.upload_progress.enabled is On in /var/www/html/index.php:1\nStack trace:\n#0 /var/www/html/index.php(1): ini_set('session.gc_maxl...', '3600')\n#1 {main}\n  thrown in <b>/var/www/html/index.php</b> on line <b>1</b><br />", []string{"session settings locked by upload progress"}},
 		{"php navigation", "/", nil, `<a href="showthread.php?t=42">thread</a>`, []string{"PHP endpoint in page"}},
 		{"php form", "/", nil, `<form action="login.php" method=post>`, []string{"PHP endpoint in page"}},
 		{"external php link", "/", nil, `<a href="https://elsewhere.example/index.php">external</a>`, nil},

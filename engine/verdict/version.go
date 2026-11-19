@@ -27,16 +27,18 @@ var october = map[[2]int]int{
 
 // Version is a PHP version as a response header advertises it.
 type Version struct {
-	Raw    string `json:"raw"`
-	Major  int    `json:"major"`
-	Minor  int    `json:"minor"`
-	Patch  int    `json:"patch"`
-	Suffix string `json:"suffix,omitempty"`
+	Raw   string `json:"raw"`
+	Major int    `json:"major"`
+	Minor int    `json:"minor"`
+	Patch int    `json:"patch"`
+	// PreRelease is a release candidate, alpha, beta or dev mark, which precedes its release.
+	PreRelease string `json:"pre_release,omitempty"`
+	Suffix     string `json:"suffix,omitempty"`
 	// Distro is the packager the header or the version names, if any.
 	Distro string `json:"distro,omitempty"`
 }
 
-var phpVersion = regexp.MustCompile(`(?i)\bPHP/(\d+)\.(\d+)\.(\d+)([-+~][^\s,;()]{0,63})?`)
+var phpVersion = regexp.MustCompile(`(?i)\bPHP/(\d+)\.(\d+)\.(\d+)((?:alpha|beta|RC)\d+|-dev)?([-+~][^\s,;()]{0,63})?`)
 
 // Distribution names as they appear in a Server header.
 var serverDistros = []struct{ token, distro string }{
@@ -56,7 +58,7 @@ func ParseVersion(poweredBy, server string) (Version, bool) {
 		if m == nil {
 			continue
 		}
-		v := Version{Raw: m[0], Suffix: m[4]}
+		v := Version{Raw: m[0], PreRelease: m[4], Suffix: m[5]}
 		v.Major, _ = strconv.Atoi(m[1])
 		v.Minor, _ = strconv.Atoi(m[2])
 		v.Patch, _ = strconv.Atoi(m[3])
@@ -101,11 +103,16 @@ const (
 
 // Standing places a version against the fixed-release table.
 func (v Version) Standing() Branch {
+	patch := v.Patch
+	if v.PreRelease != "" {
+		patch--
+	}
 	if fix, ok := fixed[[2]int{v.Major, v.Minor}]; ok {
+		partial, hasPartial := october[[2]int{v.Major, v.Minor}]
 		switch {
-		case v.Patch >= fix:
+		case patch >= fix:
 			return BranchFixed
-		case v.Patch >= october[[2]int{v.Major, v.Minor}]:
+		case hasPartial && patch >= partial:
 			return BranchOctober
 		}
 		return BranchAffected
@@ -124,9 +131,9 @@ func (v Version) FixedIn() string {
 	return ""
 }
 
-// String is major.minor.patch.
+// String is major.minor.patch with any pre-release mark.
 func (v Version) String() string {
-	return strconv.Itoa(v.Major) + "." + strconv.Itoa(v.Minor) + "." + strconv.Itoa(v.Patch)
+	return strconv.Itoa(v.Major) + "." + strconv.Itoa(v.Minor) + "." + strconv.Itoa(v.Patch) + v.PreRelease
 }
 
 // Backports reports a packager known to fix a release without changing the

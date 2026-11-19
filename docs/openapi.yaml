@@ -89,6 +89,9 @@ components:
             major: { type: integer }
             minor: { type: integer }
             patch: { type: integer }
+            pre_release:
+              type: string
+              description: A release candidate, alpha, beta or dev mark such as RC1, judged as preceding its release.
             suffix: { type: string }
             distro: { type: string }
         recommendations:

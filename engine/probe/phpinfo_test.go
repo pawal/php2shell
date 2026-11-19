@@ -117,9 +117,11 @@ func phpinfoRow(name string, values ...string) string {
 func TestPHPInfoSettings(t *testing.T) {
 	body := phpinfoPage + phpinfoRow("Server API ", "FPM/FastCGI ") + phpinfoRow("display_errors", "Off", "Off") +
 		phpinfoRow("session.save_handler", "files", "files") + phpinfoRow("session.upload_progress.enabled", "On", "Off") +
-		phpinfoRow("session.save_path", "<i>no value</i>", "<i>no value</i>")
+		phpinfoRow("session.save_path", "<i>no value</i>", "<i>no value</i>") + phpinfoRow("error_log", "<i>no value</i>", "<i>no value</i>") +
+		phpinfoRow("fatal_error_backtraces", "On", "On") + phpinfoRow("zend.exception_ignore_args", "Off", "Off") + phpinfoRow("cgi.fix_pathinfo", "1", "1")
 	got := phpinfoSettings(body)
-	want := map[string]string{verdict.ServerAPI: "FPM/FastCGI", verdict.DisplayErrors: "Off", verdict.SaveHandler: "files", verdict.UploadProgress: "On"}
+	want := map[string]string{verdict.ServerAPI: "FPM/FastCGI", verdict.DisplayErrors: "Off", verdict.SaveHandler: "files", verdict.UploadProgress: "On",
+		verdict.ErrorLog: "", verdict.FatalBacktraces: "On", verdict.IgnoreArgs: "Off", verdict.FixPathinfo: "1"}
 	if fmt.Sprint(got) != fmt.Sprint(want) {
 		t.Errorf("got %v, want %v", got, want)
 	}

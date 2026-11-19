@@ -22,7 +22,7 @@ var (
 var phpinfoRows = func() map[string]*regexp.Regexp {
 	rows := map[string]*regexp.Regexp{}
 	for _, name := range verdict.PHPInfoSettings {
-		rows[name] = regexp.MustCompile(`<tr><td class="e">` + regexp.QuoteMeta(name) + `\s*</td><td class="v">([^<]*)</td>`)
+		rows[name] = regexp.MustCompile(`<tr><td class="e">` + regexp.QuoteMeta(name) + `\s*</td><td class="v">(?:<i>no value</i>|([^<]*))</td>`)
 	}
 	return rows
 }()

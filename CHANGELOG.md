@@ -6,6 +6,10 @@ number is written.
 ## Unreleased
 
 - The release check installs the rpm with dnf, since rpm 6 refuses unsigned packages.
+- A release candidate counts as the release before it.
+- The error only the November releases raise shows a fixed release without a version.
+- phpinfo() pages name the November flaws whose preconditions they show.
+- The lab checks that the session request does not crash workers set up for CVE-2026-129496.
 
 ## v1.1.0 (2026-11-19)
 

@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/pawal/php2shell/engine/verdict"
 )
 
 // Application artifacts are hints, not proof of the runtime serving a path.
@@ -132,6 +134,9 @@ func applicationHints(resp *http.Response, body string) []string {
 	if phpDiagnostic.MatchString(body) {
 		hints = append(hints, "PHP diagnostic")
 	}
+	if strings.Contains(body, sessionLockedError) {
+		hints = append(hints, verdict.SessionLocked)
+	}
 	if phpinfoVersion(body) != "" {
 		hints = append(hints, "phpinfo() page")
 	}
@@ -169,6 +174,9 @@ func signature(body string) string {
 	}
 	return ""
 }
+
+// sessionLockedError is raised only by the releases of 19 November 2026 and later.
+const sessionLockedError = "Session ini settings cannot be changed at runtime when session.upload_progress.enabled is On"
 
 var phpDiagnostic = regexp.MustCompile(`(?is)(?:PHP (?:Warning|Fatal error|Parse error|Notice):|<(?:b|strong)>(?:Warning|Fatal error|Parse error|Notice)</(?:b|strong)>:)[^\r\n]{0,1000}\.php(?:</b>)? (?:on line|:)[^\r\n]{0,32}[0-9]`)
 

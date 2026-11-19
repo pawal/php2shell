@@ -40,6 +40,9 @@ const (
 	InspectionBlocked  = "inspection_blocked"
 )
 
+// SessionLocked is the hint for the error only the releases of 19 November 2026 and later raise.
+const SessionLocked = "session settings locked by upload progress"
+
 // Input is everything a verdict is drawn from.
 type Input struct {
 	InspectionBlocked string
@@ -97,6 +100,9 @@ func judgeReached(in Input) Result {
 	}
 	if out.Version != nil {
 		out.Summary += disagreement(*out.Version, sightings(in))
+	}
+	if slices.Contains(in.Hints, SessionLocked) {
+		out.Summary += lockedNote(out.Version)
 	}
 	if exposed(out.Verdict) && !octoberOnly(out, in) {
 		out.Summary += demonstratedNote(in.Hints) + firewallNote(in)
@@ -156,6 +162,9 @@ func judge(in Input) Result {
 	if versioned {
 		return judgeVersion(v, source, in)
 	}
+	if slices.Contains(in.Hints, SessionLocked) {
+		return result(LikelyPatched, "medium", "No version was advertised, but a page shows an error that only the releases of 19 November 2026 and later raise, so that path runs a release with the fixes."+silentNote(in), nil)
+	}
 	if in.Oracle == OraclePatched {
 		return result(Inconclusive, "low", "PHP session handling responded, but no PHP version or complete vendor patch status was established.", nil)
 	}
@@ -189,12 +198,13 @@ func judgeVersion(v Version, source string, in Input) Result {
 		if v.Backports() {
 			return result(PossiblyBackported, "low", fmt.Sprintf("The %s shows %s from %s, which fixes releases without changing the version.", source, v, v.Distro)+note+measureNote(in), &v)
 		}
+		exposure := exposureNote(v, in.PHPInfoSettings)
 		if v.Standing() == BranchOctober {
-			out := result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s, which carries the October fixes but not %s, released on 19 November 2026 with fixes for further critical flaws.", source, v, v.FixedIn())+completion(v)+note, &v)
+			out := result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s, which carries the October fixes but not %s, released on 19 November 2026 with fixes for further critical flaws.", source, v, v.FixedIn())+completion(v)+note+exposure, &v)
 			out.Recommendations = octoberAdvice
 			return out
 		}
-		return result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s; the fix is in %s.", source, v, v.FixedIn())+note+measureNote(in), &v)
+		return result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s; the fix is in %s.", source, v, v.FixedIn())+note+measureNote(in)+exposure, &v)
 	case BranchEOL:
 		summary := fmt.Sprintf("The %s shows %s, from a branch that no longer receives PHP releases.", source, v)
 		switch {
@@ -224,6 +234,15 @@ func silentNote(in Input) string {
 		return " The session request showed nothing; the phpinfo() page shows " + strings.Join(reasons, " and ") + "."
 	}
 	return " The session request showed nothing: errors are hidden, upload progress is off, as it is by default since the 19 November releases, or the path does not reach PHP."
+}
+
+// lockedNote explains the page that fails, and the mixed PHP an older version beside it shows.
+func lockedNote(v *Version) string {
+	note := " A page fails because an application changes a session setting at runtime while upload progress is on, which the releases of 19 November 2026 refuse; it works again once upload progress is off or the application stops changing session settings."
+	if v != nil && v.Standing() != BranchFixed {
+		note = " Only the releases of 19 November 2026 and later raise the error that page shows, so more than one PHP serves the site." + note
+	}
+	return note
 }
 
 // completion names the November fixes that complete the fix for CVE-2026-109619 on this branch.
