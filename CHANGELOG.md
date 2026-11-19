@@ -3,7 +3,12 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.1.2 (2026-11-19)
+
+A release about distribution builds. A PHP version that Ubuntu or Red Hat
+keeps and patches without renumbering is recognised, and the result names the
+package that carries the October fixes. No configuration change is needed on
+upgrade.
 
 - A release Ubuntu or Red Hat keeps and patches is recognised by its version, with the package carrying the October fixes.
 - An Ubuntu header with a package revision shows whether the build has those fixes.
