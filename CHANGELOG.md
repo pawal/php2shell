@@ -3,7 +3,17 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.1.0 (2026-11-19)
+
+A release for the PHP security releases of 19 November 2026. The fixed
+releases are now 8.5.13, 8.4.28, 8.3.37 and 8.2.36, and any 8.6. A release
+with only the October fixes is reported as likely vulnerable, names the
+November fixes that complete the fix for CVE-2026-109619, and lists the
+stopgaps of the November advisories. Since those releases turn session
+upload progress off by default, a silent session request is expected on
+them, and an answer means the configuration turns it on. A longer check
+timeout now also lengthens each request, and tools/batch.sh checks a list of
+targets. No configuration change is needed on upgrade.
 
 - One request may take half the check timeout, at least 8 s, so a longer timeout reaches slow sites.
 - tools/batch.sh checks a list of domains and addresses, passive by default.
