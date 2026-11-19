@@ -24,6 +24,10 @@ install the binary as `/usr/bin/php2shell`, the configuration as
 under `/usr/share/doc/php2shell/`. The service is enabled according to the
 distribution's preset policy and is restarted on upgrade.
 
+The packages are not signed. From Fedora 45, `rpm -i` refuses an unsigned
+package; install the `.rpm` with `dnf install` and the path of the file,
+which warns that it skipped the signature check.
+
 The optional PHP fingerprint database is not packaged. Run as root,
 `php2shell fingerprints` downloads it to `/etc/php2shell/fingerprints/`,
 where the service finds it at the next restart without a configuration change.

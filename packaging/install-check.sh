@@ -16,6 +16,7 @@ run() {
 }
 
 run debian:stable 'dpkg -i /pkg/php2shell_*_amd64.deb'
-run fedora:latest 'rpm -i /pkg/php2shell-*.x86_64.rpm'
+# rpm 6 refuses unsigned packages; dnf installs a local one with a warning.
+run fedora:latest "dnf install -y -q --disablerepo='*' /pkg/php2shell-*.x86_64.rpm"
 
 echo "the deb and the rpm install, and the installed binary reads its configuration"

@@ -3,6 +3,10 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
+## Unreleased
+
+- The release check installs the rpm with dnf, since rpm 6 refuses unsigned packages.
+
 ## v1.1.0 (2026-11-19)
 
 A release for the PHP security releases of 19 November 2026. The fixed
