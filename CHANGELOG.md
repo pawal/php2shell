@@ -3,13 +3,17 @@
 A release is a tag in the repository, and the tag is the only place a version
 number is written.
 
-## Unreleased
+## v1.1.1 (2026-11-19)
 
-- The release check installs the rpm with dnf, since rpm 6 refuses unsigned packages.
+A release that reads more from what a site already shows: release
+candidates, the error only the 19 November releases raise, and the settings
+of a public phpinfo() page. No configuration change is needed on upgrade.
+
 - A release candidate counts as the release before it.
 - The error only the November releases raise shows a fixed release without a version.
 - phpinfo() pages name the November flaws whose preconditions they show.
-- The lab checks that the session request does not crash workers set up for CVE-2026-129496.
+- The lab sends the session request to workers set up for CVE-2026-129496 and counts crashes.
+- The deploy document says to install the rpm with dnf on Fedora 45 and later.
 
 ## v1.1.0 (2026-11-19)
 
