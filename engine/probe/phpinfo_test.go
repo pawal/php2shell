@@ -10,16 +10,16 @@ import (
 	"github.com/pawal/php2shell/engine/verdict"
 )
 
-const phpinfoPage = `<!DOCTYPE html><html><head><title>PHP 8.4.27 - phpinfo()</title></head>
-<body><div class="center"><table><tr class="h"><td><h1 class="p">PHP Version 8.4.27</h1></td></tr></table>`
+const phpinfoPage = `<!DOCTYPE html><html><head><title>PHP 8.4.28 - phpinfo()</title></head>
+<body><div class="center"><table><tr class="h"><td><h1 class="p">PHP Version 8.4.28</h1></td></tr></table>`
 
 func TestPHPInfoVersion(t *testing.T) {
 	cases := []struct{ name, body, want string }{
-		{"phpinfo", phpinfoPage, "8.4.27"},
+		{"phpinfo", phpinfoPage, "8.4.28"},
 		{"older title", `<title>phpinfo()</title><h1 class="p">PHP Version 7.4.33</h1>`, "7.4.33"},
 		{"distribution suffix", `<title>PHP 8.3.6 - phpinfo()</title><h1 class="p">PHP Version 8.3.6-0ubuntu0.24.04.13</h1>`, "8.3.6-0ubuntu0.24.04.13"},
-		{"heading without phpinfo title", `<title>Server notes</title><h1 class="p">PHP Version 8.4.27</h1>`, ""},
-		{"prose mention", `<title>Upgrade guide</title><p>PHP Version 8.4.27 is out.</p>`, ""},
+		{"heading without phpinfo title", `<title>Server notes</title><h1 class="p">PHP Version 8.4.28</h1>`, ""},
+		{"prose mention", `<title>Upgrade guide</title><p>PHP Version 8.4.28 is out.</p>`, ""},
 	}
 	for _, c := range cases {
 		if got := phpinfoVersion(c.body); got != c.want {
@@ -43,7 +43,7 @@ func TestCheckReadsPHPInfo(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if in.PHPInfo != "8.4.27" {
+		if in.PHPInfo != "8.4.28" {
 			t.Errorf("%s: phpinfo version %q, evidence %+v", address, in.PHPInfo, evidence)
 		}
 		if got := verdict.Judge(in).Verdict; got != verdict.LikelyPatched {
@@ -80,7 +80,7 @@ func TestFindPHPInfoOnlyWhenAttested(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if in.PHPInfo != "8.4.27" || len(evidence.PHPInfo) != 2 || evidence.PHPInfo[0].Status != http.StatusNotFound {
+	if in.PHPInfo != "8.4.28" || len(evidence.PHPInfo) != 2 || evidence.PHPInfo[0].Status != http.StatusNotFound {
 		t.Fatalf("attested check: version %q, evidence %+v", in.PHPInfo, evidence.PHPInfo)
 	}
 	if got := strings.Join(asked, ","); got != "/,/phpinfo.php,/info.php" {
@@ -91,7 +91,7 @@ func TestFindPHPInfoOnlyWhenAttested(t *testing.T) {
 func TestFindPHPInfoSkippedWithAVersion(t *testing.T) {
 	var asked []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-Powered-By", "PHP/8.4.27")
+		w.Header().Set("X-Powered-By", "PHP/8.4.28")
 		if r.Method == http.MethodGet {
 			asked = append(asked, r.URL.Path)
 		}

@@ -1,29 +1,33 @@
 # php2shell detection lab
 
-Three official PHP Apache images with a one-line index.php baked in, and a
-static nginx for contrast:
+Official PHP Apache images with a one-line index.php baked in, and a static
+nginx for contrast:
 
 | Service | Port | Image | Config |
 |---|---|---|---|
 | vuln | 18081 | php:8.5.11-apache | defaults (display_errors on, expose_php on) |
-| patched | 18082 | php:8.5.12-apache | defaults |
+| october | 18082 | php:8.5.12-apache | defaults |
 | vuln-hardened | 18083 | php:8.5.11-apache | display_errors=Off, expose_php=Off |
 | static | 18084 | nginx:1.29-alpine | no PHP at all |
+| patched | 18085 | php:8.5.13-apache | defaults (upload progress off) |
+| patched-progress | 18086 | php:8.5.13-apache | session.upload_progress.enabled=1 |
 
 ```
 docker compose up -d --build
-./run-checks.sh          # passive header check + oracle POST against all three
+./run-checks.sh          # passive header check + oracle POST against every PHP service
 ./oracle.sh http://host/ # the oracle alone, prints the full HTTP response
 ./valid-id.sh http://host/ [sid]  # rejected valid-id probe, identical on both
 docker compose down --rmi local
 ```
 
 Expected: vuln shows "Failed to write session data" in the oracle response,
-patched shows only the two "read" warnings, vuln-hardened shows nothing.
-The fix returns early when session initialization fails; before it, PHP
-forced the session active and tried to write it anyway.
-`make test-lab` now expects `likely_vulnerable` for the unpatched container
-and `likely_patched` for the patched container. The session warning pattern
+october and patched-progress show only the two "read" warnings, patched and
+vuln-hardened show nothing.
+The October fix returns early when session initialization fails; before it,
+PHP forced the session active and tried to write it anyway. The November
+releases turn upload progress off by default, which silences the request.
+`make test-lab` expects `likely_vulnerable` for vuln and october and
+`likely_patched` for both 8.5.13 containers. The session warning pattern
 is an observation on that URL, not proof of both complete CVE fixes.
 
 ## Ordinary OOM control

@@ -15,5 +15,7 @@ run() {
   echo
 }
 run vuln 18081
-run patched 18082
+run october 18082
 run "vuln-hardened (display_errors=Off, expose_php=Off)" 18083
+run patched 18085
+run "patched-progress (session.upload_progress.enabled=1)" 18086

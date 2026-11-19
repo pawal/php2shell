@@ -22,10 +22,13 @@ func TestLab(t *testing.T) {
 	}{
 		{"18081", true, verdict.LikelyVulnerable},
 		{"18081", false, verdict.LikelyVulnerable},
-		{"18082", true, verdict.LikelyPatched},
-		{"18082", false, verdict.LikelyPatched},
+		{"18082", true, verdict.LikelyVulnerable},
+		{"18082", false, verdict.LikelyVulnerable},
 		{"18083", true, verdict.NoPHPSignal},
 		{"18084", true, verdict.NoPHPSignal},
+		{"18085", true, verdict.LikelyPatched},
+		{"18085", false, verdict.LikelyPatched},
+		{"18086", true, verdict.LikelyPatched},
 	}
 	p := &Prober{AllowNonGlobal: true}
 	for _, c := range cases {

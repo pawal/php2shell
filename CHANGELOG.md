@@ -7,6 +7,12 @@ number is written.
 
 - One request may take half the check timeout, at least 8 s, so a longer timeout reaches slow sites.
 - tools/batch.sh checks a list of domains and addresses, passive by default.
+- The fixed releases are now 8.5.13, 8.4.28, 8.3.37 and 8.2.36, of 19 November 2026, and 8.6.
+- A release with the October fixes only is likely vulnerable and names the November fixes it lacks.
+- Likely vulnerable results list the stopgaps of the November advisories.
+- Results advise keeping upload progress off, now the default, in place of waiting for CVE-2026-115560.
+- A November release answering the session request is reported as having upload progress turned on.
+- The lab adds 8.5.13 with upload progress off and on.
 
 ## v1.0.15 (2026-10-26)
 

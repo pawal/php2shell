@@ -14,11 +14,18 @@ the [NCSC](https://www.ncsc.gov.uk/news/critical-security-issue-affecting-php)
 and [CERT-EU](https://cert.europa.eu/publications/security-advisories/2026-018/)
 advise taking a system offline when it cannot be patched at once.
 
-On 23 October 2026 the PHP project announced CVE-2026-115560, an unlikely
-variant in session upload progress that its next bugfix release fixes
-([informational advisory](https://www.php.net/archive/2026.php#2026-10-23-1)). It needs an application that switches
-`session.serialize_handler` to `php` at runtime, which a remote check cannot
-observe, so no check assesses it.
+On 19 November 2026 the PHP project released 8.5.13, 8.4.28, 8.3.37 and
+8.2.36, and 8.6.0 on the same day
+([changelog](https://www.php.net/ChangeLog-8.php#8.5.13)). They fix
+CVE-2026-129481 on 8.3 and later and CVE-2026-129182 on 8.5, which complete
+the fix for CVE-2026-109619, and further critical flaws in sessions, the date
+extension, PHP-FPM and php-cgi. Among them is CVE-2026-115560 in session upload
+progress, announced on 23 October 2026
+([informational advisory](https://www.php.net/archive/2026.php#2026-10-23-1)).
+The releases also turn `session.upload_progress.enabled` off by default and,
+while it is on, stop with a fatal error when an application changes a session
+setting at runtime. These flaws depend on configuration and application code
+that a remote check cannot observe, so only the version assesses them.
 
 A check is remote, so its result is an assessment of the observed paths,
 not proof of a complete fix or exploitability. Only verification of the
@@ -28,7 +35,9 @@ running PHP builds and vendor patches on the server is conclusive.
 
 The check fetches the start page once and reads the PHP version from
 `X-Powered-By`, or from `Server` when the first carries none. The version is
-compared with the fixed release of its branch.
+compared with two releases of its branch: the October release, which fixes
+CVE-2026-109618 and CVE-2026-109619, and the November release, which completes
+them. Every 8.6 release carries both.
 
 A host name or address given without a scheme is checked over HTTPS. When
 that fails, whether HTTPS does not answer, refuses or resets the connection,
@@ -165,7 +174,7 @@ HTTP 2xx or 3xx before a warning pattern is classified; with output buffering
 on, an application can answer the request with a redirect whose body still
 carries the warnings. Older behaviour, all three
 warnings, is classified from whatever arrived, since a cut-off body can hide
-the third warning but not invent it. The pattern associated with the fix,
+the third warning but not invent it. The pattern of the October fixes,
 the first two warnings without the third, requires that every startup
 warning was read: a complete body, or at least 1 KiB of output after the last
 session warning. PHP prints these warnings during request startup, before any
@@ -178,8 +187,14 @@ fix. Partial passive responses MAY
 still supply headers and hints, with their incompleteness recorded.
 
 It shows nothing when warnings are hidden, which is the production default,
-when session upload progress is disabled, when the session handler is not the
-file handler, or when the path is not served by PHP.
+when session upload progress is disabled, which is the default from the
+November releases, when the session handler is not the file handler, or when
+the path is not served by PHP.
+
+In the lab, 8.5.12 and 8.5.13 with upload progress turned on give the same
+answer, the first two warnings, so the answer cannot tell the October release
+from the November one. A November version with that answer means a php.ini or
+pool setting turns upload progress on, and the result says so.
 
 The evidence keeps each distinct warning line the answer was counted from,
 as plain text, at most six lines of 300 bytes each.
@@ -188,10 +203,10 @@ as plain text, at most six lines of 300 bytes each.
 
 | Verdict | Ground | Confidence |
 |---|---|---|
-| `likely_vulnerable` | An affected reported version, or older session behaviour on a named path | medium |
+| `likely_vulnerable` | A reported version before the November release of its branch, or older session behaviour on a named path | medium |
 | `possibly_backported` | As above, from a distribution that fixes without renumbering | low |
 | `eol_branch` | The advertised version is 8.1 or older | medium |
-| `likely_patched` | The advertised version carries the fix | medium |
+| `likely_patched` | The advertised version is the November release of its branch or later | medium |
 | `inconclusive` | PHP indicators or a changed session response without a usable version | low |
 | `no_php_signal` | Nothing showed PHP | low |
 | `inspection_blocked` | A challenge or access control prevented inspection | low |
@@ -199,6 +214,14 @@ as plain text, at most six lines of 300 bytes each.
 
 The `vulnerable` and `patched` API codes remain reserved for compatibility;
 current checks MUST NOT emit these confirmed, high-confidence verdicts.
+
+A version with the October fixes and without the November ones is
+`likely_vulnerable`. Its summary names the November fixes that complete
+CVE-2026-109619 on its branch. Its advice lists the stopgaps of the November
+advisories and omits the advice to take the site offline, since the PHP
+project rates the critical November flaws as needing non-default
+configuration or uncommon setups. With older session behaviour on any path,
+the result keeps the advice for a release without the October fixes.
 
 An `unreachable` result names the reason: the connection timed out, was
 refused or reset, or TLS failed. A site that opens in a browser but times
@@ -233,15 +256,16 @@ drawn from PHP evidence, that is every verdict except `no_php_signal`,
 of compromise since 17 October 2026, and the commands list the process tree
 and the files changed since that date. The `likely_vulnerable` and
 `eol_branch` results also relay the advice to take the site offline when it
-cannot be upgraded at once, and the PHP advisory's interim measures for each
-CVE, among them keeping `session.upload_progress.enabled=0` after the upgrade
-until the release that fixes CVE-2026-115560. The other results drawn from
-PHP evidence relay that suggestion on its own, unless a phpinfo() page
-shows upload progress already off.
+cannot be upgraded at once, the PHP advisory's interim measures for each
+CVE, and, for `likely_vulnerable`, the stopgaps of the November advisories.
+The other results drawn from PHP evidence advise keeping
+`session.upload_progress.enabled=0` unless the site needs it, unless a
+phpinfo() page shows upload progress already off.
 
 While the verdict leaves the site possibly unfixed, that is
 `likely_vulnerable`, `possibly_backported`, `eol_branch`, `inconclusive` or
-`inspection_blocked`, the summary adds two notes. When a PHP hint names
+`inspection_blocked`, the summary adds two notes, except on a version with
+the October fixes, which these notes do not concern. When a PHP hint names
 WordPress, Drupal or Joomla, it says that [Wiz](https://www.wiz.io/blog/php2shell-php-rce) demonstrated
 unauthenticated remote code execution against that application; the flaws
 are in PHP itself, so the absence of this note does not lower the risk. When

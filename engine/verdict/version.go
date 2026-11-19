@@ -8,8 +8,17 @@ import (
 	"strings"
 )
 
-// fixed is the first release of each branch carrying the fix.
+// fixed is the first release of each branch carrying the fixes of 19 November 2026.
 var fixed = map[[2]int]int{
+	{8, 2}: 36,
+	{8, 3}: 37,
+	{8, 4}: 28,
+	{8, 5}: 13,
+	{8, 6}: 0,
+}
+
+// october is the first release of each branch carrying the fixes of 21 October 2026.
+var october = map[[2]int]int{
 	{8, 2}: 35,
 	{8, 3}: 36,
 	{8, 4}: 27,
@@ -84,6 +93,7 @@ type Branch string
 
 const (
 	BranchFixed    Branch = "fixed"
+	BranchOctober  Branch = "october"
 	BranchAffected Branch = "affected"
 	BranchEOL      Branch = "eol"
 	BranchUnknown  Branch = "unknown"
@@ -92,8 +102,11 @@ const (
 // Standing places a version against the fixed-release table.
 func (v Version) Standing() Branch {
 	if fix, ok := fixed[[2]int{v.Major, v.Minor}]; ok {
-		if v.Patch >= fix {
+		switch {
+		case v.Patch >= fix:
 			return BranchFixed
+		case v.Patch >= october[[2]int{v.Major, v.Minor}]:
+			return BranchOctober
 		}
 		return BranchAffected
 	}
@@ -165,10 +178,12 @@ func (v Version) rank() int {
 		return 0
 	case BranchAffected:
 		return 1
-	case BranchUnknown:
+	case BranchOctober:
 		return 2
+	case BranchUnknown:
+		return 3
 	}
-	return 3
+	return 4
 }
 
 // disagreement names the sources that show a release other than v.

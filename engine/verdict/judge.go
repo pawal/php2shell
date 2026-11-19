@@ -92,10 +92,13 @@ func judgeReached(in Input) Result {
 	if in.Oracle == OraclePatched || in.Oracle == OracleUnpatched {
 		out.Summary += sessionNote(in)
 	}
+	if in.Oracle == OraclePatched && out.Version != nil && out.Version.Standing() == BranchFixed {
+		out.Summary += " The answer shows upload progress on, against the default of the 19 November releases, so a php.ini or pool setting turns it on."
+	}
 	if out.Version != nil {
 		out.Summary += disagreement(*out.Version, sightings(in))
 	}
-	if exposed(out.Verdict) {
+	if exposed(out.Verdict) && !octoberOnly(out, in) {
 		out.Summary += demonstratedNote(in.Hints) + firewallNote(in)
 	}
 	// A block the summary already names needs no guess about the layer in front.
@@ -142,7 +145,7 @@ func judge(in Input) Result {
 			return result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s; the fix is in %s.", source, v, v.FixedIn()), vp)
 		}
 		summary := "The session response suggests missing session-handling changes."
-		if versioned && v.Standing() == BranchFixed {
+		if versioned && (v.Standing() == BranchFixed || v.Standing() == BranchOctober) {
 			summary += fmt.Sprintf(" The %s shows %s; verify the running workers, the session extension and vendor patches because these observations conflict.", source, v)
 		}
 		return result(LikelyVulnerable, "medium", summary, vp)
@@ -170,7 +173,7 @@ func sessionNote(in Input) string {
 	if len(in.OraclePaths) > 0 {
 		where = strings.Join(in.OraclePaths, ", ")
 	}
-	behaviour := "matched the session behaviour associated with the fix"
+	behaviour := "matched the session behaviour of the October fixes with upload progress on"
 	if in.Oracle == OracleUnpatched {
 		behaviour = "matched the older session behaviour"
 	}
@@ -182,9 +185,14 @@ func judgeVersion(v Version, source string, in Input) Result {
 	switch v.Standing() {
 	case BranchFixed:
 		return result(LikelyPatched, "medium", fmt.Sprintf("The %s shows %s, which carries the fix.", source, v)+note, &v)
-	case BranchAffected:
+	case BranchOctober, BranchAffected:
 		if v.Backports() {
 			return result(PossiblyBackported, "low", fmt.Sprintf("The %s shows %s from %s, which fixes releases without changing the version.", source, v, v.Distro)+note+measureNote(in), &v)
+		}
+		if v.Standing() == BranchOctober {
+			out := result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s, which carries the October fixes but not %s, released on 19 November 2026 with fixes for further critical flaws.", source, v, v.FixedIn())+completion(v)+note, &v)
+			out.Recommendations = octoberAdvice
+			return out
 		}
 		return result(LikelyVulnerable, "medium", fmt.Sprintf("The %s shows %s; the fix is in %s.", source, v, v.FixedIn())+note+measureNote(in), &v)
 	case BranchEOL:
@@ -215,7 +223,23 @@ func silentNote(in Input) string {
 	if reasons := hiding(in.PHPInfoSettings); len(reasons) > 0 {
 		return " The session request showed nothing; the phpinfo() page shows " + strings.Join(reasons, " and ") + "."
 	}
-	return " The session request showed nothing: errors are hidden, upload progress is off, or the path does not reach PHP."
+	return " The session request showed nothing: errors are hidden, upload progress is off, as it is by default since the 19 November releases, or the path does not reach PHP."
+}
+
+// completion names the November fixes that complete the fix for CVE-2026-109619 on this branch.
+func completion(v Version) string {
+	switch {
+	case v.Minor >= 5:
+		return " Among them, CVE-2026-129481 and CVE-2026-129182 complete the fix for CVE-2026-109619."
+	case v.Minor >= 3:
+		return " Among them, CVE-2026-129481 completes the fix for CVE-2026-109619."
+	}
+	return ""
+}
+
+// octoberOnly reports a verdict drawn from a release with the October fixes and no older session behaviour.
+func octoberOnly(out Result, in Input) bool {
+	return out.Version != nil && out.Version.Standing() == BranchOctober && in.Oracle != OracleUnpatched
 }
 
 func result(verdict, confidence, summary string, v *Version) Result {

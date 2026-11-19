@@ -37,7 +37,7 @@ func TestCheckVerdicts(t *testing.T) {
 		{name: "unpatched session behaviour", warnings: readWarnings + " Failed to write session data", want: verdict.LikelyVulnerable, oracle: true},
 		{name: "session change does not establish backport", poweredBy: "PHP/8.3.6", warnings: readWarnings, want: verdict.LikelyVulnerable, oracle: true},
 		{name: "affected header", poweredBy: "PHP/8.5.11", want: verdict.LikelyVulnerable},
-		{name: "fixed server header", server: "Apache PHP/8.5.12", want: verdict.LikelyPatched},
+		{name: "fixed server header", server: "Apache PHP/8.5.13", want: verdict.LikelyPatched},
 		{name: "backported", poweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", want: verdict.PossiblyBackported, oracle: true},
 		{name: "eol", poweredBy: "PHP/8.1.2", want: verdict.EOLBranch},
 		{name: "cookie hint", cookie: "PHPSESSID=example", want: verdict.Inconclusive, oracle: true},
@@ -392,7 +392,7 @@ func TestCheckSignatureBehindACDN(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := verdict.Judge(in)
-	if got.Verdict != verdict.LikelyVulnerable || !strings.HasPrefix(got.Summary, "The server signature on /phpinfo.php shows 8.4.26; the fix is in 8.4.27.") || strings.Contains(got.Summary, "disagree") {
+	if got.Verdict != verdict.LikelyVulnerable || !strings.HasPrefix(got.Summary, "The server signature on /phpinfo.php shows 8.4.26; the fix is in 8.4.28.") || strings.Contains(got.Summary, "disagree") {
 		t.Errorf("%+v", got)
 	}
 	if evidence.PHPInfo[0].Signature == "" || !slices.Contains(in.Hints, "PHP server signature") {

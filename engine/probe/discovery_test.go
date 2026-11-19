@@ -44,7 +44,7 @@ func TestDiscoveryFindsVersionAndDoesNotRecurse(t *testing.T) {
 		case "/":
 			fmt.Fprint(w, `<a href="/forum.php">Forum</a><form action="/login.php"></form><a href="/third.php">more</a>`)
 		case "/forum.php":
-			w.Header().Set("X-Powered-By", "PHP/8.5.12")
+			w.Header().Set("X-Powered-By", "PHP/8.5.13")
 			fmt.Fprint(w, `<a href="/recursive.php">more</a>`)
 		}
 	}))
@@ -111,7 +111,7 @@ func TestDiscoveredPathUsedByAttestedOracle(t *testing.T) {
 func TestDiscoveryTimeoutPreservesInitialEvidence(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
-			w.Header().Set("X-Powered-By", "PHP/8.5.12")
+			w.Header().Set("X-Powered-By", "PHP/8.5.13")
 			fmt.Fprint(w, `<a href="/slow.php">slow</a>`)
 			return
 		}

@@ -14,12 +14,15 @@ func TestJudge(t *testing.T) {
 	}{
 		{"unreachable", Input{}, Unreachable},
 		{"oracle unpatched", Input{Reachable: true, PoweredBy: "PHP/8.5.11", Oracle: OracleUnpatched}, LikelyVulnerable},
-		{"oracle unpatched past a fixed header", Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OracleUnpatched}, LikelyVulnerable},
-		{"oracle patched", Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OraclePatched}, LikelyPatched},
+		{"oracle unpatched past a fixed header", Input{Reachable: true, PoweredBy: "PHP/8.5.13", Oracle: OracleUnpatched}, LikelyVulnerable},
+		{"oracle patched", Input{Reachable: true, PoweredBy: "PHP/8.5.13", Oracle: OraclePatched}, LikelyPatched},
+		{"oracle patched under an october header", Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OraclePatched}, LikelyVulnerable},
 		{"oracle patched on a possible backport", Input{Reachable: true, PoweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", Oracle: OraclePatched}, PossiblyBackported},
 		{"oracle patched without version", Input{Reachable: true, Oracle: OraclePatched}, Inconclusive},
 		{"session change without complete backport evidence", Input{Reachable: true, PoweredBy: "PHP/8.5.11", Oracle: OraclePatched}, LikelyVulnerable},
-		{"fixed header", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleNotRun}, LikelyPatched},
+		{"fixed header", Input{Reachable: true, PoweredBy: "PHP/8.4.28", Oracle: OracleNotRun}, LikelyPatched},
+		{"october header", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleSilent}, LikelyVulnerable},
+		{"8.6 header", Input{Reachable: true, PoweredBy: "PHP/8.6.0", Oracle: OracleSilent}, LikelyPatched},
 		{"affected header", Input{Reachable: true, PoweredBy: "PHP/8.4.26", Oracle: OracleSilent}, LikelyVulnerable},
 		{"ubuntu header", Input{Reachable: true, PoweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", Oracle: OracleSilent}, PossiblyBackported},
 		{"rocky server header", Input{Reachable: true, Server: "Apache (Rocky Linux) PHP/8.2.13"}, PossiblyBackported},
@@ -76,7 +79,7 @@ func TestCompromiseAdvice(t *testing.T) {
 // The CVE-2026-115560 advice is left out when phpinfo() shows upload progress off.
 func TestProgressOffSkippedWhenOff(t *testing.T) {
 	for value, want := range map[string]bool{"Off": false, "0": false, "On": true, "": true} {
-		in := Input{Reachable: true, PHPInfo: "8.4.27"}
+		in := Input{Reachable: true, PHPInfo: "8.4.28"}
 		if value != "" {
 			in.PHPInfoSettings = map[string]string{UploadProgress: value}
 		}
@@ -94,7 +97,7 @@ func TestDemonstratedNote(t *testing.T) {
 	if !strings.Contains(affected.Summary, "against WordPress and Joomla, which the site appears to run") {
 		t.Errorf("affected: %s", affected.Summary)
 	}
-	fixed := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.27", Hints: hints})
+	fixed := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.28", Hints: hints})
 	if strings.Contains(fixed.Summary, "Wiz") {
 		t.Errorf("fixed: %s", fixed.Summary)
 	}
@@ -117,7 +120,7 @@ func TestFirewallNote(t *testing.T) {
 		}
 	}
 	for name, in := range map[string]Input{
-		"fixed":   {Reachable: true, PoweredBy: "PHP/8.4.27", Front: []string{"Cloudflare"}},
+		"fixed":   {Reachable: true, PoweredBy: "PHP/8.4.28", Front: []string{"Cloudflare"}},
 		"varnish": {Reachable: true, PoweredBy: "PHP/8.4.20", Front: []string{"Varnish"}},
 	} {
 		if got := Judge(in); strings.Contains(got.Summary, note) {
@@ -128,19 +131,52 @@ func TestFirewallNote(t *testing.T) {
 
 // Older session behaviour under a fixed header is conflicting evidence.
 func TestUnpatchedUnderFixedHeader(t *testing.T) {
-	got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OracleUnpatched})
-	if !strings.Contains(got.Summary, "verify the running workers, the session extension") {
-		t.Errorf("summary: %s", got.Summary)
+	for _, header := range []string{"PHP/8.5.12", "PHP/8.5.13"} {
+		got := Judge(Input{Reachable: true, PoweredBy: header, Oracle: OracleUnpatched})
+		if got.Verdict != LikelyVulnerable || !strings.Contains(got.Summary, "verify the running workers, the session extension") || !slices.Contains(got.Recommendations, Offline) {
+			t.Errorf("%s: %+v", header, got)
+		}
+	}
+}
+
+// A release with the October fixes only is likely vulnerable, without the PHP2Shell notes.
+func TestOctoberRelease(t *testing.T) {
+	for _, c := range []struct{ header, want, completes string }{
+		{"PHP/8.5.12", "carries the October fixes but not 8.5.13, released on 19 November 2026", "CVE-2026-129481 and CVE-2026-129182 complete"},
+		{"PHP/8.4.27", "carries the October fixes but not 8.4.28", "CVE-2026-129481 completes"},
+		{"PHP/8.2.35", "carries the October fixes but not 8.2.36", ""},
+	} {
+		got := Judge(Input{Reachable: true, PoweredBy: c.header, Hints: []string{"generator WordPress"}, Front: []string{"Cloudflare"}})
+		if got.Verdict != LikelyVulnerable || !strings.Contains(got.Summary, c.want) || !slices.Equal(got.Recommendations, octoberAdvice) {
+			t.Errorf("%s: %+v", c.header, got)
+		}
+		if (c.completes == "") == strings.Contains(got.Summary, "Among them") || !strings.Contains(got.Summary, c.completes) {
+			t.Errorf("%s completion: %s", c.header, got.Summary)
+		}
+		if strings.Contains(got.Summary, "Wiz") || strings.Contains(got.Summary, "Cloudflare's firewall rules") {
+			t.Errorf("%s carries the PHP2Shell notes: %s", c.header, got.Summary)
+		}
+	}
+}
+
+// A November release answering the session request has upload progress turned on.
+func TestProgressOnUnderFixedHeader(t *testing.T) {
+	const note = "upload progress on, against the default of the 19 November releases"
+	if got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.13", Oracle: OraclePatched}); !strings.Contains(got.Summary, note) {
+		t.Errorf("fixed: %s", got.Summary)
+	}
+	if got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Oracle: OraclePatched}); strings.Contains(got.Summary, note) {
+		t.Errorf("october: %s", got.Summary)
 	}
 }
 
 // A phpinfo() version stands in for a missing header and adds removal advice.
 func TestPHPInfoVersion(t *testing.T) {
-	got := Judge(Input{Reachable: true, Server: "nginx", PHPInfo: "8.4.27", Oracle: OracleNotRun})
-	if got.Verdict != LikelyPatched || !strings.Contains(got.Summary, "phpinfo() page shows 8.4.27") || !slices.Contains(got.Recommendations, RemovePHPInfo) {
+	got := Judge(Input{Reachable: true, Server: "nginx", PHPInfo: "8.4.28", Oracle: OracleNotRun})
+	if got.Verdict != LikelyPatched || !strings.Contains(got.Summary, "phpinfo() page shows 8.4.28") || !slices.Contains(got.Recommendations, RemovePHPInfo) {
 		t.Errorf("phpinfo: %+v", got)
 	}
-	header := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.26", PHPInfo: "8.4.27"})
+	header := Judge(Input{Reachable: true, PoweredBy: "PHP/8.4.26", PHPInfo: "8.4.28"})
 	if header.Verdict != LikelyVulnerable || !strings.Contains(header.Summary, "header shows") {
 		t.Errorf("header first: %+v", header)
 	}
@@ -168,7 +204,7 @@ func TestPHPInfoSettings(t *testing.T) {
 	if !slices.ContainsFunc(measured.Recommendations, func(s string) bool { return strings.HasPrefix(s, "Restart Apache") }) {
 		t.Errorf("apache restart: %v", measured.Recommendations)
 	}
-	fixed := Judge(Input{Reachable: true, PHPInfo: "8.4.27", PHPInfoSettings: map[string]string{UploadProgress: "Off"}})
+	fixed := Judge(Input{Reachable: true, PHPInfo: "8.4.28", PHPInfoSettings: map[string]string{UploadProgress: "Off"}})
 	if strings.Contains(fixed.Summary, "interim") {
 		t.Errorf("a fixed version needs no measure: %s", fixed.Summary)
 	}
@@ -181,11 +217,11 @@ func TestPHPInfoSettings(t *testing.T) {
 // Disagreeing sources are named, and the version least likely fixed decides.
 func TestDisagreeingVersions(t *testing.T) {
 	old := mustVersion(t, "PHP/8.5.11")
-	got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.12", Sightings: []Sighting{{"header on /old.php", old}}})
+	got := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.13", Sightings: []Sighting{{"header on /old.php", old}}})
 	if got.Verdict != LikelyVulnerable || got.Version.String() != "8.5.11" {
 		t.Fatalf("worst version: %+v", got)
 	}
-	if !strings.HasPrefix(got.Summary, "The header on /old.php shows 8.5.11; the fix is in 8.5.12.") || !strings.Contains(got.Summary, "Sources disagree: the header shows 8.5.12.") {
+	if !strings.HasPrefix(got.Summary, "The header on /old.php shows 8.5.11; the fix is in 8.5.13.") || !strings.Contains(got.Summary, "Sources disagree: the header shows 8.5.13.") {
 		t.Errorf("summary: %s", got.Summary)
 	}
 	same := Judge(Input{Reachable: true, PoweredBy: "PHP/8.5.11", Sightings: []Sighting{{"header on /old.php", old}}})
@@ -217,10 +253,10 @@ func TestFrontNote(t *testing.T) {
 	}{
 		{"no php signal", Input{Reachable: true, Front: front}, true},
 		{"inconclusive", Input{Reachable: true, Hints: []string{"PHPSESSID cookie"}, Front: front}, true},
-		{"silent session request", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleSilent, Front: front}, true},
+		{"silent session request", Input{Reachable: true, PoweredBy: "PHP/8.4.28", Oracle: OracleSilent, Front: front}, true},
 		{"blocked", Input{Reachable: true, InspectionBlocked: "HTTP 403 access denied", Front: front}, true},
 		{"named block", Input{Reachable: true, InspectionBlocked: "Sansec Shield firewall", Front: []string{"Sucuri"}}, false},
-		{"header version", Input{Reachable: true, PoweredBy: "PHP/8.4.27", Oracle: OracleNotRun, Front: front}, false},
+		{"header version", Input{Reachable: true, PoweredBy: "PHP/8.4.28", Oracle: OracleNotRun, Front: front}, false},
 		{"session answer", Input{Reachable: true, Oracle: OracleUnpatched, Front: front}, false},
 		{"nothing in front", Input{Reachable: true}, false},
 	} {
@@ -265,7 +301,7 @@ func TestOtherPlatformsNote(t *testing.T) {
 }
 
 func TestSessionSignalCannotEstablishBothCVEFixes(t *testing.T) {
-	for _, header := range []string{"", "PHP/8.5.11", "PHP/8.5.12", "PHP/8.3.6-0ubuntu0.24.04.13"} {
+	for _, header := range []string{"", "PHP/8.5.11", "PHP/8.5.12", "PHP/8.5.13", "PHP/8.3.6-0ubuntu0.24.04.13"} {
 		got := Judge(Input{Reachable: true, PoweredBy: header, Oracle: OraclePatched, OraclePaths: []string{"https://example.com/app.php"}})
 		if got.Verdict == Patched || got.Verdict == Vulnerable || got.Confidence == "high" || !strings.Contains(got.Summary, "https://example.com/app.php") || !strings.Contains(got.Summary, "does not establish a complete fix") || !strings.Contains(got.Summary, "CVE-2026-109618 is assessed from version evidence") {
 			t.Fatalf("%s: %+v", header, got)
@@ -283,7 +319,7 @@ func TestOlderSessionBehaviourKeepsVersionFraming(t *testing.T) {
 		t.Errorf("eol: %+v", eol)
 	}
 	ubuntu := Judge(Input{Reachable: true, PoweredBy: "PHP/8.3.6-0ubuntu0.24.04.13", Oracle: OracleUnpatched})
-	if ubuntu.Verdict != LikelyVulnerable || !strings.Contains(ubuntu.Summary, "the fix is in 8.3.36") {
+	if ubuntu.Verdict != LikelyVulnerable || !strings.Contains(ubuntu.Summary, "the fix is in 8.3.37") {
 		t.Errorf("backport distribution: %+v", ubuntu)
 	}
 	none := Judge(Input{Reachable: true, Oracle: OracleUnpatched})
